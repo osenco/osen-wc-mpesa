@@ -26,13 +26,8 @@ define( 'MPESA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MPESA_INC_DIR', MPESA_DIR.'includes/' );
 define( 'WC_MPESA_VERSION', '0.18.01' );
 
-//Pro Version
-define( 'WC_MPESA_PRO_VERSION', '0.18.01' );
-
 register_activation_hook( __FILE__, 'wc_mpesa_install' );
 register_uninstall_hook( __FILE__, 'wc_mpesa_uninstall' );
-
-add_action( 'init', 'wc_mpesa_scripts' );
 
 add_action( 'plugins_loaded', 'wc_mpesa_gateway_init', 11 );
 
@@ -56,24 +51,6 @@ require_once( MPESA_INC_DIR.'metaboxes.php' );
 //Payments Post Type
 require_once( MPESA_INC_DIR.'payments.php' );
 
-// Admin Dashboard Analytics Widget
-require_once( MPESA_INC_DIR.'analytics.php' );
-
-// APIs Utility Functions
-require_once( MPESA_INC_DIR.'utility.php' );
-
-// MPesa Transaction Types For Pro
-require_once( MPESA_INC_DIR.'mpesa-pro.php' );
-
-function  mpesa_c2b( $args ) { return MPesa::c2b( $args ); }
-function  mpesa_b2c( $args ) { return MPesa::b2c( $args ); }
-function  mpesa_b2b( $args ) { return MPesa::b2b( $args ); }
-function  mpesa_checkout( $args ) { return MPesa::online_checkout( $args ); }
-function  mpesa_check_status( $args ) { return MPesa::check_status( $args ); }
-function  mpesa_reverse( $args ) { return MPesa::reverse( $args ); }
-function  mpesa_balance( $args ) { return MPesa::balance( $args ); }
-function  mpesa_stk_push( $args ) { return MPesa::stkpush( $args ); }
-
 function get_post_id_by_meta_key_and_value($key, $value) {
     global $wpdb;
     $meta = $wpdb->get_results("SELECT * FROM `".$wpdb->postmeta."` WHERE meta_key='".$key."' AND meta_value='".$value."'");
@@ -95,13 +72,6 @@ function wc_mpesa_install()
 {
 	update_option( 'wc_mpesa_version', WC_MPESA_VERSION );
 	update_option( 'wc_mpesa_urls_reg', 0 );
-
-	// Pro
-	update_option( 'wc_mpesa_pro_license', 0 );
-	update_option( 'wc_mpesa_pro_receipt', 0 );
-	/**
-	* @todo Redirect to activation notice for pro
-	*/
 }
 
 /**
@@ -111,14 +81,6 @@ function wc_mpesa_uninstall()
 {
 	delete_option( 'wc_mpesa_version' );
 	delete_option( 'wc_mpesa_urls_reg' );
-	
-	// Pro
-	delete_option( 'wc_mpesa_pro_license' );
-	delete_option( 'wc_mpesa_pro_receipt' );
-}
-
-function wc_mpesa_scripts(){
-	wp_enqueue_script( 'canvasjs', plugins_url( 'includes/js/canvasjs.min.js', __FILE__ ), '', '', true );
 }
 
 function register_urls_notice()
