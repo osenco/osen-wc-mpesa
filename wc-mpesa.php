@@ -45,9 +45,6 @@ add_filter( 'plugin_row_meta', 'mpesa_row_meta', 10, 2 );
 // Admin Menus
 require_once( MPESA_INC_DIR.'menu.php' );
 
-// Payment Post Type Metaboxes
-require_once( MPESA_INC_DIR.'metaboxes.php' );
-
 //Payments Post Type
 require_once( MPESA_INC_DIR.'payments.php' );
 
