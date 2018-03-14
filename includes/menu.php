@@ -16,36 +16,9 @@ function mpesa_transactions_menu()
         'MPesa',
         'manage_options',
         'mpesa',
-        'mpesa_transactions_menu_transactions',
+        'mpesa_transactions_menu_about',
         'dashicons-money',
         58
-    );
-
-    add_submenu_page( 
-        'mpesa', 
-        'About this Plugin', 
-        'About', 
-        'manage_options',
-        'mpesa_about', 
-        'mpesa_transactions_menu_about' 
-    );
-
-    add_submenu_page( 
-        'mpesa', 
-        'MPesa APIs Utility', 
-        'Utility',
-        'manage_options',
-        'mpesa_utility', 
-        'mpesa_transactions_menu_utility' 
-    );
-
-    add_submenu_page( 
-        'mpesa', 
-        'MPesa Payments Analytics', 
-        'Analytics', 
-        'manage_options',
-        'mpesa_analytics', 
-        'mpesa_transactions_menu_analytics' 
     );
 
     add_submenu_page( 
@@ -84,11 +57,6 @@ function mpesa_transactions_menu_about()
 
         <h4>Get in touch with me ( <a href="https://mauko.co.ke/">Mauko</a> ) either via email ( <a href="mail-to:hi@mauko.co.ke">hi@mauko.co.ke</a> ) or via phone( <a href="tel:+254204404993">+254204404993</a> )</h4>
     </div><?php
-}
-
-function mpesa_transactions_menu_transactions()
-{
-	wp_redirect( admin_url( 'edit.php?post_type=mpesaipn' ) );
 }
 
 function mpesa_transactions_menu_pref()
