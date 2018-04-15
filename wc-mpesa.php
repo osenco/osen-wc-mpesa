@@ -4,11 +4,11 @@
  * Plugin URI: https://wc-mpesa.mauko.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate MPesa for making and receiving online payments.
  * Author: Mauko Maunde < hi@mauko.co.ke >
- * Version: 0.18.01
+ * Version: 1.4
  * Author URI: https://mauko.co.ke/
  *
  * Requires at least: 4.4
- * Tested up to: 4.9.2
+ * Tested up to: 4.9.5
  * @todo Add uninstall script - delete all payments?
  * @todo Consider adding KopoKopo /Pesapal support ?????	
  */
