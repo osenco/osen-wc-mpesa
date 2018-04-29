@@ -1,4 +1,4 @@
-                                           _
+                                         _
 		______   ____    _________| |   _______	   _______      _______	   ______
 		|   _ \_/_   | 	|           |  |   __  \   |   ____|  /   ____|   /  __  \
 		|  | |  | |  | 	|           |  |  |  |  |  |       |  |       |  |  |  |
@@ -14,8 +14,6 @@
 # MPESA For WooCommerce
 WordPress Plugin that extends WordPress and WooCommerce functionality to integrate MPESA for making payments, remittances, checking account balance transaction status and reversals. It also adds Kenyan Counties to the WooCommerce states list.
 ![alt text](https://user-images.githubusercontent.com/14233942/31839718-fefe17ca-b5ea-11e7-9afa-95fa395a8e43.png)
-
-This plugin depends on and makes extensive use of ![this M-Pesa library](https://github.com/ModoPesa/mpesa-php).
 
 ## Installation
 Getting started with MPESA for WooCommerce is very easy. All configuration is done in the WooCommerce settings in the WordPress admin dashboard.
@@ -48,8 +46,7 @@ While this plugin provides adequate MPESA integration for a basic ecommerce site
 * PDF Export/Print
 
 ### Cost
-* KSH 599/yr
-* $6/yr
+* KSH 4999/$5
 
 ## Acknowledgements
 * MPESA and the MPESA Logo are registered trademarks of Safaricom Ltd
