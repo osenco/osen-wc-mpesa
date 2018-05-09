@@ -46,7 +46,7 @@ While this plugin provides adequate MPESA integration for a basic ecommerce site
 * PDF Export/Print
 
 ### Cost
-* KSH 4999/$5
+* KSH 4999/$50
 
 ## Acknowledgements
 * MPESA and the MPESA Logo are registered trademarks of Safaricom Ltd
