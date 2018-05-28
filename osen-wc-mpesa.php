@@ -238,11 +238,11 @@ function wc_mpesa_gateway_init()
 			$this->mpesa_callback_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=reconcile';
 			$this->mpesa_timeout_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=timeout';
 			$this->mpesa_result_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=reconcile';
-			$this->mpesa_confirmation_url 	= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=confirm';
-			$this->mpesa_validation_url 	= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=validate';
+			$this->mpesa_confirmation_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=confirm';
+			$this->mpesa_validation_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=validate';
 
-			$this->mpesa_live = $this->get_option( 'live' );
-			$this->mpesa_credential = ( $this->get_option( 'credentials' ) == "" ) ? null : $this->get_option( 'credentials' );
+			$this->mpesa_live 			= $this->get_option( 'live' );
+			$this->mpesa_credential 		= ( $this->get_option( 'credentials' ) == "" ) ? null : $this->get_option( 'credentials' );
 
 			$this->mpesa_codes = array(
 				0	=> 'Success',
