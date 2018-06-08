@@ -184,6 +184,7 @@ function wc_mpesa_gateway_init()
 	{
 		public $mpesa_name;
 		public $mpesa_shortcode;
+		public $mpesa_partyb;
 		public $mpesa_type;
 		public $mpesa_key;
 		public $mpesa_secret;
@@ -229,6 +230,7 @@ function wc_mpesa_gateway_init()
 
 			$this->mpesa_name 				= $this->get_option( 'business' );
 			$this->mpesa_shortcode 			= $this->get_option( 'shortcode' );
+			$this->mpesa_partyb 			= $this->get_option( 'partyb' );
 			$this->mpesa_type 				= $this->get_option( 'idtype' );
 			$this->mpesa_key 				= $this->get_option( 'key' );
 			$this->mpesa_secret 			= $this->get_option( 'secret' );
@@ -320,6 +322,13 @@ function wc_mpesa_gateway_init()
 				'shortcode' => array( 
 					'title'       => __( 'MPesa Shortcode', 'woocommerce' ),
 					'type'        => 'text',
+					'description' => __( 'HO Number In LIVE.', 'woocommerce' ),
+					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
+					'desc_tip'    => true,
+				 ),
+				'partyb' => array( 
+					'title'       => __( 'Party B', 'woocommerce' ),
+					'type'        => 'text',
 					'description' => __( 'Your MPesa Business Till/Paybill Number.', 'woocommerce' ),
 					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
 					'desc_tip'    => true,
@@ -337,20 +346,6 @@ function wc_mpesa_gateway_init()
 					'description' => __( 'Your App Consumer Secret From Safaricom Daraja.', 'woocommerce' ),
 					'default'     => __( 'VAdWE9ns8jGoImZW', 'woocommerce' ),
 					'desc_tip'    => true,
-				 ),
-				'username' => array( 
-					'title'       => __( 'MPesa Portal Username', 'woocommerce' ),
-					'type'        => 'text',
-					'description' => __( 'Your user name used on the MPesa Web Portal for the Business Administrator or Business Manager or Business Operator roles within the organisation in MPesa. Use Initiator Name in Sandbox.', 'woocommerce' ),
-					'default'     => __( 'MPesa Portal Username', 'woocommerce' ),
-					'desc_tip'    => true,
-				 ),
-				'password' => array( 
-					'title'       => __( 'M-Pesa Portal Password', 'woocommerce' ),
-					'type'        => 'text',
-					'description' => __( 'Your user password used on the M-Pesa Web Portal for the Business Administrator or Business Manager or Business Operator roles within the organisation in M-Pesa. Required for B2B, B2C Transactions.', 'woocommerce' ),
-					'default'     => __( 'M-Pesa Portal Password', 'woocommerce' ),
-					'desc_tip'    => true
 				 ),
 				'passkey' => array( 
 					'title'       => __( 'Online Pass Key', 'woocommerce' ),
@@ -594,7 +589,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 	            'TransactionType' 	=> 'CustomerPayBillOnline',
 	            'Amount' 			=> str_replace( '.00', '', $total ),
 	            'PartyA' 			=> $phone,
-	            'PartyB' 			=> $this->mpesa_shortcode,
+	            'PartyB' 			=> $this->mpesa_partyb,
 	            'PhoneNumber' 		=> $phone,
 	            'CallBackURL' 		=> $this->mpesa_callback_url,
 	            'AccountReference' 	=> ( $this->get_option( 'account' ) == 'WC' ) ? 'WC'.$order_id : $this->get_option( 'account' ),
