@@ -9,7 +9,7 @@
  *
  * Requires at least: 4.4
  * Tested up to: 4.9.5
- * @todo Add uninstall script - delete all payments?	
+ * @todo Add uninstall script - delete all payments?
  */
 
 // Exit if accessed directly.
@@ -322,16 +322,16 @@ function wc_mpesa_gateway_init()
 					'desc_tip'    => true,
 				 ),
 				'shortcode' => array( 
-					'title'       => __( 'MPesa Shortcode', 'woocommerce' ),
+					'title'       => __( 'HO/Paybill Number', 'woocommerce' ),
 					'type'        => 'text',
-					'description' => __( 'HO Number In LIVE.', 'woocommerce' ),
+					'description' => __( 'HO (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
 					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'partyb' => array( 
-					'title'       => __( 'Party B', 'woocommerce' ),
+					'title'       => __( 'Business Shortcode', 'woocommerce' ),
 					'type'        => 'text',
-					'description' => __( 'Your MPesa Business Till/Paybill Number.', 'woocommerce' ),
+					'description' => __( 'Your MPesa Business Till/Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
 					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
@@ -733,35 +733,8 @@ function wc_mpesa_confirm()
 	if( ! isset( $response['Body'] ) ){
     	return;
     }
-
- //    $resultCode 					= $response['Body']['stkCallback']['ResultCode'];
-	// $resultDesc 					= $response['Body']['stkCallback']['ResultDesc'];
-	// $merchantRequestID 				= $response['Body']['stkCallback']['MerchantRequestID'];
-	// $checkoutRequestID 				= $response['Body']['stkCallback']['CheckoutRequestID'];
-
-	// $post = get_post_id_by_meta_key_and_value( '_request_id', $merchantRequestID );
-
-	// $total = get_post_meta( $post, '_amount', true );
-	// $order = get_post_meta( $post, '_order_id', true );
-    
-	// $mpesa = new WC_Gateway_MPESA();
-
-	// if( isset( $response['Body']['stkCallback']['CallbackMetadata'] ) ){
-	// 	$amount 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
-	// 	$mpesaReceiptNumber 			= $response['Body']['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
-	// 	$balance 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
-	// 	$utilityAccountAvailableFunds 	= $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
-	// 	$transactionDate 				= $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
-	// 	$phone 							= $response['Body']['stkCallback']['CallbackMetadata']['Item'][5]['Value'];
-
-	// 	$status = ( $amount == $total ) ? $mpesa->proceed( $order ) : $mpesa->reject( $order );
-	// } else {
-	// 	$status = $mpesa->reject( $order );
-	// }
-
 	header( "Access-Control-Allow-Origin: *" );
 	header( 'Content-Type:Application/json' );
-	//wp_send_json( $status );
 	wp_send_json( $mpesa->proceed() );
 }
 
@@ -778,80 +751,10 @@ function wc_mpesa_validate()
 	if( ! isset( $response['Body'] ) ){
     	return;
     }
-
- //    $resultCode 					= $response['Body']['stkCallback']['ResultCode'];
-	// $resultDesc 					= $response['Body']['stkCallback']['ResultDesc'];
-	// $merchantRequestID 				= $response['Body']['stkCallback']['MerchantRequestID'];
-	// $checkoutRequestID 				= $response['Body']['stkCallback']['CheckoutRequestID'];
-
-	// $post = get_post_id_by_meta_key_and_value( '_request_id', $merchantRequestID );
-
-	// $total = get_post_meta( $post, '_amount', true );
-	// $order = get_post_meta( $post, '_order_id', true );
-    
-	// $mpesa = new WC_Gateway_MPESA();
-
-	// if( isset( $response['Body']['stkCallback']['CallbackMetadata'] ) ){
-	// 	$amount 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
-	// 	$mpesaReceiptNumber 			= $response['Body']['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
-	// 	$balance 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
-	// 	$utilityAccountAvailableFunds 	= $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
-	// 	$transactionDate 				= $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
-	// 	$phone 							= $response['Body']['stkCallback']['CallbackMetadata']['Item'][5]['Value'];
-
-	// 	$status = ( $amount == $total ) ? $mpesa->proceed( $order ) : $mpesa->reject( $order );
-	// } else {
-	// 	$status = $mpesa->reject( $order );
-	// }
-
 	header( "Access-Control-Allow-Origin: *" );
 	header( 'Content-Type:Application/json' );
-	//wp_send_json( $status );
 	wp_send_json( $mpesa->proceed() );
 }
-
-/**
- * 
- */
-// function status()
-// {
-// 	if ( ! isset( $_GET['mpesa_ipn_listener'] ) ){ return; }
-//     if ( $_GET['mpesa_ipn_listener'] !== 'status' ){ return; }
-
-//     $response = json_decode( file_get_contents( 'php://input' ), true );
-
-//     $resultCode 				= $response['Result']['ResultCode'];
-//     $resultDesc 				= $response['Result']['ResultDesc'];
-//     $originatorConversationID 	= $response['Result']['OriginatorConversationID'];
-//     $conversationID 			= $response['Result']['ConversationID'];
-//     $transactionID 				= $response['Result']['TransactionID'];
-//     $receiptNo 					= $response['Result']['ResultParameters']['ResultParameter'][0]['Value'];
-//     $conversationID 			= $response['Result']['ResultParameters']['ResultParameter'][1]['Value'];
-//     $finalisedTime 				= $response['Result']['ResultParameters']['ResultParameter'][2]['Value'];
-//     $amount 					= $response['Result']['ResultParameters']['ResultParameter'][3]['Value'];
-//     $transactionStatus 			= $response['Result']['ResultParameters']['ResultParameter'][4]['Value'];
-//     $reasonType 				= $response['Result']['ResultParameters']['ResultParameter'][5]['Value'];
-//     $transactionReason			= $response['Result']['ResultParameters']['ResultParameter'][6]['Value'];
-//     $debitPartyCharges 			= $response['Result']['ResultParameters']['ResultParameter'][7]['Value'];
-//     $debitAccountType 			= $response['Result']['ResultParameters']['ResultParameter'][8]['Value'];
-//     $initiatedTime 				= $response['Result']['ResultParameters']['ResultParameter'][9]['Value'];
-//     $originatorConversationID 	= $response['Result']['ResultParameters']['ResultParameter'][10]['Value'];
-//     $creditPartyName 			= $response['Result']['ResultParameters']['ResultParameter'][11]['Value'];
-//     $debitPartyName 			= $response['Result']['ResultParameters']['ResultParameter'][12]['Value'];
-
-//     $post = $transactionID;
-//     $status = ( $resultCode == 0 ) ? 'on-hold' : 'processing';
-// 	update_post_meta( $post, '_order_status', $status );
-// 	update_post_meta( $post, '_amount', $amount );
-
-//     $order_id = get_post_meta( $post, '_order_id', true );
-//     if( wc_get_order( $order_id ) ){
-//     	$order = new WC_Order( $order_id );
-    	
-//         $order->update_status( $status );
-//         $order->add_order_note( __( $resultDesc, 'woocommerce' ) );
-//     }
-// }
 	
 /**
  * 
