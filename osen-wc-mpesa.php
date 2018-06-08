@@ -1,16 +1,15 @@
 <?php
 /**
  * Plugin Name: MPesa For WooCommerce
- * Plugin URI: https://wc-mpesa.mauko.co.ke/
+ * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate MPesa for making and receiving online payments.
- * Author: Mauko Maunde < hi@mauko.co.ke >
+ * Author: Mauko Maunde < mauko@osen.co.ke >
  * Version: 1.4
- * Author URI: https://mauko.co.ke/
+ * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.4
  * Tested up to: 4.9.5
- * @todo Add uninstall script - delete all payments?
- * @todo Consider adding KopoKopo /Pesapal support ?????	
+ * @todo Add uninstall script - delete all payments?	
  */
 
 // Exit if accessed directly.
@@ -197,7 +196,7 @@ function wc_mpesa_gateway_init()
 		public $mpesa_confirmation_url;
 		public $mpesa_validation_url;
 
-		public $mpesa_live = 'no';
+		public $mpesa_env = 'no';
 		public $mpesa_credential;
 
 		/**
@@ -243,7 +242,7 @@ function wc_mpesa_gateway_init()
 			$this->mpesa_confirmation_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=confirm';
 			$this->mpesa_validation_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=validate';
 
-			$this->mpesa_live 			= $this->get_option( 'live' );
+			$this->mpesa_env 			= $this->get_option( 'env' );
 			$this->mpesa_credential 		= ( $this->get_option( 'credentials' ) == "" ) ? null : $this->get_option( 'credentials' );
 
 			$this->mpesa_codes = array(
@@ -294,18 +293,21 @@ function wc_mpesa_gateway_init()
 					'description' => '',
 					'default'     => 'no',
 				 ),
-				'live' => array( 
-					'title'       => __( 'Environment', 'woocommerce' ),
-					'label'       => __( 'Live ( Leave Unchecked for Sandbox )', 'woocommerce' ),
-					'type'        => 'checkbox',
-					'description' => '',
-					'default'     => 'no',
-				 ),
 				'title' => array( 
 					'title'       => __( 'Method Title', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'Payment method name that the customer will see on your checkout.', 'woocommerce' ),
 					'default'     => __( 'Lipa Na MPesa', 'woocommerce' ),
+					'desc_tip'    => true,
+				 ),
+				'env' => array( 
+					'title'       => __( 'Environment', 'woocommerce' ),
+					'type'        => 'select',
+					'options' 		=> array( 
+				      	'live' 		=> __( 'Live', 'woocommerce' ),
+				     	'sandbox' 	=> __( 'Sandbox', 'woocommerce' ),
+				    ),
+					'description' => __( 'MPesa Environment', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'idtype' => array( 
@@ -493,7 +495,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 
 		public function authenticate()
 		{
-		    $endpoint = ( $this->mpesa_live == 'yes' ) ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+		    $endpoint = ( $this->mpesa_env == 'live' ) ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
 			$credentials = base64_encode( $this->mpesa_key.':'.$this->mpesa_secret );
 
@@ -515,7 +517,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 	    {
 			$token = $this->authenticate();
 
-			$endpoint = ( $this->mpesa_live == 'yes' ) ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+			$endpoint = ( $this->mpesa_env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
 
 			$curl = curl_init();
 	        curl_setopt( $curl, CURLOPT_URL, $endpoint );
@@ -567,7 +569,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 
 			$token = $this->authenticate();
 
-			$endpoint = ( $this->mpesa_live == 'yes' ) ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+			$endpoint = ( $this->mpesa_env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
 			$timestamp = date( 'YmdHis' );
 	        $password = base64_encode( $this->mpesa_shortcode.$this->mpesa_passkey.$timestamp );
