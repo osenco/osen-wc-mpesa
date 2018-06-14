@@ -613,12 +613,18 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 				$error_message = 'Could not connect to MPesa to process payment. Please try again';
 				$order->update_status( 'failed', __( 'Could not connect to MPesa to process payment.', 'woocommerce' ) );
 				wc_add_notice( __( 'Failed! ', 'woothemes' ) . $error_message, 'error' );
-				return; 
+				return array(
+					'result' 	=> 'fail',
+						'redirect'	=> ''
+				);
 			} elseif ( isset( $result->errorCode ) ) {
 				$error_message = 'MPesa Error '.$result->errorCode.': '.$result->errorMessage;
 				$order->update_status( 'failed', __( $error_message, 'woocommerce' ) );
 				wc_add_notice( __( 'Failed! ', 'woothemes' ) . $error_message, 'error' );
-				return;
+				return array(
+					'result' 	=> 'fail',
+					'redirect'	=> ''
+				);
 			} else {
 				/**
 				 * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
