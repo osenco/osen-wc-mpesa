@@ -26,7 +26,7 @@ Your site/app MUST be running over https for the MPESA Instant Payment Notificat
 * Click the install button and the plugin will be installed. Once installed, activate the plugin and configure it at http://yoursite.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=mpesa
 
 ### Manual Installation 
-* First, you need to download the latest release of the plugin from [the WordPress plugin repository](https://plugins.wordpress.org/wc-mpesa) or [the github repo](https://github.com/osenco/osen-wc-mpesa/archive/v0.5.28.zip).
+* First, you need to download the latest release of the plugin from [the WordPress plugin repository](https://plugins.wordpress.org/osen-wc-mpesa) or [the github repo](https://github.com/osenco/osen-wc-mpesa/archive/v0.7.8.zip).
 * Using an FTP program, or your hosting control panel, upload the plugin folder (wc-mpesa) to your WordPress installation’s wp-content/plugins/ directory.
 * Activate the plugin from the Plugins menu within the WordPress admin
 
@@ -35,18 +35,8 @@ That is all. You are now ready to receive and send money using MPESA on your Wor
 ## Contributing
 * Fork the repo, do your magic and make a pull request.
 
-## Pro Version
-While this plugin provides adequate MPESA integration for a basic ecommerce site/app, we also offer a pro version for those who want more.
-
-### Features
-* Advanced C2B/B2B/B2C/Status APIs 
-* Analytics
-* 24/7 Support
-* Branding Customizations
-* PDF Export/Print
-
-### Cost
-* KSH 4999/$50
+### Integration Cost
+* Our team of developers are on hand to provide assistance for when you wish to move from Sandbox(test) to Live(production) environment. This assistance is charged a fiat fee of `KSH 4000/$40`
 
 ## Acknowledgements
 * MPESA and the MPESA Logo are registered trademarks of Safaricom Ltd
