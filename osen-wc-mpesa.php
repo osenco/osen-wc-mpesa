@@ -18,34 +18,21 @@ if ( !defined( 'ABSPATH' ) ){
 }
 
 if ( !in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
-	return;
+	exit('Please install WooCommerce for this extension to work');
 }
 
 define( 'MPESA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MPESA_INC_DIR', MPESA_DIR.'includes/' );
-define( 'WC_MPESA_VERSION', '0.18.01' );
-
-register_activation_hook( __FILE__, 'wc_mpesa_install' );
-register_uninstall_hook( __FILE__, 'wc_mpesa_uninstall' );
-
-add_action( 'plugins_loaded', 'wc_mpesa_gateway_init', 11 );
-
-add_action( 'init', 'wc_mpesa_confirm' );
-add_action( 'init', 'wc_mpesa_validate' );
-add_action( 'init', 'wc_mpesa_reconcile' );
-add_action( 'init', 'wc_mpesa_timeout' );
-add_action( 'init', 'wc_mpesa_register' );
-
-add_filter( 'woocommerce_states', 'mpesa_ke_woocommerce_counties' );
-add_filter( 'woocommerce_payment_gateways', 'wc_mpesa_add_to_gateways' );
-add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'mpesa_action_links' );
-add_filter( 'plugin_row_meta', 'mpesa_row_meta', 10, 2 );
+define( 'WC_MPESA_VERSION', '0.18.06' );
 
 // Admin Menus
 require_once( MPESA_INC_DIR.'menu.php' );
 
 //Payments Post Type
 require_once( MPESA_INC_DIR.'payments.php' );
+
+//Payments Metaboxes
+require_once( MPESA_INC_DIR.'metaboxes.php' );
 
 function get_post_id_by_meta_key_and_value($key, $value) {
     global $wpdb;
@@ -64,6 +51,7 @@ function get_post_id_by_meta_key_and_value($key, $value) {
 /**
  * Installation hook callback creates plugin settings
  */
+register_activation_hook( __FILE__, 'wc_mpesa_install' );
 function wc_mpesa_install()
 {
 	update_option( 'wc_mpesa_version', WC_MPESA_VERSION );
@@ -73,6 +61,7 @@ function wc_mpesa_install()
 /**
  * Uninstallation hook callback deletes plugin settings
  */
+register_uninstall_hook( __FILE__, 'wc_mpesa_uninstall' );
 function wc_mpesa_uninstall()
 {
 	delete_option( 'wc_mpesa_version' );
@@ -81,14 +70,18 @@ function wc_mpesa_uninstall()
 
 function register_urls_notice()
 {
-	echo '<div class="notification">You need to register your confirmation and validation endpoints to work.</div>';
+	if ( get_option( 'wc_mpesa_urls_reg', 0 ) ) {
+		echo '<div class="notification">You need to register your confirmation and validation endpoints to work.</div>';
+	}
 }
 
+add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'mpesa_action_links' );
 function mpesa_action_links( $links )
 {
 	return array_merge( $links, [ '<a href="'.admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ).'">&nbsp;Preferences</a>' ] );
 } 
 
+add_filter( 'plugin_row_meta', 'mpesa_row_meta', 10, 2 );
 function mpesa_row_meta( $links, $file )
 {
 	$plugin = plugin_basename( __FILE__ );
@@ -109,6 +102,7 @@ function mpesa_row_meta( $links, $file )
 /**
  * Add Kenyan counties to list of woocommerce states
  */
+add_filter( 'woocommerce_states', 'mpesa_ke_woocommerce_counties' );
 function mpesa_ke_woocommerce_counties( $counties ) 
 {
 	$counties['KE'] = array( 
@@ -167,12 +161,14 @@ function mpesa_ke_woocommerce_counties( $counties )
 /*
  * Register our gateway with woocommerce
  */
+add_filter( 'woocommerce_payment_gateways', 'wc_mpesa_add_to_gateways' );
 function wc_mpesa_add_to_gateways( $gateways )
 {
 	$gateways[] = 'WC_Gateway_MPESA';
 	return $gateways;
 }
 
+add_action( 'plugins_loaded', 'wc_mpesa_gateway_init', 11 );
 function wc_mpesa_gateway_init() 
 {
 	/**
@@ -204,16 +200,15 @@ function wc_mpesa_gateway_init()
 		 */
 		public function __construct() 
 		{
-			$env = get_option( 'woocommerce_mpesa_settings' )["live"] == 'yes' ? 'live' : 'sandbox';
-			$reg_notice = '<a href="'.home_url( '/?mpesa_ipn_register='.$env ).'" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once for sandbox and once when you go live.';
+			$env = get_option( 'woocommerce_mpesa_settings' )["env"];
+			$reg_notice = '<li><a href="'.home_url( '/?mpesa_ipn_register='.$env ).'" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once for sandbox and once when you go live.</li>';
 			$test_cred = ( $env == 'sandbox' ) ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >generate sandbox test credentials here</a>.</li>' : '';
 			//$reg_notice = has_valid_licence() ? '' : $reg_notice;
 
 			$this->id                 		= 'mpesa';
 			$this->icon               		= apply_filters( 'woocommerce_mpesa_icon', plugins_url( 'mpesa.png', __FILE__ ) );
 			$this->method_title       		= __( 'Lipa Na MPesa', 'woocommerce' );
-			$this->method_description 		= __( '<h4 style="color: red;">IMPORTANT!</h4><li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>
-				<li>'.$reg_notice.'</li>'.$test_cred );
+			$this->method_description 		= __( '<h4 style="color: red;">IMPORTANT!</h4><li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred );
 			$this->has_fields         		= false;
 
 			// Load settings
@@ -314,15 +309,15 @@ function wc_mpesa_gateway_init()
 					'title'       => __( 'Identifier Type', 'woocommerce' ),
 					'type'        => 'select',
 					'options' => array( 
-				      	1 => __( 'Shortcode', 'woocommerce' ),
+				      	1 => __( 'MSISDN', 'woocommerce' ),
 				     	2 => __( 'Till Number', 'woocommerce' ),
-				      	4 => __( 'MSISDN', 'woocommerce' )
+				      	4 => __( 'Shortcode', 'woocommerce' )
 				    ),
 					'description' => __( 'MPesa Identifier Type', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'shortcode' => array( 
-					'title'       => __( 'HO/Paybill Number', 'woocommerce' ),
+					'title'       => __( 'Head Office Number', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'HO (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
 					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
@@ -370,7 +365,7 @@ function wc_mpesa_gateway_init()
 					'default'     => __( 'Cross-check your details above before pressing the button below.
 Your phone number MUST be registered with MPesa( and ON ) for this to work.
 You will get a pop-up on your phone asking you to confirm the payment.
-Enter your service ( MPesa ) PIN to proceed.
+Enter your service ( MPesa ) PIN to proceed. In case you don\'t see the pop up on your phone, please upgrade your SIM card by dialing *234*1*6#.
 You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
@@ -537,7 +532,8 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 			curl_setopt( $curl, CURLOPT_HEADER, false );
 			$content = curl_exec( $curl );
 			if ( $content ) {
-				$status = json_decode( $content )->ResponseDescription;
+				$msg = json_decode( $content );
+				$status = isset( $msg->ResponseDescription ) ? $msg->ResponseDescription : "Coud not register URLs";
 			} else {
 				$status = "Sorry could not connect to Daraja. Check your configuration and try again.";
 			}
@@ -558,14 +554,8 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 			$first_name = $order->get_billing_first_name();
 			$last_name = $order->get_billing_last_name();
 
-			// Remove the plus sign before the customer's phone number if present
-			if ( substr( $phone, 0,1 ) == "+" ) {
-				$phone = str_replace( "+", "", $phone );
-			}
-			// Correct phone number format
-			if ( substr( $phone, 0,1 ) == "0" ) {
-				$phone = preg_replace('/^0/', '254', $phone);
-			}
+			$phone = str_replace( "+", "", $phone );
+			$phone = preg_replace('/^0/', '254', $phone);
 
 			$token = $this->authenticate();
 
@@ -588,15 +578,15 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 	            'BusinessShortCode' => $this->mpesa_shortcode,
 	            'Password' 			=> $password,
 	            'Timestamp' 		=> $timestamp,
-	            'TransactionType' 	=> 'CustomerPayBillOnline',
-	            'Amount' 			=> str_replace( '.00', '', $total ),
+	            'TransactionType' 	=> ( $this->get_option('idtype') == 4 ) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
+	            'Amount' 			=> round( $total ),
 	            'PartyA' 			=> $phone,
 	            'PartyB' 			=> $this->mpesa_partyb,
 	            'PhoneNumber' 		=> $phone,
 	            'CallBackURL' 		=> $this->mpesa_callback_url,
 	            'AccountReference' 	=> ( $this->get_option( 'account' ) == 'WC' ) ? 'WC'.$order_id : $this->get_option( 'account' ),
-	            'TransactionDesc' 	=> 'WooCommerce Payment',
-	            'Remark'			=> 'WooCommerce Payment'
+	            'TransactionDesc' 	=> 'WooCommerce Payment For '.$order_id,
+	            'Remark'			=> 'WooCommerce Payment Via MPesa'
 	        );
 
 	        $data_string = json_encode( $curl_post_data );
@@ -614,17 +604,17 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 				$order->update_status( 'failed', __( 'Could not connect to MPesa to process payment.', 'woocommerce' ) );
 				wc_add_notice( __( 'Failed! ', 'woothemes' ) . $error_message, 'error' );
 				return array(
-					'result' 	=> 'fail',
-						'redirect'	=> ''
-				);
+		        	'result' 	=> 'fail',
+					'redirect'	=> ''
+		        );
 			} elseif ( isset( $result->errorCode ) ) {
 				$error_message = 'MPesa Error '.$result->errorCode.': '.$result->errorMessage;
 				$order->update_status( 'failed', __( $error_message, 'woocommerce' ) );
 				wc_add_notice( __( 'Failed! ', 'woothemes' ) . $error_message, 'error' );
 				return array(
-					'result' 	=> 'fail',
+		        	'result' 	=> 'fail',
 					'redirect'	=> ''
-				);
+		        );
 			} else {
 				/**
 				 * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
@@ -716,6 +706,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
  * Register Validation and Confirmation URLs
  * Outputs registration status
  */
+add_action( 'init', 'wc_mpesa_register' );
 function wc_mpesa_register()
 {
 	header( "Access-Control-Allow-Origin: *" );
@@ -729,6 +720,7 @@ function wc_mpesa_register()
 /**
  * 
  */
+add_action( 'init', 'wc_mpesa_confirm' );
 function wc_mpesa_confirm()
 {
 	if ( ! isset( $_GET['mpesa_ipn_listener'] ) ) return;
@@ -747,6 +739,7 @@ function wc_mpesa_confirm()
 /**
  * 
  */
+add_action( 'init', 'wc_mpesa_validate' );
 function wc_mpesa_validate()
 {
 	if ( ! isset( $_GET['mpesa_ipn_listener'] ) ){ return; }
@@ -765,6 +758,7 @@ function wc_mpesa_validate()
 /**
  * 
  */
+add_action( 'init', 'wc_mpesa_reconcile' );
 function wc_mpesa_reconcile()
 {
 	if ( ! isset( $_GET['mpesa_ipn_listener'] ) ){ return; }
@@ -812,6 +806,7 @@ function wc_mpesa_reconcile()
 	    	
 	    	if ( $ipn_balance == 0 ) {
 	    		$order->payment_complete();
+	            //$order->update_status( 'complete' );
 	        	$order->add_order_note( __( "Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}" ) );
 				update_post_meta( $post, '_order_status', 'complete' );
 	        } elseif ( $ipn_balance < 0 ) {
@@ -845,6 +840,7 @@ function wc_mpesa_reconcile()
 /**
  * 
  */
+add_action( 'init', 'wc_mpesa_timeout' );
 function wc_mpesa_timeout()
 {
 	if ( ! isset( $_GET['mpesa_ipn_listener'] ) ){ return; }
@@ -873,3 +869,9 @@ function wc_mpesa_timeout()
         $order->add_order_note( __( "MPesa Payment Timed Out", 'woocommerce' ) );
     }
 }
+
+function wcmpesa_new_order_column( $columns ) {
+    $columns['mpesa'] = 'Reinitiate Mpesa';
+    return $columns;
+}
+add_filter( 'manage_edit-shop_order_columns', 'wcmpesa_new_order_column' );
