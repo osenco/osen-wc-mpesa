@@ -3,13 +3,12 @@
  * Plugin Name: MPesa For WooCommerce
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate MPesa for making and receiving online payments.
- * Author: Mauko Maunde < mauko@osen.co.ke >
- * Version: 1.4
+ * Author: Osen Concepts Kenya < hi@osen.co.ke >
+ * Version: 1.7.8
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.4
  * Tested up to: 4.9.5
- * @todo Add uninstall script - delete all payments?
  */
 
 // Exit if accessed directly.
@@ -23,7 +22,7 @@ if ( !in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', 
 
 define( 'MPESA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MPESA_INC_DIR', MPESA_DIR.'includes/' );
-define( 'WC_MPESA_VERSION', '0.18.06' );
+define( 'WC_MPESA_VERSION', '1.7.8' );
 
 // Admin Menus
 require_once( MPESA_INC_DIR.'menu.php' );
@@ -179,12 +178,10 @@ function wc_mpesa_gateway_init()
 	{
 		public $mpesa_name;
 		public $mpesa_shortcode;
-		public $mpesa_partyb;
+		public $mpesa_headoffice;
 		public $mpesa_type;
 		public $mpesa_key;
 		public $mpesa_secret;
-		public $mpesa_username;
-		public $mpesa_password;
 		public $mpesa_passkey;
 		public $mpesa_callback_url;
 		public $mpesa_timeout_url;
@@ -192,8 +189,7 @@ function wc_mpesa_gateway_init()
 		public $mpesa_confirmation_url;
 		public $mpesa_validation_url;
 
-		public $mpesa_env = 'no';
-		public $mpesa_credential;
+		public $mpesa_env = 'sanbox';
 
 		/**
 		 * Constructor for the gateway.
