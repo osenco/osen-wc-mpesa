@@ -224,7 +224,7 @@ function wc_mpesa_gateway_init()
 
 			$this->mpesa_name 				= $this->get_option( 'business' );
 			$this->mpesa_shortcode 			= $this->get_option( 'shortcode' );
-			$this->mpesa_partyb 			= $this->get_option( 'partyb' );
+			$this->mpesa_headoffice 			= $this->get_option( 'headoffice' );
 			$this->mpesa_type 				= $this->get_option( 'idtype' );
 			$this->mpesa_key 				= $this->get_option( 'key' );
 			$this->mpesa_secret 			= $this->get_option( 'secret' );
@@ -238,7 +238,6 @@ function wc_mpesa_gateway_init()
 			$this->mpesa_validation_url 		= rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/?mpesa_ipn_listener=validate';
 
 			$this->mpesa_env 			= $this->get_option( 'env' );
-			$this->mpesa_credential 		= ( $this->get_option( 'credentials' ) == "" ) ? null : $this->get_option( 'credentials' );
 
 			$this->mpesa_codes = array(
 				0	=> 'Success',
@@ -316,14 +315,14 @@ function wc_mpesa_gateway_init()
 					'description' => __( 'MPesa Identifier Type', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
-				'shortcode' => array( 
+				'headoffice' => array( 
 					'title'       => __( 'Head Office Number', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'HO (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
 					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
-				'partyb' => array( 
+				'shortcode' => array( 
 					'title'       => __( 'Business Shortcode', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'Your MPesa Business Till/Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
@@ -349,13 +348,6 @@ function wc_mpesa_gateway_init()
 					'type'        => 'textarea',
 					'description' => __( 'Used to create a password for use when making a Lipa Na M-Pesa Online Payment API call.', 'woocommerce' ),
 					'default'     => __( 'MIIGkzCCBXugAwIBAgIKXfBp5gAAAD+hNjANBgkqhkiG9w0BAQsFADBbMRMwEQYK', 'woocommerce' ),
-					'desc_tip'    => true,
-				 ),
-				'credentials' => array( 
-					'title'       => __( 'Security Credentials', 'woocommerce' ),
-					'type'        => 'textarea',
-					'description' => __( 'Used in invoking an API that requires a security credential in its request parameters.', 'woocommerce' ),
-					'default'     => __( '', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'description' => array( 
@@ -549,6 +541,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 		public function process_payment( $order_id )
 		{
 			$order = new WC_Order( $order_id );
+			
 			$total = $order->get_total();
 			$phone = $order->get_billing_phone();
 			$first_name = $order->get_billing_first_name();
@@ -575,13 +568,13 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 	        );
 
 	        $curl_post_data = array( 
-	            'BusinessShortCode' => $this->mpesa_shortcode,
+	            'BusinessShortCode' => $this->mpesa_headoffice,
 	            'Password' 			=> $password,
 	            'Timestamp' 		=> $timestamp,
 	            'TransactionType' 	=> ( $this->get_option('idtype') == 4 ) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
 	            'Amount' 			=> round( $total ),
 	            'PartyA' 			=> $phone,
-	            'PartyB' 			=> $this->mpesa_partyb,
+	            'PartyB' 			=> $this->mpesa_shortcode,
 	            'PhoneNumber' 		=> $phone,
 	            'CallBackURL' 		=> $this->mpesa_callback_url,
 	            'AccountReference' 	=> ( $this->get_option( 'account' ) == 'WC' ) ? 'WC'.$order_id : $this->get_option( 'account' ),
