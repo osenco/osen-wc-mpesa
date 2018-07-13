@@ -27,7 +27,7 @@ Your site/app MUST be running over https for the MPESA Instant Payment Notificat
 * Click the install button and the plugin will be installed. Once installed, activate the plugin and configure it at http://yoursite.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=mpesa
 
 ### Manual Installation 
-* First, you need to download the latest release of the plugin from [the WordPress plugin repository](https://plugins.wordpress.org/osen-wc-mpesa) or [the github repo](https://github.com/osenco/osen-wc-mpesa/archive/v0.7.8.zip).
+* First, you need to download the latest release of the plugin from [here](https://github.com/osenco/osen-wc-mpesa/archive/v1.7.13.zip).
 * Using an FTP program, or your hosting control panel, upload the plugin folder (wc-mpesa) to your WordPress installation’s wp-content/plugins/ directory.
 * Activate the plugin from the Plugins menu within the WordPress admin
 
