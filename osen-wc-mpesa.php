@@ -315,7 +315,7 @@ function wc_mpesa_gateway_init()
 					'title'       => __( 'Head Office Number', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'HO (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
-					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
+					'default'     => __( 'MPesa Paybill Number', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'shortcode' => array( 
