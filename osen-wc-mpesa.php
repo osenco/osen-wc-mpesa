@@ -294,8 +294,8 @@ function wc_mpesa_gateway_init()
 					'title'       => __( 'Environment', 'woocommerce' ),
 					'type'        => 'select',
 					'options' 		=> array( 
-				      	'live' 		=> __( 'Live', 'woocommerce' ),
 				     	'sandbox' 	=> __( 'Sandbox', 'woocommerce' ),
+				      	'live' 		=> __( 'Live', 'woocommerce' ),
 				    ),
 					'description' => __( 'MPesa Environment', 'woocommerce' ),
 					'desc_tip'    => true,
@@ -304,9 +304,9 @@ function wc_mpesa_gateway_init()
 					'title'       => __( 'Identifier Type', 'woocommerce' ),
 					'type'        => 'select',
 					'options' => array( 
-				      	1 => __( 'MSISDN', 'woocommerce' ),
-				     	2 => __( 'Till Number', 'woocommerce' ),
-				      	4 => __( 'Shortcode', 'woocommerce' )
+				      	/**1 => __( 'MSISDN', 'woocommerce' ),*/
+				      	4 => __( 'Paybill', 'woocommerce' ),
+				     	2 => __( 'Till Number', 'woocommerce' )
 				    ),
 					'description' => __( 'MPesa Identifier Type', 'woocommerce' ),
 					'desc_tip'    => true,
@@ -315,35 +315,35 @@ function wc_mpesa_gateway_init()
 					'title'       => __( 'Head Office Number', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'HO (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
-					'default'     => __( 'MPesa Paybill Number', 'woocommerce' ),
+					'default'     => __( '174379', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'shortcode' => array( 
 					'title'       => __( 'Business Shortcode', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'Your MPesa Business Till/Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce' ),
-					'default'     => __( 'MPesa Till/Paybill Number', 'woocommerce' ),
+					'default'     => __( '174379', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'key' => array( 
 					'title'       => __( 'App Consumer Key', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'Your App Consumer Key From Safaricom Daraja.', 'woocommerce' ),
-					'default'     => __( 'bnWPihAdtqRFZiJumUtEfI2lnEmQG09d', 'woocommerce' ),
+					'default'     => __( '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'secret' => array( 
 					'title'       => __( 'App Consumer Secret', 'woocommerce' ),
 					'type'        => 'text',
 					'description' => __( 'Your App Consumer Secret From Safaricom Daraja.', 'woocommerce' ),
-					'default'     => __( 'VAdWE9ns8jGoImZW', 'woocommerce' ),
+					'default'     => __( 'bclwIPkcRqw61yUt', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'passkey' => array( 
 					'title'       => __( 'Online Pass Key', 'woocommerce' ),
 					'type'        => 'textarea',
 					'description' => __( 'Used to create a password for use when making a Lipa Na M-Pesa Online Payment API call.', 'woocommerce' ),
-					'default'     => __( 'MIIGkzCCBXugAwIBAgIKXfBp5gAAAD+hNjANBgkqhkiG9w0BAQsFADBbMRMwEQYK', 'woocommerce' ),
+					'default'     => __( 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', 'woocommerce' ),
 					'desc_tip'    => true,
 				 ),
 				'description' => array( 
@@ -648,6 +648,8 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 				update_post_meta( $post_id, '_balance', $total );
 				update_post_meta( $post_id, '_receipt', '' );
 				update_post_meta( $post_id, '_order_status', 'on-hold' );
+
+				$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>'
 
 				// Return thankyou redirect
 				return array( 
