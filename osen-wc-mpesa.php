@@ -4,7 +4,7 @@
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate MPesa for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.7.8
+ * Version: 1.8.8
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.4
@@ -305,7 +305,7 @@ function wc_mpesa_gateway_init()
 					'type'        => 'select',
 					'options' => array( 
 				      	/**1 => __( 'MSISDN', 'woocommerce' ),*/
-				      	4 => __( 'Paybill', 'woocommerce' ),
+				      	4 => __( 'Paybill Number', 'woocommerce' ),
 				     	2 => __( 'Till Number', 'woocommerce' )
 				    ),
 					'description' => __( 'MPesa Identifier Type', 'woocommerce' ),
@@ -577,7 +577,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 	            'BusinessShortCode' => $this->mpesa_headoffice,
 	            'Password' 			=> $password,
 	            'Timestamp' 		=> $timestamp,
-	            'TransactionType' 	=> ( $this->get_option('idtype') == 4 ) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+	            'TransactionType' 	=> ( $this->get_option('idtype') == 4 ) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
 	            'Amount' 			=> round( $total ),
 	            'PartyA' 			=> $phone,
 	            'PartyB' 			=> $this->mpesa_shortcode,
@@ -649,7 +649,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 				update_post_meta( $post_id, '_receipt', '' );
 				update_post_meta( $post_id, '_order_status', 'on-hold' );
 
-				$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>'
+				$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>';
 
 				// Return thankyou redirect
 				return array( 
