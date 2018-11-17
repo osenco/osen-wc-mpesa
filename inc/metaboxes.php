@@ -7,16 +7,16 @@
  */
 
 add_action( 'add_meta_boxes', 'mpesa_mb_sm' );
-add_action( 'save_post', 'mpesa_ipn_save_meta' );
+add_action( 'save_post', 'c2b_payment_save_meta' );
 
 function mpesa_mb_sm() {
-	add_meta_box( 'mpesa-ipn-customer_details', 'Customer Details', 'customer_details', 'mpesaipn', 'normal', 'high' );
-	add_meta_box( 'mpesa-ipn-order_details', 'Order Details', 'order_details', 'mpesaipn', 'normal', 'high' );
-	add_meta_box( 'mpesa-ipn-payment_details', 'Payment Details', 'payment_details', 'mpesaipn', 'side', 'high' );
-	//add_meta_box( 'mpesa-ipn-payment_status', 'Payment Status', 'mpesa_status', 'mpesaipn', 'side', 'low' );
-	add_meta_box( 'woocommerce-order-notes', 'Payment Order Notes', 'order_notes','mpesaipn', 'normal', 'default' );
+	add_meta_box( 'c2b-payment-customer_details', 'Customer Details', 'customer_details', 'c2b_payment', 'normal', 'high' );
+	add_meta_box( 'c2b-payment-order_details', 'Order Details', 'order_details', 'c2b_payment', 'normal', 'high' );
+	add_meta_box( 'c2b-payment-payment_details', 'Payment Details', 'payment_details', 'c2b_payment', 'side', 'high' );
+	//add_meta_box( 'c2b-payment-payment_status', 'Payment Status', 'mpesa_status', 'c2b_payment', 'side', 'low' );
+	add_meta_box( 'woocommerce-order-notes', 'Payment Order Notes', 'order_notes','c2b_payment', 'normal', 'default' );
 
-	add_meta_box( 'mpesa-ipn-payment_create', 'Paid For Via MPesa?', 'mpesa_payment', 'shop_order', 'side', 'low' );
+	add_meta_box( 'c2b-payment-payment_create', 'Paid For Via MPesa?', 'mpesa_payment', 'shop_order', 'side', 'low' );
 }
 
 function mpesa_payment( $post )
@@ -29,7 +29,7 @@ function mpesa_payment( $post )
 		</tr>
 		<tr valign="top" >
 			<td>
-				<a href="'.admin_url( 'post-new.php?post_type=mpesaipn&order='.$post->ID.'' ).'" class="page-title-action">Add New MPesa Payment</a>
+				<a href="'.admin_url( 'post-new.php?post_type=c2b_payment&order='.$post->ID.'' ).'" class="page-title-action">Add New MPesa Payment</a>
 			</td>
 		</tr>
 	</table>';
@@ -45,7 +45,7 @@ function mpesa_status( $post )
 		</tr>
 		<tr valign="top" >
 			<td>
-				<button type="submit" name="mpesaipn_status" class="page-title-action">Check Payment Status</a>
+				<button type="submit" name="c2b_payment_status" class="page-title-action">Check Payment Status</a>
 			</td>
 		</tr>
 	</table>';
@@ -71,11 +71,11 @@ function customer_details( $post )
 
 	echo '<style> #add_order_note { width: 100%; } </style><table class="form-table" >
 		<tr valign="top" >
-			<th scope="row" >Customer Full Names</th>
+			<th scope="row" >Full Names</th>
 			<td><input type="text" name="customer" value="'. esc_attr( $customer ) .' " / > </td>
 		</tr>
 		<tr valign="top" >
-			<th scope="row">Customer Phone Number</th>
+			<th scope="row">Phone Number</th>
 			<td><input type="text" name="phone" value="'. esc_attr( $phone ) .' " / >
 			<input type="hidden" name="ipnmb">
 			<input type="hidden" name="post_title", value="Manual">
@@ -161,7 +161,7 @@ function payment_details( $post )
 	</p><?php
 }
 
-function mpesa_ipn_save_meta( $post_id ) {
+function c2b_payment_save_meta( $post_id ) {
 	if ( isset( $_POST['save_meta']) ) {
 		$customer = trim( $_POST['customer'] );
 		$phone = trim( $_POST['phone'] );
