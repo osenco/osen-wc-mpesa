@@ -82,20 +82,20 @@ class MpesaC2B
       return array( 
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $transID
+        'ThirdPartyTransID'       => $data['transID'] ?? 0
        );
     } else {
         if ( !call_user_func_array( $callback, array( $data ) ) ) {
           return array( 
             'ResponseCode'        => 1, 
             'ResponseDesc'        => 'Failed',
-            'ThirdPartyTransID'   => $transID
+            'ThirdPartyTransID'   => $data['transID'] ?? 0
            );
         } else {
           return array( 
-            'ResponseCode'            => 0, 
-            'ResponseDesc'            => 'Success',
-            'ThirdPartyTransID'       => $transID
+            'ResponseCode'        => 0, 
+            'ResponseDesc'        => 'Success',
+            'ThirdPartyTransID'   => $data['transID'] ?? 0
            );
         }
     }
@@ -106,10 +106,10 @@ class MpesaC2B
    */
   public static function timeout( $callback = null, $data = null )
   {
-    if( is_null( $callback) ){
+    if( is_null( $callback ) ){
       return true;
     } else {
-        return call_user_func_array( $callback, array( $data ) );
+      return call_user_func_array( $callback, array( $data ) );
     }
   }
 
@@ -120,23 +120,23 @@ class MpesaC2B
   {
     if( is_null( $callback) ){
       return array( 
-        'ResponseCode'            => 0, 
-        'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $transID
+        'ResponseCode'          => 0, 
+        'ResponseDesc'          => 'Success',
+        'ThirdPartyTransID'     => $data['transID'] ?? 0
        );
     } else {
       if ( !call_user_func_array( $callback, array( $data ) ) ) {
         return array( 
           'ResponseCode'        => 1, 
           'ResponseDesc'        => 'Failed',
-          'ThirdPartyTransID'   => $transID
+          'ThirdPartyTransID'   => $data['transID'] ?? 0
          );
       } else {
-      return array( 
-        'ResponseCode'            => 0, 
-        'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $transID
-       );
+        return array( 
+          'ResponseCode'        => 0, 
+          'ResponseDesc'        => 'Success',
+          'ThirdPartyTransID'   => $data['transID'] ?? 0
+         );
       }
     }
   }
@@ -147,14 +147,14 @@ class MpesaC2B
   public static function request( $phone, $amount, $reference, $trxdesc = '', $remark = '' )
   {
     $phone      = str_replace( "+", "", $phone );
-    $phone      = preg_replace('/^0/', '254', $phone);
+    $phone      = preg_replace( '/^0/', '254', $phone );
     $token      = self::token();
 
-    $endpoint = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+    $endpoint   = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
-    $timestamp = date( 'YmdHis' );
-    $password = base64_encode( self::$shortcode.self::$passkey.$timestamp );
-    $curl = curl_init();
+    $timestamp  = date( 'YmdHis' );
+    $password   = base64_encode( self::$headoffice.self::$passkey.$timestamp );
+    $curl       = curl_init();
     curl_setopt( $curl, CURLOPT_URL, $endpoint );
     curl_setopt( 
       $curl, 
@@ -166,18 +166,18 @@ class MpesaC2B
     );
 
     $curl_post_data = array( 
-        'BusinessShortCode' => self::$headoffice,
-        'Password'      => $password,
-        'Timestamp'     => $timestamp,
-        'TransactionType'   => ( self::$type == 4 ) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
-        'Amount'      => round( $total ),
-        'PartyA'      => $phone,
-        'PartyB'      => self::$shortcode,
-        'PhoneNumber'     => $phone,
-        'CallBackURL'     => self::$reconcile,
-        'AccountReference'  => $reference,
-        'TransactionDesc'   => 'WooCommerce Payment For '.$order_id,
-        'Remark'      => 'WooCommerce Payment Via MPesa'
+      'BusinessShortCode'   => self::$headoffice,
+      'Password'            => $password,
+      'Timestamp'           => $timestamp,
+      'TransactionType'     => ( self::$type == 4 ) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+      'Amount'              => round( $total ),
+      'PartyA'              => $phone,
+      'PartyB'              => self::$shortcode,
+      'PhoneNumber'         => $phone,
+      'CallBackURL'         => self::$reconcile,
+      'AccountReference'    => $reference,
+      'TransactionDesc'     => 'WooCommerce Payment For '.$order_id,
+      'Remark'              => 'WooCommerce Payment Via MPesa'
     );
 
     $data_string = json_encode( $curl_post_data );
@@ -190,12 +190,10 @@ class MpesaC2B
     $requested = curl_exec($curl);
 
     if ( !$requested ) {
-      $response = false;
+      return false;
     } else {
-      $response = json_decode( $requested, true );
+      return json_decode( $requested, true );
     }
-
-    return $response;
   }
 
   /**
@@ -204,31 +202,16 @@ class MpesaC2B
   public static function reconcile( $callback, $data )
   {
     $response = is_null( $data ) ? json_decode( file_get_contents( 'php://input' ), true ) : $data;
-    if( !isset( $response['Body'] ) ){
-      return false;
-    }
-
-    $payment = $response['Body'];
-    if( !isset($payment['CallbackMetadata'])){
-      $data = null;
-      return false;
-    }
-
-    $data = array(
-      'receipt' => $payment['CallbackMetadata']['Item'][1]['Value'],
-      'amount'  => $payment['CallbackMetadata']['Item'][0]['Value']
-    );
     
-    return is_null( $callback ) ? true : call_user_func_array( $callback, $payment );
+    return is_null( $callback ) ? true : call_user_func_array( $callback, array( $response ) );
   }
 
   /**
    * 
    */
-  public static function register()
+  public static function register( $env = 'sandbox' )
   {
-    $protocol = ( ( !empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-    $endpoint = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+    $endpoint = ( $env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
     $curl = curl_init();
     curl_setopt( $curl, CURLOPT_URL, $endpoint );
     curl_setopt( $curl, CURLOPT_HTTPHEADER, array( 'Content-Type:application/json','Authorization:Bearer '.self::token() ) );
@@ -236,8 +219,8 @@ class MpesaC2B
     $curl_post_data = array( 
       'ShortCode'         => self::$shortcode,
       'ResponseType'      => 'Cancelled',
-      'ConfirmationURL'   => $protocol.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].'/'.self::$confirm,
-      'ValidationURL'     => $protocol.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].'/'.self::$validate
+      'ConfirmationURL'   => self::$confirm,
+      'ValidationURL'     => self::$validate
     );
     $data_string = json_encode( $curl_post_data );
     curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
@@ -263,10 +246,11 @@ class MpesaC2B
  *  reconcile   |   string  | Reconciliation URI    | lipia/reconcile
  * @return bool
  */ 
-function c2b_config( $configuration = array() )
+function c2b_config( $config = array() )
 {
-  return MpesaC2B::set( $configuration );
+  return MpesaC2B::set( $config );
 }
+
 /**
  * Wrapper function to process response data for validation
  * @param String $callback - Optional callback function to process the response
@@ -294,9 +278,9 @@ function c2b_confirm( $callback = null, $data = null  )
  * @param String $reference - Account to show in STK Prompt
  * @param String $trxdesc   - Transaction Description(optional)
  * @param String $remark    - Remarks about transaction(optional)
- * @return Array
+ * @return array
  */ 
-function c2b_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = ' Mpesa Transaction' )
+function c2b_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = 'Mpesa Transaction' )
 {
   return MpesaC2B::request( $phone, $amount, $reference, $trxdesc, $remark );
 }
@@ -304,7 +288,7 @@ function c2b_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction
 /**
  * Wrapper function to process response data for reconcilliation
  * @param String $callback - Optional callback function to process the response
- * @return Bool
+ * @return bool
  */          
 function c2b_reconcile( $callback = null, $data = null )
 {
@@ -314,7 +298,7 @@ function c2b_reconcile( $callback = null, $data = null )
 /**
  * Wrapper function to process response data for reconcilliation
  * @param String $callback - Optional callback function to process the response
- * @return Bool
+ * @return bool
  */          
 function c2b_timeout( $callback = null, $data = null )
 {
@@ -323,9 +307,9 @@ function c2b_timeout( $callback = null, $data = null )
 
 /**
  * Wrapper function to register URLs
- * @return Array
+ * @return array
  */
-function c2b_register()
+function c2b_register( $env = 'sandbox' )
 {
-  return MpesaC2B::register();
+  return MpesaC2B::register( $env );
 }

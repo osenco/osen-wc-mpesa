@@ -63,20 +63,20 @@ class MpesaB2C
       return array( 
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $transID
+        'ThirdPartyTransID'       => $data['transID']
        );
     } else {
         if ( !call_user_func_array( $callback, array( $data ) ) ) {
           return array( 
             'ResponseCode'        => 1, 
             'ResponseDesc'        => 'Failed',
-            'ThirdPartyTransID'   => $transID
+            'ThirdPartyTransID'   => $data['transID']
            );
         } else {
           return array( 
             'ResponseCode'            => 0, 
             'ResponseDesc'            => 'Success',
-            'ThirdPartyTransID'       => $transID
+            'ThirdPartyTransID'       => $data['transID']
            );
         }
     }
@@ -91,20 +91,20 @@ class MpesaB2C
       return array( 
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $transID
+        'ThirdPartyTransID'       => $data['transID']
        );
     } else {
       if ( !call_user_func_array( $callback, array( $data ) ) ) {
         return array( 
           'ResponseCode'        => 1, 
           'ResponseDesc'        => 'Failed',
-          'ThirdPartyTransID'   => $transID
+          'ThirdPartyTransID'   => $data['transID']
          );
       } else {
       return array( 
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $transID
+        'ThirdPartyTransID'       => $data['transID']
        );
       }
     }
@@ -115,7 +115,6 @@ class MpesaB2C
    */
   public static function request( $phone, $amount, $reference, $trxdesc, $remark )
   {
-    $protocol   = ( ( !empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     $phone      = str_replace( "+", "", $phone );
     $phone      = preg_replace('/^0/', '254', $phone);
     $token      = self::token();
@@ -141,8 +140,8 @@ class MpesaB2C
       'PartyA'              => self::$shortcode,
       'PartyB'              => $phone,
       'Remarks'             => $remark,
-      'QueueTimeOutURL'     => $protocol.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].'/'.self::$timeout,
-      'ResultURL'           => $protocol.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].'/'.self::$reconcile,
+      'QueueTimeOutURL'     => self::$timeout,
+      'ResultURL'           => self::$reconcile,
       'Occasion'            => $reference
     );
 
@@ -166,7 +165,7 @@ class MpesaB2C
   /**
    * 
    */          
-  public static function reconcile( $callback, $data )
+  public static function reconcile( $callback = null, $data = null )
   {
     $response = is_null( $data ) ? json_decode( file_get_contents( 'php://input' ), true ) : $data;
     if( !isset( $response['Body'] ) ){
@@ -174,7 +173,7 @@ class MpesaB2C
     }
 
     $payment = $response['Body'];
-    if( !isset($payment['CallbackMetadata'])){
+    if( !isset( $payment['CallbackMetadata'] ) ){
       $data = null;
       return false;
     }
@@ -192,7 +191,6 @@ class MpesaB2C
    */
   public static function register()
   {
-    $protocol = ( ( !empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     $endpoint = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
     $curl = curl_init();
     curl_setopt( $curl, CURLOPT_URL, $endpoint );
@@ -201,8 +199,8 @@ class MpesaB2C
     $curl_post_data = array( 
       'ShortCode'         => self::$shortcode,
       'ResponseType'      => 'Cancelled',
-      'ConfirmationURL'   => $protocol.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].'/'.self::$confirm,
-      'ValidationURL'     => $protocol.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].'/'.self::$validate
+      'ConfirmationURL'   => self::$confirm,
+      'ValidationURL'     => self::$validate
     );
     $data_string = json_encode( $curl_post_data );
     curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
@@ -217,7 +215,7 @@ class MpesaB2C
 ### WRAPPER FUNCTIONS
 /**
  * Wrapper function to process response data for reconcilliation
- * @param Array $configuration - Key-value pairs of settings
+ * @param Array $config - Key-value pairs of settings
  *   KEY        |   TYPE    |   DESCRIPTION         | POSSIBLE VALUES
  *  env         |   string  | Environment in use    | live/sandbox
  *  parent      |   number  | Head Office Shortcode | 123456
@@ -228,10 +226,11 @@ class MpesaB2C
  *  reconcile   |   string  | Reconciliation URI    | lipia/reconcile
  * @return bool
  */ 
-function b2c_config( $configuration = array() )
+function b2c_config( $config = array() )
 {
-  return MpesaB2C::set( $configuration );
+  return MpesaB2C::set( $config );
 }
+
 /**
  * Wrapper function to process response data for validation
  * @param String $callback - Optional callback function to process the response
@@ -259,7 +258,7 @@ function b2c_confirm( $callback = null, $data = null  )
  * @param String $reference - Account to show in STK Prompt
  * @param String $trxdesc   - Transaction Description(optional)
  * @param String $remark    - Remarks about transaction(optional)
- * @return Array
+ * @return array
  */ 
 function b2c_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = ' Mpesa Transaction' )
 {
@@ -269,7 +268,7 @@ function b2c_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction
 /**
  * Wrapper function to process response data for reconcilliation
  * @param String $callback - Optional callback function to process the response
- * @return Bool
+ * @return bool
  */          
 function b2c_reconcile( $callback = null, $data = null )
 {
@@ -278,7 +277,7 @@ function b2c_reconcile( $callback = null, $data = null )
 
 /**
  * Wrapper function to register URLs
- * @return Array
+ * @return array
  */
 function b2c_register()
 {

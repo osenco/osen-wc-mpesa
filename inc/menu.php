@@ -11,29 +11,20 @@ function wc_mpesa_menu()
 {
     add_submenu_page( 
         'edit.php?post_type=c2b_payment', 
+        'B2C Payments', 
+        'B2C Payments', 
+        'manage_options',
+        'wc_mpesa_b2c', 
+        'wc_mpesa_menu_b2c' 
+    );
+
+    add_submenu_page( 
+        'edit.php?post_type=c2b_payment', 
         'About this Plugin', 
         'About Plugin', 
         'manage_options',
         'wc_mpesa_about', 
         'wc_mpesa_menu_about' 
-    );
-
-    add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
-        'MPesa APIs Utility', 
-        'Utility Services',
-        'manage_options',
-        'wc_mpesa_utility', 
-        'wc_mpesa_transactions_menu_utility' 
-    );
-
-    add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
-        'MPesa Payments Analytics', 
-        'Analytics', 
-        'manage_options',
-        'wc_mpesa_analytics', 
-        'wc_mpesa_transactions_menu_analytics' 
     );
 
     add_submenu_page( 
@@ -50,8 +41,17 @@ function wc_mpesa_menu()
         'MPesa B2C Preferences', 
         'Configure B2C', 
         'manage_options',
-        'wc_mpesa_preferences', 
-        'wc_mpesa_menu_settings' 
+        'wc_mpesa_b2c_preferences', 
+        'wc_mpesa_b2c_settings' 
+    );
+
+    add_submenu_page( 
+        'edit.php?post_type=c2b_payment', 
+        'MPesa Payments Analytics', 
+        'Analytics', 
+        'manage_options',
+        'wc_mpesa_analytics', 
+        'wc_mpesa_transactions_menu_analytics' 
     );
 }
 
@@ -97,4 +97,9 @@ function wc_mpesa_menu_about()
 function wc_mpesa_menu_settings()
 {
     wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ) );
+}
+
+function wc_mpesa_menu_b2c()
+{
+    wp_redirect( admin_url( 'edit.php?post_type=b2c_payment' ) );
 }

@@ -38,15 +38,41 @@ function wc_mpesa_detect_woocommerce_deactivation( $plugin, $network_activation 
 }
 add_action( 'deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2 );
 
+add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'mpesa_action_links' );
+function mpesa_action_links( $links )
+{
+	return array_merge( $links, [ '<a href="'.admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ).'">&nbsp;Preferences</a>' ] );
+} 
+
+add_filter( 'plugin_row_meta', 'mpesa_row_meta', 10, 2 );
+function mpesa_row_meta( $links, $file )
+{
+	$plugin = plugin_basename( __FILE__ );
+
+	if ( $plugin == $file ) {
+		$row_meta = array( 
+			'github'    => '<a href="' . esc_url( 'https://github.com/osenco/osen-wc-mpesa/' ) . '" target="_blank" aria-label="' . esc_attr__( 'Contribute on Github', 'woocommerce' ) . '">' . esc_html__( 'Github', 'woocommerce' ) . '</a>',
+			'apidocs' => '<a href="' . esc_url( 'https://developer.safaricom.co.ke/docs/' ) . '" target="_blank" aria-label="' . esc_attr__( 'MPesa API Docs ( Daraja )', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>'
+		 );
+
+		return array_merge( $links, $row_meta );
+	}
+
+	return ( array ) $links;
+}
+
 define( 'WCM_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCM_MAIN', WCM_DIR.'mpesa/' );
 define( 'WCM_FUNC', WCM_DIR.'inc/' );
 define( 'WCM_WC', WCM_DIR.'wc/' );
 define( 'WCM_VER', '1.9.0' );
 
-require_once ( WCM_FUNC.'payments.php' );
+require_once ( WCM_FUNC.'c2b-payments.php' );
+require_once ( WCM_FUNC.'b2c-payments.php' );
 require_once ( WCM_FUNC.'metaboxes.php' );
 require_once ( WCM_MAIN.'c2b.php' );
+require_once ( WCM_MAIN.'b2c.php' );
+require_once ( WCM_FUNC.'b2c-settings.php' );
 require_once ( WCM_FUNC.'menu.php' );
 require_once ( WCM_WC.'woocommerce.php' );
 require_once ( WCM_FUNC.'functions.php' );

@@ -6,9 +6,26 @@
  * @since 0.18.01
  */
 
+function get_post_id_by_meta_key_and_value( $key, $value ) {
+    global $wpdb;
+    $meta = $wpdb->get_results("SELECT * FROM `".$wpdb->postmeta."` WHERE meta_key='".$key."' AND meta_value='".$value."'");
+    if (is_array($meta) && !empty($meta) && isset($meta[0])) {
+        $meta = $meta[0];
+    }
+
+    if (is_object($meta)) {
+        return $meta->post_id;
+    } else {
+        return false;
+    }
+}
+
 function wc_mpesa_reconcile( $response ){
 	if( empty( $response ) ){
-    	return;
+    	return array(
+    		'errorCode' 	=> 1,
+    		'errorMessage' 	=> 'Empty reconciliation response data' 
+    	);
     }
 
     $resultCode 						= $response['stkCallback']['ResultCode'];
@@ -81,7 +98,10 @@ function wc_mpesa_reconcile( $response ){
 function wc_mpesa_timeout( $response )
 {
 	if( empty( $response ) ){
-    	return;
+    	return array(
+    		'errorCode' 	=> 1,
+    		'errorMessage' 	=> 'Empty timeout response data' 
+    	);
     }
  	
  	$resultCode 					= $response['stkCallback']['ResultCode'];
@@ -102,57 +122,56 @@ function wc_mpesa_timeout( $response )
     }
 }
 
-add_action( 'init', function() {
-    add_rewrite_rule( '^/wcmpesa_register/?([^/]*)/?', 'index.php?wcmpesa_register=1', 'top' );
-    add_rewrite_rule( '^/wcmpesa_confirm/?([^/]*)/?', 'index.php?wcmpesa_confirm=1', 'top' );
-    add_rewrite_rule( '^/wcmpesa_validate/?([^/]*)/?', 'index.php?wcmpesa_validate=1', 'top' );
-    add_rewrite_rule( '^/wcmpesa_reconcile/?([^/]*)/?', 'index.php?wcmpesa_reconcile=1', 'top' );
-    add_rewrite_rule( '^/wcmpesa_timeout/?([^/]*)/?', 'index.php?wcmpesa_timeout=1', 'top' );
+add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
+    $wp_rewrite->rules = array_merge(
+        ['wcmpesa/([\w+]*)/action/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]'],
+        $wp_rewrite->rules
+    );
 } );
 
 add_filter( 'query_vars', function( $query_vars ) {
-    $query_vars[] = 'wcmpesa_register';
-    $query_vars[] = 'wcmpesa_confirm';
-    $query_vars[] = 'wcmpesa_validate';
-    $query_vars[] = 'wcmpesa_reconcile';
-    $query_vars[] = 'wc_mpesa_timeout';
-
+    $query_vars[] = 'wcmpesa';
+    $query_vars[] = 'action';
     return $query_vars;
 } );
 
-add_action( 'wp', function() {
+add_action( 'template_redirect', function() {
+    $route = get_query_var( 'wcmpesa' );
+    $action = get_query_var( 'action' );
 
-    if ( get_query_var( 'wcmpesa_register' ) ){
-		header( "Access-Control-Allow-Origin: *" );
-		header( 'Content-Type:Application/json' );
-		wp_send_json( c2b_register() );
-    } elseif ( get_query_var( 'wcmpesa_confirm' ) ){
-		header( "Access-Control-Allow-Origin: *" );
-		header( 'Content-Type:Application/json' );
-    	$response = json_decode( file_get_contents( 'php://input' ), true );
-    	$data = isset( $response['Body'] ) ? $response['Body'] : '';
-    
-    	wp_send_json( c2b_confirm( null, $data ) );
-    } elseif ( get_query_var( 'wcmpesa_validate' ) ){
-		header( "Access-Control-Allow-Origin: *" );
-		header( 'Content-Type:Application/json' );
-		$response = json_decode( file_get_contents( 'php://input' ), true );
-		$data = isset( $response['Body'] ) ? $response['Body'] : '';
+    if ( $route ) {
+		$response 	= json_decode( file_get_contents( 'php://input' ), true );
+		$data 		= isset( $response['Body'] ) ? $response['Body'] : array();
 
-		wp_send_json( c2b_validate( null, $data ) );
-	} elseif ( get_query_var( 'wcmpesa_reconcile' ) ){
-		header( "Access-Control-Allow-Origin: *" );
-		header( 'Content-Type:Application/json' );
-	    $response = json_decode( file_get_contents( 'php://input' ), true );		    
-	    $data = isset( $response['Body'] ) ? $response['Body'] : '';
+    	switch ( $route ) {
+    		case 'confirm':
+    			$data['transID'] = $action;
+    			wp_send_json( c2b_confirm( null, $data ) );
+    			break;
 
-	    c2b_reconcile( 'wc_mpesa_reconcile', $data );
-	} elseif ( get_query_var( 'wcmpesa_timeout' ) ){
-		header( "Access-Control-Allow-Origin: *" );
-		header( 'Content-Type:Application/json' );
-	    $response = json_decode( file_get_contents( 'php://input' ), true );
-	    $data = isset( $response['Body'] ) ? $response['Body'] : '';
+    		case 'validate':
+    			$data['transID'] = $action;
+    			wp_send_json( c2b_validate( null, $data ) );
+    			break;
 
-	    c2b_timeout( 'wc_mpesa_timeout', $data );
-	}
+    		case 'register':
+    			wp_send_json( c2b_register( $action ) );
+    			break;
+
+			case 'reconcile':
+				wp_send_json( c2b_reconcile( $action, $data ) );
+				break;
+
+    		case 'timeout':
+    			wp_send_json( c2b_timeout( $action, $data ) );
+    			break;
+    		
+    		default:
+    			$data['transID'] = $action;
+    			wp_send_json( c2b_validate( null, $data ) );
+    			break;
+    	}
+        
+        die;
+    }
 } );

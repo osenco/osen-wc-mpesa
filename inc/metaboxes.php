@@ -10,10 +10,10 @@ add_action( 'add_meta_boxes', 'mpesa_mb_sm' );
 add_action( 'save_post', 'c2b_payment_save_meta' );
 
 function mpesa_mb_sm() {
-	add_meta_box( 'c2b-payment-customer_details', 'Customer Details', 'customer_details', 'c2b_payment', 'normal', 'high' );
-	add_meta_box( 'c2b-payment-order_details', 'Order Details', 'order_details', 'c2b_payment', 'normal', 'high' );
-	add_meta_box( 'c2b-payment-payment_details', 'Payment Details', 'payment_details', 'c2b_payment', 'side', 'high' );
-	//add_meta_box( 'c2b-payment-payment_status', 'Payment Status', 'mpesa_status', 'c2b_payment', 'side', 'low' );
+	add_meta_box( 'c2b-payment-customer_details', 'Customer Details', 'customer_details', [ 'c2b_payment', 'b2c_payment'], 'normal', 'high' );
+	add_meta_box( 'c2b-payment-order_details', 'Order Details', 'order_details', [ 'c2b_payment', 'b2c_payment'], 'normal', 'high' );
+	add_meta_box( 'c2b-payment-payment_details', 'Payment Details', 'payment_details', [ 'c2b_payment', 'b2c_payment'], 'side', 'high' );
+	add_meta_box( 'c2b-payment-payment_status', 'Payment Status', 'mpesa_status', [ 'c2b_payment', 'shop_order' ], 'side', 'low' );
 	add_meta_box( 'woocommerce-order-notes', 'Payment Order Notes', 'order_notes','c2b_payment', 'normal', 'default' );
 
 	add_meta_box( 'c2b-payment-payment_create', 'Paid For Via MPesa?', 'mpesa_payment', 'shop_order', 'side', 'low' );
@@ -56,12 +56,12 @@ function customer_details( $post )
 	$customer = get_post_meta( $post->ID, '_customer', true );
 	$phone = get_post_meta( $post->ID, '_phone', true );
 	if( isset( $_GET['order'])){
-		$order = new WC_Order( $_GET['order'] );
-		$total = wc_format_decimal( $order->get_total(), 2 );
-		$phone = $order->get_billing_phone();
+		$order 		= new WC_Order( $_GET['order'] );
+		$total 		= wc_format_decimal( $order->get_total(), 2 );
+		$phone 		= $order->get_billing_phone();
 		$first_name = $order->get_billing_first_name();
-		$last_name = $order->get_billing_last_name();
-		$customer = "{$first_name} {$last_name}";
+		$last_name 	= $order->get_billing_last_name();
+		$customer 	= "{$first_name} {$last_name}";
 	}
 
 	// Remove the plus sign before the customer's phone number
@@ -69,14 +69,14 @@ function customer_details( $post )
 		$phone = str_replace( "+", "", $phone );
 	}
 
-	echo '<style> #add_order_note { width: 100%; } </style><table class="form-table" >
+	echo '<table class="form-table" >
 		<tr valign="top" >
 			<th scope="row" >Full Names</th>
-			<td><input type="text" name="customer" value="'. esc_attr( $customer ) .' " / > </td>
+			<td><input type="text" name="customer" value="'. esc_attr( $customer ) .' " class="regular-text" / > </td>
 		</tr>
 		<tr valign="top" >
 			<th scope="row">Phone Number</th>
-			<td><input type="text" name="phone" value="'. esc_attr( $phone ) .' " / >
+			<td><input type="text" name="phone" value="'. esc_attr( $phone ) .' " class="regular-text" / >
 			<input type="hidden" name="ipnmb">
 			<input type="hidden" name="post_title", value="Manual">
 			</td>
@@ -107,16 +107,16 @@ function order_details( $post )
 		<tr valign="top" >
 			<th scope="row" >Order ID</th>
 			<td>
-				<input type="text" name="order_id" value="'. esc_attr( $order ) .' " / >'.$new.'
+				<input type="text" name="order_id" value="'. esc_attr( $order ) .' " class="regular-text" />'.$new.'
 			</td>
 		</tr>
 		<tr valign="top" >
 			<th scope="row">Order Amount</th>
-			<td><input type="text" name="amount" value="'. esc_attr( $amount ) .' " / > </td>
+			<td><input type="text" name="amount" value="'. esc_attr( $amount ) .' " class="regular-text" /> </td>
 		</tr>
 		<tr valign="top" >
 			<th scope="row">Amount Paid</th>
-			<td><input type="text" name="paid" value="'. esc_attr( $paid ) .' " / > </td>
+			<td><input type="text" name="paid" value="'. esc_attr( $paid ) .' " class="regular-text" /> </td>
 		</tr>
 	</table>';
 }
@@ -127,7 +127,7 @@ function order_notes( $post )
 		<tr valign="top" >
 			<th scope="row" >Add Order Note</th>
 			<td>
-				<textarea id="add_order_note" name="order_note"></textarea>
+				<textarea id="add_order_note" name="order_note" class="large-text"></textarea>
 			</td>
 		</tr>
 	</table>';
@@ -153,7 +153,7 @@ function payment_details( $post )
 	<p>Set Order(Payment) Status
 		<select name="status">
 			<option class="postbox" value="<?php echo esc_attr( $status ); ?>"><?php echo esc_attr( $statuses[$status] ); ?></option>
-			<?php  unset( $statuses[$status]); foreach( $statuses as $ostatus => $label ): ?>
+			<?php  unset( $statuses[$status] ); foreach( $statuses as $ostatus => $label ): ?>
 				<option class="postbox" value="<?php echo esc_attr( $ostatus ); ?>"><?php echo esc_attr( $label ); ?></option>
 			<?php endforeach; ?>
 		</select>
