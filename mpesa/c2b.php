@@ -203,7 +203,7 @@ class MpesaC2B
   {
     $response = is_null( $data ) ? json_decode( file_get_contents( 'php://input' ), true ) : $data;
     
-    return is_null( $callback ) ? true : call_user_func_array( $callback, array( $response ) );
+    return is_null( $callback ) ? array( 'resultCode' => 0, 'resultDesc' => 'Success' ) : call_user_func_array( $callback, array( $response ) );
   }
 
   /**

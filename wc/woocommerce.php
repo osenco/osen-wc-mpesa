@@ -105,7 +105,7 @@ function wc_mpesa_gateway_init()
 		public function __construct() 
 		{
 			$env = get_option( 'woocommerce_mpesa_settings' )["env"];
-			$reg_notice = '<li><a href="'.home_url( 'wcmpesa/register/action/'.$env ).'" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once for sandbox and once when you go live.</li>';
+			$reg_notice = '<li><a href="'.home_url( 'wcmpesa/register/action/'.$env ).'/baseapi/c2b" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once for sandbox and once when you go live.</li>';
 			$test_cred = ( $env == 'sandbox' ) ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >generate sandbox test credentials here</a>.</li>' : '';
 			//$reg_notice = has_valid_licence() ? '' : $reg_notice;
 
@@ -135,10 +135,10 @@ function wc_mpesa_gateway_init()
 					'headoffice' 	=> $this->get_option( 'headoffice', '174379' ),
 					'shortcode' 	=> $this->get_option( 'shortcode', '174379' ),
 					'type'	 		=> $this->get_option( 'idtype', 4 ),
-					'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0',
-					'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0',
-					'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile',
-					'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout'
+					'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/baseapi/c2b/',
+					'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/baseapi/c2b/',
+					'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/baseapi/c2b/',
+					'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/baseapi/c2b/'
 				)
 			);
 

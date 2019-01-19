@@ -20,6 +20,50 @@ function get_post_id_by_meta_key_and_value( $key, $value ) {
     }
 }
 
+function wc_mpesa_request( $phone, $amount, $ref = '' )
+{
+	$curl_post_data = array(
+
+        //Fill in the request parameters with valid values
+
+        'BusinessShortCode' => $shortcd,
+
+		'Password' => $pwd,
+
+        'Timestamp' => $timestamp,
+
+        'TransactionType' => 'CustomerPayBillOnline',
+
+        'Amount' => $total,
+
+        'PartyA' => $_SESSION['tel'],
+
+        'PartyB' => $shortcd,
+
+        'PhoneNumber' => $_SESSION['tel'],
+
+        'CallBackURL' => $callback_url.'/index.php?callback_action=1',
+
+        'AccountReference' => time(),
+
+        'TransactionDesc' => 'Sending a lipa na mpesa request'
+
+    );
+
+    $data_string = json_encode($curl_post_data);
+
+	$response = wp_remote_post( 
+		$url, 
+		array(
+			'headers' => array(
+				'Content-Type' => 'application/json', 
+				'Authorization' => 'Bearer ' . $access_token
+			),
+			'body'    => $data_string
+		)
+	);
+}
+
 function wc_mpesa_reconcile( $response ){
 	if( empty( $response ) ){
     	return array(
@@ -124,7 +168,11 @@ function wc_mpesa_timeout( $response )
 
 add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
     $wp_rewrite->rules = array_merge(
-        ['wcmpesa/([\w+]*)/action/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]'],
+        array(
+        	'wcmpesa/([\w+]*)' => 'index.php?wcmpesa=$matches[1]', 
+        	'wcmpesa/([\w+]*)/action/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 
+        	'wcmpesa/([\w+]*)/action/([\w+]*)/baseapi/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]&baseapi=$matches[3]'
+        ),
         $wp_rewrite->rules
     );
 } );
@@ -132,46 +180,31 @@ add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
 add_filter( 'query_vars', function( $query_vars ) {
     $query_vars[] = 'wcmpesa';
     $query_vars[] = 'action';
+    $query_vars[] = 'baseapi';
     return $query_vars;
 } );
 
 add_action( 'template_redirect', function() {
-    $route = get_query_var( 'wcmpesa' );
-    $action = get_query_var( 'action' );
+    $route 	= get_query_var( 'wcmpesa' );
+    $action = get_query_var( 'action', null );
+    $api 	= get_query_var( 'baseapi', 'c2b' );
 
     if ( $route ) {
 		$response 	= json_decode( file_get_contents( 'php://input' ), true );
 		$data 		= isset( $response['Body'] ) ? $response['Body'] : array();
+    	
+    	$action = $action == '0' ? null : $action;
 
-    	switch ( $route ) {
-    		case 'confirm':
-    			$data['transID'] = $action;
-    			wp_send_json( c2b_confirm( null, $data ) );
-    			break;
+    	wp_send_json( 
+    		call_user_func_array( 
+      			$api.'_'.$route, 
+      			array( 
+      				$action, 
+      				$data 
+      			) 
+      		)
+    	);
 
-    		case 'validate':
-    			$data['transID'] = $action;
-    			wp_send_json( c2b_validate( null, $data ) );
-    			break;
-
-    		case 'register':
-    			wp_send_json( c2b_register( $action ) );
-    			break;
-
-			case 'reconcile':
-				wp_send_json( c2b_reconcile( $action, $data ) );
-				break;
-
-    		case 'timeout':
-    			wp_send_json( c2b_timeout( $action, $data ) );
-    			break;
-    		
-    		default:
-    			$data['transID'] = $action;
-    			wp_send_json( c2b_validate( null, $data ) );
-    			break;
-    	}
-        
         die;
     }
 } );

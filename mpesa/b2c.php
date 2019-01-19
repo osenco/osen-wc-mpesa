@@ -16,17 +16,36 @@ header('Access-Control-Allow-Origin: *');
 class MpesaB2C
 {
   public static $env = 'sandbox';
+  public static $business;
   public static $appkey;
   public static $appsecret;
   public static $passkey;
   public static $shortcode;
-  public static $username;
-  public static $password;
+  public static $headoffice;
   public static $type = 4;
   public static $validate;
   public static $confirm;
   public static $reconcile;
-  public static $instructions;
+  public static $timeout;
+  public static $codes = array(
+    0   => 'Success',
+    1   => 'Insufficient Funds',
+    2   => 'Less Than Minimum Transaction Value',
+    3   => 'More Than Maximum Transaction Value',
+    4   => 'Would Exceed Daily Transfer Limit',
+    5   => 'Would Exceed Minimum Balance',
+    6   => 'Unresolved Primary Party',
+    7   => 'Unresolved Receiver Party',
+    8   => 'Would Exceed Maxiumum Balance',
+    11  => 'Debit Account Invalid',
+    12  => 'Credit Account Invalid',
+    13  => 'Unresolved Debit Account',
+    14  => 'Unresolved Credit Account',
+    15  => 'Duplicate Detected',
+    17  => 'Internal Failure',
+    20  => 'Unresolved Initiator',
+    26  => 'Traffic blocking condition in place'
+  );
 
   public static function set( $config )
   {
@@ -63,22 +82,34 @@ class MpesaB2C
       return array( 
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $data['transID']
+        'ThirdPartyTransID'       => $data['transID'] ?? 0
        );
     } else {
         if ( !call_user_func_array( $callback, array( $data ) ) ) {
           return array( 
             'ResponseCode'        => 1, 
             'ResponseDesc'        => 'Failed',
-            'ThirdPartyTransID'   => $data['transID']
+            'ThirdPartyTransID'   => $data['transID'] ?? 0
            );
         } else {
           return array( 
-            'ResponseCode'            => 0, 
-            'ResponseDesc'            => 'Success',
-            'ThirdPartyTransID'       => $data['transID']
+            'ResponseCode'        => 0, 
+            'ResponseDesc'        => 'Success',
+            'ThirdPartyTransID'   => $data['transID'] ?? 0
            );
         }
+    }
+  }
+
+  /**
+   * 
+   */
+  public static function timeout( $callback = null, $data = null )
+  {
+    if( is_null( $callback ) ){
+      return true;
+    } else {
+      return call_user_func_array( $callback, array( $data ) );
     }
   }
 
@@ -89,23 +120,23 @@ class MpesaB2C
   {
     if( is_null( $callback) ){
       return array( 
-        'ResponseCode'            => 0, 
-        'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $data['transID']
+        'ResponseCode'          => 0, 
+        'ResponseDesc'          => 'Success',
+        'ThirdPartyTransID'     => $data['transID'] ?? 0
        );
     } else {
       if ( !call_user_func_array( $callback, array( $data ) ) ) {
         return array( 
           'ResponseCode'        => 1, 
           'ResponseDesc'        => 'Failed',
-          'ThirdPartyTransID'   => $data['transID']
+          'ThirdPartyTransID'   => $data['transID'] ?? 0
          );
       } else {
-      return array( 
-        'ResponseCode'            => 0, 
-        'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $data['transID']
-       );
+        return array( 
+          'ResponseCode'        => 0, 
+          'ResponseDesc'        => 'Success',
+          'ThirdPartyTransID'   => $data['transID'] ?? 0
+         );
       }
     }
   }
@@ -165,33 +196,19 @@ class MpesaB2C
   /**
    * 
    */          
-  public static function reconcile( $callback = null, $data = null )
+  public static function reconcile( $callback, $data )
   {
     $response = is_null( $data ) ? json_decode( file_get_contents( 'php://input' ), true ) : $data;
-    if( !isset( $response['Body'] ) ){
-      return false;
-    }
-
-    $payment = $response['Body'];
-    if( !isset( $payment['CallbackMetadata'] ) ){
-      $data = null;
-      return false;
-    }
-
-    $data = array(
-      'receipt' => $payment['CallbackMetadata']['Item'][1]['Value'],
-      'amount'  => $payment['CallbackMetadata']['Item'][0]['Value']
-    );
     
-    return is_null( $callback ) ? true : call_user_func_array( $callback, $payment );
+    return is_null( $callback ) ? array( 'resultCode' => 0, 'resultDesc' => 'Success' ) : call_user_func_array( $callback, array( $response ) );
   }
 
   /**
    * 
    */
-  public static function register()
+  public static function register( $env = 'sandbox' )
   {
-    $endpoint = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+    $endpoint = ( $env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/registerurl';
     $curl = curl_init();
     curl_setopt( $curl, CURLOPT_URL, $endpoint );
     curl_setopt( $curl, CURLOPT_HTTPHEADER, array( 'Content-Type:application/json','Authorization:Bearer '.self::token() ) );
@@ -215,7 +232,7 @@ class MpesaB2C
 ### WRAPPER FUNCTIONS
 /**
  * Wrapper function to process response data for reconcilliation
- * @param Array $config - Key-value pairs of settings
+ * @param Array $configuration - Key-value pairs of settings
  *   KEY        |   TYPE    |   DESCRIPTION         | POSSIBLE VALUES
  *  env         |   string  | Environment in use    | live/sandbox
  *  parent      |   number  | Head Office Shortcode | 123456
@@ -260,7 +277,7 @@ function b2c_confirm( $callback = null, $data = null  )
  * @param String $remark    - Remarks about transaction(optional)
  * @return array
  */ 
-function b2c_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = ' Mpesa Transaction' )
+function b2c_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = 'Mpesa Transaction' )
 {
   return MpesaB2C::request( $phone, $amount, $reference, $trxdesc, $remark );
 }
@@ -276,10 +293,20 @@ function b2c_reconcile( $callback = null, $data = null )
 }
 
 /**
+ * Wrapper function to process response data for reconcilliation
+ * @param String $callback - Optional callback function to process the response
+ * @return bool
+ */          
+function b2c_timeout( $callback = null, $data = null )
+{
+  return MpesaB2C::timeout( $callback, $data );
+}
+
+/**
  * Wrapper function to register URLs
  * @return array
  */
-function b2c_register()
+function b2c_register( $env = 'sandbox' )
 {
-  return MpesaB2C::register();
+  return MpesaB2C::register( $env );
 }
