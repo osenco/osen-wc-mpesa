@@ -8,284 +8,282 @@
  * @license See LICENSE
  */
 
-add_action( 'admin_init', 'wpayb2c_settings_init' );
-function wpayb2c_settings_init() {
-    register_setting( 'wpayb2c', 'wpayb2c_options' );
+add_action( 'admin_init', 'b2c_settings_init' );
+function b2c_settings_init() {
+    register_setting( 'wcmpesab2c', 'b2c_wcmpesa_options' );
     
-    add_settings_section( 'wpayb2c_section_mpesa', __( 'Settings for Mpesa B2C', 'wpayb2c' ), 'wpayb2c_section_wpayb2c_mpesa_cb', 'wpayb2c' );
+    add_settings_section( 'b2c_section_mpesa', __( 'Settings for Mpesa Business to Customer', 'woocommerce' ), 'b2c_section_b2c_mpesa_cb', 'wcmpesab2c' );
 
     add_settings_field(
         'env',
-        __( 'Environment', 'wpayb2c' ),
-        'wpayb2c_fields_env_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Environment', 'woocommerce' ),
+        'b2c_fields_env_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'env',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'type',
-        __( 'Identifier Type', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Identifier Type', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'type',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'shortcode',
-        __( 'Mpesa Shortcode', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_shortcode_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Mpesa Shortcode', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_shortcode_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'shortcode',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'username',
-        __( 'Mpesa Username', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_username_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Mpesa Username', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_username_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'username',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'password',
-        __( 'Mpesa Password', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_password_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Mpesa Password', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_password_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'password',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'appkey',
-        __( 'App Consumer Key', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_ck_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'App Consumer Key', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_ck_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'appkey',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
 
     add_settings_field(
         'appsecret',
-        __( 'App Consumer Secret', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_cs_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'App Consumer Secret', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_cs_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'appsecret',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'passkey',
-        __( 'Online Passkey', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_pk_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Online Passkey', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_pk_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'passkey',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
     add_settings_field(
         'instructions',
-        __( 'Withdrawal Instructions', 'wpayb2c' ),
-        'wpayb2c_fields_wpayb2c_mpesa_w_cb',
-        'wpayb2c',
-        'wpayb2c_section_mpesa',
+        __( 'Withdrawal Instructions', 'woocommerce' ),
+        'b2c_fields_b2c_mpesa_w_cb',
+        'wcmpesab2c',
+        'b2c_section_mpesa',
         [
         'label_for' => 'instructions',
-        'class' => 'wpayb2c_row',
-        'wpayb2c_custom_data' => 'custom',
+        'class' => 'b2c_row',
+        'b2c_custom_data' => 'custom',
         ]
     );
     
 }
 
-function wpayb2c_section_wpayb2c_mpesa_cb( $args ) {
-    $options = get_option( 'wpayb2c_options', ['env'=>'sandbox'] );
-    if ( !in_array( 'osen-wc-mpesa/osen-wc-mpesa.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ): ?>
-        <p id="<?php echo esc_attr( $args['id'] ); ?>">
+function b2c_section_b2c_mpesa_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options', ['env'=>'sandbox'] ); ?>
+        <div id="<?php echo esc_attr( $args['id'] ); ?>">
             <h5 style="color: red;">Before You Proceed,</h5>
             <li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven't. Fill in the app's consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Transaction Notification to work, ensure your site is running over https(SSL).</li>
             <li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >generate sandbox test credentials here</a>.</li>
-            <li>Click here to <a href="<?php echo home_url( '/?wpayb2c_ipn_register='.esc_attr( $options['env'] ) ); ?>" target="_blank">register confirmation & validation URLs for <?php echo esc_attr( $options['env'] ); ?> </a></li>
-        </p>
-    <?php endif;
+            <li><a href="<?php echo home_url( 'wcmpesa/register/action/'.esc_attr( $options['env'] ) ); ?>/baseapi/b2c" target="_blank">Click here to register <?php echo esc_attr( $options['env'] ); ?> confirmation & validation URLs</a>. You only need to do this once.</li>
+        </div><?php
 }
 
-function wpayb2c_fields_env_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_env_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <select id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     >
         <option value="sandbox" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'sandbox', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'Sandbox', 'wpayb2c' ); ?>
+        <?php esc_html_e( 'Sandbox(Testing)', 'woocommerce' ); ?>
         </option>
         <option value="live" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'live', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'Live', 'wpayb2c' ); ?>
+        <?php esc_html_e( 'Live(Production)', 'woocommerce' ); ?>
         </option>
     </select>
     <p class="description">
-    <?php esc_html_e( 'Environment', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'Environment', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_shortcode_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_shortcode_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     value="<?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?>"
     class="regular-text"
     >
     <p class="description">
-    <?php esc_html_e( 'Paybill/Till or phone number', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'B2C Paybill number', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_username_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_username_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     value="<?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?>"
     class="regular-text"
     >
     <p class="description">
-    <?php esc_html_e( 'MPesa Portal Username', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'MPesa Portal Username', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_password_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_password_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     value="<?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?>"
     class="regular-text"
     >
     <p class="description">
-    <?php esc_html_e( 'MPesa Portal Password', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'MPesa Portal Password', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <select id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     >
         <option value="4" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], '4', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'Paybill Number', 'wpayb2c' ); ?>
+        <?php esc_html_e( 'Paybill Number', 'woocommerce' ); ?>
         </option>
         <option value="2" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], '2', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'Till Number', 'wpayb2c' ); ?>
+        <?php esc_html_e( 'Till Number', 'woocommerce' ); ?>
         </option>
     </select>
     <p class="description">
-    <?php esc_html_e( 'Business identifier type', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'Business identifier type', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_ck_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_ck_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     value="<?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?>"
     class="regular-text"
     >
     <p class="description">
-    <?php esc_html_e( 'Daraja application consumer key.', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'Daraja application consumer key.', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_cs_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_cs_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['wpayb2c_custom_data'] ); ?>"
-    name="wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
+    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
+    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
     value="<?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?>"
     class="regular-text"
     >
     <p class="description">
-    <?php esc_html_e( 'Daraja application consumer secret', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'Daraja application consumer secret', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_pk_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_pk_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <textarea id="<?php echo esc_attr( $args['label_for'] ); ?>" 
-        name='wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]' 
+        name='b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]' 
         rows='1' 
         cols='50' 
         type='textarea'
         class="large-text code"><?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?></textarea>
     <p class="description">
-    <?php esc_html_e( 'Online Pass Key', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'Online Pass Key', 'woocommerce' ); ?>
     </p>
     <?php
 }
 
-function wpayb2c_fields_wpayb2c_mpesa_w_cb( $args ) {
-    $options = get_option( 'wpayb2c_options' );
+function b2c_fields_b2c_mpesa_w_cb( $args ) {
+    $options = get_option( 'b2c_wcmpesa_options' );
     ?>
     <textarea id="<?php echo esc_attr( $args['label_for'] ); ?>" 
-        name='wpayb2c_options[<?php echo esc_attr( $args['label_for'] ); ?>]' 
+        name='b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]' 
         rows='2' 
         cols='50' 
         type='textarea'
         class="large-text code"><?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?></textarea>
     <p class="description">
-    <?php esc_html_e( 'Instructions to show on Withdrawal Page', 'wpayb2c' ); ?>
+    <?php esc_html_e( 'Instructions to show on Withdrawal Page', 'woocommerce' ); ?>
     </p>
     <?php
 }
@@ -306,21 +304,21 @@ function wc_mpesa_b2c_settings() {
     // wordpress will add the "settings-updated" $_GET parameter to the url
     if ( isset( $_GET['settings-updated'] ) ) {
     // add settings saved message with the class of "updated"
-    add_settings_error( 'wpayb2c_messages', 'wpayb2c_message', __( 'WPay C2B Settings Updated', 'wpayb2c' ), 'updated' );
+    add_settings_error( 'b2c_messages', 'b2c_message', __( 'WPay C2B Settings Updated', 'woocommerce' ), 'updated' );
     }
     
     // show error/update messages
-    settings_errors( 'wpayb2c_messages' );
+    settings_errors( 'b2c_messages' );
     ?>
     <div class="wrap">
         <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
         <form action="options.php" method="post">
             <?php
-            // output security fields for the registered setting "wpayb2c"
-            settings_fields( 'wpayb2c' );
+            // output security fields for the registered setting "wcmpesab2c"
+            settings_fields( 'wcmpesab2c' );
             // output setting sections and their fields
-            // (sections are registered for "wpayb2c", each field is registered to a specific section)
-            do_settings_sections( 'wpayb2c' );
+            // (sections are registered for "wcmpesab2c", each field is registered to a specific section)
+            do_settings_sections( 'wcmpesab2c' );
             // output save settings button
             submit_button( 'Save C2B Settings' );
             ?>

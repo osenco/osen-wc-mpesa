@@ -16,7 +16,8 @@ header('Access-Control-Allow-Origin: *');
 class MpesaB2C
 {
   public static $env = 'sandbox';
-  public static $business;
+  public static $username;
+  public static $password;
   public static $appkey;
   public static $appsecret;
   public static $passkey;
@@ -27,25 +28,6 @@ class MpesaB2C
   public static $confirm;
   public static $reconcile;
   public static $timeout;
-  public static $codes = array(
-    0   => 'Success',
-    1   => 'Insufficient Funds',
-    2   => 'Less Than Minimum Transaction Value',
-    3   => 'More Than Maximum Transaction Value',
-    4   => 'Would Exceed Daily Transfer Limit',
-    5   => 'Would Exceed Minimum Balance',
-    6   => 'Unresolved Primary Party',
-    7   => 'Unresolved Receiver Party',
-    8   => 'Would Exceed Maxiumum Balance',
-    11  => 'Debit Account Invalid',
-    12  => 'Credit Account Invalid',
-    13  => 'Unresolved Debit Account',
-    14  => 'Unresolved Credit Account',
-    15  => 'Duplicate Detected',
-    17  => 'Internal Failure',
-    20  => 'Unresolved Initiator',
-    26  => 'Traffic blocking condition in place'
-  );
 
   public static function set( $config )
   {
@@ -69,8 +51,10 @@ class MpesaB2C
     curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
     curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
     $curl_response = curl_exec( $curl );
+
+    $data = json_decode( $curl_response );
     
-    return json_decode( $curl_response )->access_token;
+    return $data->access_token ?? '';
   }
 
   /**
@@ -144,7 +128,7 @@ class MpesaB2C
   /**
    * 
    */
-  public static function request( $phone, $amount, $reference, $trxdesc, $remark )
+  public static function request( $phone, $amount, $reference, $trxdesc = '', $remark = '' )
   {
     $phone      = str_replace( "+", "", $phone );
     $phone      = preg_replace('/^0/', '254', $phone);
@@ -158,10 +142,6 @@ class MpesaB2C
     openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
 
     $password    = base64_encode($encrypted);
-
-    $curl        = curl_init();
-    curl_setopt( $curl, CURLOPT_URL, $endpoint );
-    curl_setopt( $curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:Bearer '. $token )); //setting custom header
 
     $curl_post_data = array(
       'InitiatorName'       => self::$username,
@@ -178,19 +158,17 @@ class MpesaB2C
 
     $data_string = json_encode($curl_post_data);
 
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-
-    $requested = curl_exec($curl);
-
-    if ( !$requested ) {
-      $response = array( 'errorMessage' => 'Could Not Connect To Daraja' );
-    } else {
-      $response = json_decode( $requested, true );
-    }
-
-    return $response;
+    $response = wp_remote_post( 
+      $endpoint, 
+      array(
+        'headers' => array(
+          'Content-Type' => 'application/json', 
+          'Authorization' => 'Bearer ' . self::token()
+        ), 
+        'body'    => $data_string
+      )
+    );
+    return is_wp_error( $response ) ? array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' ) : json_decode( $response['body'], true );
   }
 
   /**
@@ -225,7 +203,8 @@ class MpesaB2C
     curl_setopt( $curl, CURLOPT_POSTFIELDS, $data_string );
     curl_setopt( $curl, CURLOPT_HEADER, false );
 
-    return json_decode( curl_exec( $curl ), true );
+    $response = curl_exec( $curl );
+    return curl_exec( $curl ) ? json_decode( $response, true ) : array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' );
   }
 }
 

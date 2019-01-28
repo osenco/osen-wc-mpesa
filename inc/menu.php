@@ -44,15 +44,6 @@ function wc_mpesa_menu()
         'wc_mpesa_b2c_preferences', 
         'wc_mpesa_b2c_settings' 
     );
-
-    add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
-        'MPesa Payments Analytics', 
-        'Analytics', 
-        'manage_options',
-        'wc_mpesa_analytics', 
-        'wc_mpesa_transactions_menu_analytics' 
-    );
 }
 
 function wc_mpesa_menu_about()

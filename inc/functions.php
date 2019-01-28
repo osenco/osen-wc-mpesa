@@ -6,6 +6,45 @@
  * @since 0.18.01
  */
 
+add_action( 'plugins_loaded', 'wc_mpesa_config', 11 );
+function wc_mpesa_config() 
+{
+	$mpesa = new \WC_MPESA_Gateway();
+	\MpesaC2B::set(
+		array(
+			'env' 			=> $mpesa->get_option( 'env' ),
+			'business' 		=> $mpesa->get_option( 'business' ),
+			'appkey' 		=> $mpesa->get_option( 'key' ),
+			'appsecret' 	=> $mpesa->get_option( 'secret' ),
+			'headoffice' 	=> $mpesa->get_option( 'headoffice', '174379' ),
+			'shortcode' 	=> $mpesa->get_option( 'shortcode', '174379' ),
+			'type'	 		=> $mpesa->get_option( 'idtype', 4 ),
+			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/baseapi/c2b/',
+			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/baseapi/c2b/',
+			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/baseapi/c2b/',
+			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/baseapi/c2b/'
+		)
+	);
+
+	//b2c
+	$b2c = get_option( 'b2c_wcmpesa_options' );
+	\MpesaB2C::set(
+		array(
+			'env' 			=> $b2c['env'],
+			'appkey' 		=> $b2c['appkey'],
+			'appsecret' 	=> $b2c['appsecret'],
+			'shortcode' 	=> $b2c['shortcode'],
+			'type'	 		=> $b2c['type'],
+			'username'	 	=> $b2c['username'],
+			'password'	 	=> $b2c['password'],
+			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/baseapi/b2c/',
+			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/baseapi/b2c/',
+			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/baseapi/b2c/',
+			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/baseapi/b2c/'
+		)
+	);
+}
+
 function get_post_id_by_meta_key_and_value( $key, $value ) {
     global $wpdb;
     $meta = $wpdb->get_results("SELECT * FROM `".$wpdb->postmeta."` WHERE meta_key='".$key."' AND meta_value='".$value."'");
@@ -18,50 +57,6 @@ function get_post_id_by_meta_key_and_value( $key, $value ) {
     } else {
         return false;
     }
-}
-
-function wc_mpesa_request( $phone, $amount, $ref = '' )
-{
-	$curl_post_data = array(
-
-        //Fill in the request parameters with valid values
-
-        'BusinessShortCode' => $shortcd,
-
-		'Password' => $pwd,
-
-        'Timestamp' => $timestamp,
-
-        'TransactionType' => 'CustomerPayBillOnline',
-
-        'Amount' => $total,
-
-        'PartyA' => $_SESSION['tel'],
-
-        'PartyB' => $shortcd,
-
-        'PhoneNumber' => $_SESSION['tel'],
-
-        'CallBackURL' => $callback_url.'/index.php?callback_action=1',
-
-        'AccountReference' => time(),
-
-        'TransactionDesc' => 'Sending a lipa na mpesa request'
-
-    );
-
-    $data_string = json_encode($curl_post_data);
-
-	$response = wp_remote_post( 
-		$url, 
-		array(
-			'headers' => array(
-				'Content-Type' => 'application/json', 
-				'Authorization' => 'Bearer ' . $access_token
-			),
-			'body'    => $data_string
-		)
-	);
 }
 
 function wc_mpesa_reconcile( $response ){
@@ -93,12 +88,12 @@ function wc_mpesa_reconcile( $response ){
 		$customer 						= "MPesa Customer";
 	}
 
-	if( isset( $response['Body']['stkCallback']['CallbackMetadata'] ) ){
-		$amount 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
-		$mpesaReceiptNumber 			= $response['Body']['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
-		$balance 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
-		$transactionDate 				= $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
-		$phone 							= $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
+	if( isset( $response['stkCallback']['CallbackMetadata'] ) ){
+		$amount 						= $response['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
+		$mpesaReceiptNumber 			= $response['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
+		$balance 						= $response['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
+		$transactionDate 				= $response['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
+		$phone 							= $response['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
 
 		$after_ipn_paid = round($before_ipn_paid)+round($amount);
 		$ipn_balance = $after_ipn_paid-$amount_due;
@@ -192,12 +187,14 @@ add_action( 'template_redirect', function() {
     if ( $route ) {
 		$response 	= json_decode( file_get_contents( 'php://input' ), true );
 		$data 		= isset( $response['Body'] ) ? $response['Body'] : array();
-    	
-    	$action = $action == '0' ? null : $action;
+    	$action 	= $action == '0' ? null : $action;
 
     	wp_send_json( 
     		call_user_func_array( 
-      			$api.'_'.$route, 
+      			array( 
+      				'Mpesa'.strtoupper( $api ),
+      				$route
+      			), 
       			array( 
       				$action, 
       				$data 

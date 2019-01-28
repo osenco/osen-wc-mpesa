@@ -27,26 +27,18 @@ class MpesaC2B
   public static $confirm;
   public static $reconcile;
   public static $timeout;
-  public static $codes = array(
-    0   => 'Success',
-    1   => 'Insufficient Funds',
-    2   => 'Less Than Minimum Transaction Value',
-    3   => 'More Than Maximum Transaction Value',
-    4   => 'Would Exceed Daily Transfer Limit',
-    5   => 'Would Exceed Minimum Balance',
-    6   => 'Unresolved Primary Party',
-    7   => 'Unresolved Receiver Party',
-    8   => 'Would Exceed Maxiumum Balance',
-    11  => 'Debit Account Invalid',
-    12  => 'Credit Account Invalid',
-    13  => 'Unresolved Debit Account',
-    14  => 'Unresolved Credit Account',
-    15  => 'Duplicate Detected',
-    17  => 'Internal Failure',
-    20  => 'Unresolved Initiator',
-    26  => 'Traffic blocking condition in place'
-  );
 
+  /**  
+   * @param Array $config - Key-value pairs of settings
+   *   KEY        |   TYPE    |   DESCRIPTION         | POSSIBLE VALUES
+   *  env         |   string  | Environment in use    | live/sandbox
+   *  parent      |   number  | Head Office Shortcode | 123456
+   *  shortcode   |   number  | Business Paybill/Till | 123456
+   *  type        |   integer | Identifier Type       | 1(MSISDN)/2(Till)/4(Paybill)
+   *  validate    |   string  | Validation URI        | lipia/validate
+   *  confirm     |   string  | Confirmation URI      | lipia/confirm
+   *  reconcile   |   string  | Reconciliation URI    | lipia/reconcile
+   */
   public static function set( $config )
   {
     foreach ( $config as $key => $value ) {
@@ -69,8 +61,15 @@ class MpesaC2B
     curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
     curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
     $curl_response = curl_exec( $curl );
+
+    $data = json_decode( $curl_response );
     
-    return json_decode( $curl_response )->access_token;
+    return $data->access_token ?? '';
+
+// $token_response = wp_remote_get( $url, array('headers' => array('Authorization' => 'Basic ' . $credentials))); 
+// $token_array = json_decode($token_response['body'], true );
+// return isset( $token_array->access_token ) ? $token_array->access_token : ''; 
+
   }
 
   /**
@@ -187,13 +186,20 @@ class MpesaC2B
     curl_setopt( $curl, CURLOPT_HEADER, false );
 
 
-    $requested = curl_exec($curl);
+    $response = curl_exec( $curl );
+    return curl_exec( $curl ) ? json_decode( $response, true ) : array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' );
 
-    if ( !$requested ) {
-      return false;
-    } else {
-      return json_decode( $requested, true );
-    }
+    // $response = wp_remote_post( 
+    //   $endpoint, 
+    //   array(
+    //     'headers' => array(
+    //       'Content-Type' => 'application/json', 
+    //       'Authorization' => 'Bearer ' . self::token()
+    //     ), 
+    //     'body'    => $data_string
+    //   )
+    // );
+    // return !is_wp_error( $response ) ? json_decode( $response['body'], true ) : array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' );
   }
 
   /**
@@ -228,7 +234,20 @@ class MpesaC2B
     curl_setopt( $curl, CURLOPT_POSTFIELDS, $data_string );
     curl_setopt( $curl, CURLOPT_HEADER, false );
 
-    return json_decode( curl_exec( $curl ), true );
+    $response = curl_exec( $curl );
+    return curl_exec( $curl ) ? json_decode( $response, true ) : array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' );
+
+    // $response = wp_remote_post( 
+    //   $endpoint, 
+    //   array(
+    //     'headers' => array(
+    //       'Content-Type' => 'application/json', 
+    //       'Authorization' => 'Bearer ' . self::token()
+    //     ), 
+    //     'body'    => $data_string
+    //   )
+    // );
+    // return !is_wp_error( $response ) ? json_decode( $response['body'], true ) : array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' );
   }
 }
 

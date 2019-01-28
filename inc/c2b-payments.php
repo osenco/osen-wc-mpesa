@@ -7,9 +7,6 @@
  */
 
 add_action( 'init', 'c2b_payments_post_type', 0 );
-add_action( 'manage_posts_custom_column','c2b_payments_table_column_content', 10, 2 );
-add_filter( 'manage_c2b_payments_posts_columns', 'filter_c2b_payments_table_columns' );
-add_filter( 'manage_edit-c2b_payments_sortable_columns', 'c2b_payments_columns_sortable' );
 
 // Register Custom Post - C2B Payments
 function c2b_payments_post_type() {
@@ -17,7 +14,7 @@ function c2b_payments_post_type() {
     $labels = array(
         'name'                  => _x( 'C2B Payments', 'C2B Payment General Name', 'woocommerce' ),
         'singular_name'         => _x( 'C2B Payment', 'C2B Payment Singular Name', 'woocommerce' ),
-        'menu_name'             => __( 'MPesa', 'woocommerce' ),
+        'menu_name'             => __( 'MPESA', 'woocommerce' ),
         'name_admin_bar'        => __( 'C2B Payment', 'woocommerce' ),
         'archives'              => __( 'Payment Archives', 'woocommerce' ),
         'attributes'            => __( 'Payment Attributes', 'woocommerce' ),
@@ -57,6 +54,8 @@ function c2b_payments_post_type() {
         'exclude_from_search'   => true,
         'publicly_queryable'    => false,
         'capability_type'       => 'page',
+        'menu_icon'             => 'dashicons-money',
+        // 'menu_icon'             => apply_filters( 'woocommerce_mpesa_icon', plugins_url( 'mpesa.png', __FILE__ ) ),
         'rewrite'               => false,
     );
 
@@ -71,15 +70,16 @@ function c2b_payments_post_type() {
  * @param Array $columns The existing columns
  * @return Array $filtered_columns The filtered columns
  */
+add_filter( 'manage_c2b_payment_posts_columns', 'filter_c2b_payments_table_columns' );
 function filter_c2b_payments_table_columns( $columns )
 {
     $columns['title'] = "Type";
     $columns['customer'] = "Customer";
     $columns['amount'] = "Amount";
     $columns['paid'] = "Paid";
+    $columns['balance'] = "Balance";
     $columns['request'] = "Request";
     $columns['receipt'] = "Receipt";
-    $columns['balance'] = "Balance";
     $columns['status'] = "Status";
     unset( $columns['date'] );
     return $columns;
@@ -92,6 +92,7 @@ function filter_c2b_payments_table_columns( $columns )
  * @param String $column The name of the column being acted upon
  * @return void
  */
+add_action( 'manage_posts_custom_column','c2b_payments_table_column_content', 10, 2 );
 function c2b_payments_table_column_content( $column_id, $post_id )
 {
     $order_id = get_post_meta( $post_id, '_order_id', true );
@@ -142,11 +143,13 @@ function c2b_payments_table_column_content( $column_id, $post_id )
  * @param Array $columns The original columns
  * @return Array $columns The filtered columns
  */
+add_filter( 'manage_edit-c2b_payment_sortable_columns', 'c2b_payments_columns_sortable' );
 function c2b_payments_columns_sortable( $columns ) 
 {
     $columns['title'] = "Type";
     $columns['customer'] = "Customer";
     $columns['paid'] = "Paid";
+    $columns['balance'] = "Balance";
     $columns['receipt'] = "Receipt";
     $columns['status'] = "Status";
     return $columns;

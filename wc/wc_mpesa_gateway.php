@@ -7,65 +7,6 @@
  */
 
 /**
- * Add Kenyan counties to list of woocommerce states
- */
-add_filter( 'woocommerce_states', 'mpesa_ke_woocommerce_counties' );
-function mpesa_ke_woocommerce_counties( $counties ) 
-{
-	$counties['KE'] = array( 
-		'BAR' => __( 'Baringo', 'woocommerce' ),
-		'BMT' => __( 'Bomet', 'woocommerce' ),
-		'BGM' => __( 'Bungoma', 'woocommerce' ),
-		'BSA' => __( 'Busia', 'woocommerce' ),
-		'EGM' => __( 'Elgeyo-Marakwet', 'woocommerce' ),
-		'EBU' => __( 'Embu', 'woocommerce' ),
-		'GSA' => __( 'Garissa', 'woocommerce' ),
-		'HMA' => __( 'Homa Bay', 'woocommerce' ),
-		'ISL' => __( 'Isiolo', 'woocommerce' ),
-		'KAJ' => __( 'Kajiado', 'woocommerce' ),
-		'KAK' => __( 'Kakamega', 'woocommerce' ),
-		'KCO' => __( 'Kericho', 'woocommerce' ),
-		'KBU' => __( 'Kiambu', 'woocommerce' ),
-		'KLF' => __( 'Kilifi', 'woocommerce' ),
-		'KIR' => __( 'Kirinyaga', 'woocommerce' ),
-		'KSI' => __( 'Kisii', 'woocommerce' ),
-		'KIS' => __( 'Kisumu', 'woocommerce' ),
-		'KTU' => __( 'Kitui', 'woocommerce' ),
-		'KLE' => __( 'Kwale', 'woocommerce' ),
-		'LKP' => __( 'Laikipia', 'woocommerce' ),
-		'LAU' => __( 'Lamu', 'woocommerce' ),
-		'MCS' => __( 'Machakos', 'woocommerce' ),
-		'MUE' => __( 'Makueni', 'woocommerce' ),
-		'MDA' => __( 'Mandera', 'woocommerce' ),
-		'MAR' => __( 'Marsabit', 'woocommerce' ),
-		'MRU' => __( 'Meru', 'woocommerce' ),
-		'MIG' => __( 'Migori', 'woocommerce' ),
-		'MBA' => __( 'Mombasa', 'woocommerce' ),
-		'MRA' => __( 'Muranga', 'woocommerce' ),
-		'NBO' => __( 'Nairobi', 'woocommerce' ),
-		'NKU' => __( 'Nakuru', 'woocommerce' ),
-		'NDI' => __( 'Nandi', 'woocommerce' ),
-		'NRK' => __( 'Narok', 'woocommerce' ),
-		'NYI' => __( 'Nyamira', 'woocommerce' ),
-		'NDR' => __( 'Nyandarua', 'woocommerce' ),
-		'NER' => __( 'Nyeri', 'woocommerce' ),
-		'SMB' => __( 'Samburu', 'woocommerce' ),
-		'SYA' => __( 'Siaya', 'woocommerce' ),
-		'TVT' => __( 'Taita Taveta', 'woocommerce' ),
-		'TAN' => __( 'Tana River', 'woocommerce' ),
-		'TNT' => __( 'Tharaka-Nithi', 'woocommerce' ),
-		'TRN' => __( 'Trans-Nzoia', 'woocommerce' ),
-		'TUR' => __( 'Turkana', 'woocommerce' ),
-		'USG' => __( 'Uasin Gishu', 'woocommerce' ),
-		'VHG' => __( 'Vihiga', 'woocommerce' ),
-		'WJR' => __( 'Wajir', 'woocommerce' ),
-		'PKT' => __( 'West Pokot', 'woocommerce' )
-	 );
-
-	return $counties;
-}
-
-/**
  * Register our gateway with woocommerce
  */
 add_filter( 'woocommerce_payment_gateways', 'wc_mpesa_add_to_gateways' );
@@ -105,14 +46,14 @@ function wc_mpesa_gateway_init()
 		public function __construct() 
 		{
 			$env = get_option( 'woocommerce_mpesa_settings' )["env"];
-			$reg_notice = '<li><a href="'.home_url( 'wcmpesa/register/action/'.$env ).'/baseapi/c2b" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once for sandbox and once when you go live.</li>';
+			$reg_notice = '<li><a href="'.home_url( 'wcmpesa/register/action/'.$env ).'/baseapi/c2b" target="_blank">Click here to register '.$env.' confirmation & validation URLs</a>. You only need to do this once.</li>';
 			$test_cred = ( $env == 'sandbox' ) ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >generate sandbox test credentials here</a>.</li>' : '';
-			//$reg_notice = has_valid_licence() ? '' : $reg_notice;
 
 			$this->id                 		= 'mpesa';
 			$this->icon               		= apply_filters( 'woocommerce_mpesa_icon', plugins_url( 'mpesa.png', __FILE__ ) );
 			$this->method_title       		= __( 'Lipa Na MPesa', 'woocommerce' );
-			$this->method_description 		= __( '<h4 style="color: red;">IMPORTANT!</h4><li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred ).'<li>Peter Njeru has a <a href="https://peternjeru.co.ke/safdaraja/ui/#go_live_tutorial">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254705459494">+254705459494</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
+			$this->method_description 		= __( '<h4 style="color: red;">IMPORTANT!</h4>
+				<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url( 'edit.php?post_type=c2b_payment&page=wc_mpesa_b2c_preferences' ).'">&nbsp; Setup Business-2-Customer</a>.</strong><li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred ).'<li>Peter Njeru has a <a href="https://peternjeru.co.ke/safdaraja/ui/#go_live_tutorial">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254705459494">+254705459494</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
 			$this->has_fields         		= false;
 
 			// Load settings
@@ -126,21 +67,7 @@ function wc_mpesa_gateway_init()
 			$this->enable_for_methods 		= $this->get_option( 'enable_for_methods', array() );
 			$this->enable_for_virtual 		= $this->get_option( 'enable_for_virtual', 'yes' ) === 'yes' ? true : false;
 
-			c2b_config(
-				array(
-					'env' 			=> $this->get_option( 'env' ),
-					'business' 		=> $this->get_option( 'business' ),
-					'appkey' 		=> $this->get_option( 'key' ),
-					'appsecret' 	=> $this->get_option( 'secret' ),
-					'headoffice' 	=> $this->get_option( 'headoffice', '174379' ),
-					'shortcode' 	=> $this->get_option( 'shortcode', '174379' ),
-					'type'	 		=> $this->get_option( 'idtype', 4 ),
-					'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/baseapi/c2b/',
-					'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/baseapi/c2b/',
-					'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/baseapi/c2b/',
-					'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/baseapi/c2b/'
-				)
-			);
+			
 
 			add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
 			
@@ -289,7 +216,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 					'title'       => __( 'Order Status on Payment', 'woocommerce' ),
 					'type'        => 'select',
 					'options' => array( 
-				      	'complete' => __( 'Mark order as complete', 'woocommerce' ),
+				      	'completed' => __( 'Mark order as completed', 'woocommerce' ),
 				     	'processing' => __( 'Mark order as processing', 'woocommerce' )
 				    ),
 					'description' => __( 'What status to set the order after Mpesa payment has been received', 'woocommerce' ),
@@ -369,17 +296,9 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 
 			$reference = ( $this->get_option( 'account' ) == 'WC' ) ? 'WC'.$order_id : $this->get_option( 'account' );
 
-			$result = c2b_request( $phone, $amount, $reference, bloginfo('name').' Purchase', 'WCMPesa' );
+			$result = \MpesaC2B::request( $phone, $amount, $reference, bloginfo('name').' Purchase', 'WCMPesa' );
 
-			if( ! $result ){
-				$error_message = 'Could not connect to MPesa to process payment. Please try again';
-				$order->update_status( 'failed', __( 'Could not connect to MPesa to process payment.', 'woocommerce' ) );
-				wc_add_notice( __( 'Failed! ', 'woocommerce' ) . $error_message, 'error' );
-				return array(
-		        	'result' 	=> 'fail',
-					'redirect'	=> ''
-		        );
-			} elseif ( isset( $result['errorCode'] ) ) {
+			if ( isset( $result['errorCode'] ) ) {
 				$error_message = 'MPesa Error '.$result['errorCode'].': '.$result['errorMessage'];
 				$order->update_status( 'failed', __( $error_message, 'woocommerce' ) );
 				wc_add_notice( __( 'Failed! ', 'woocommerce' ) . $error_message, 'error' );
@@ -403,16 +322,14 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 				 */
 				WC()->cart->empty_cart(); 
 
-				$author = is_user_logged_in() ? get_current_user_id() : $this->get_option( 'accountant' );
-	 
 				// Insert the payment into the database
 				$post_id = wp_insert_post( 
 					array( 
 		    			'post_title' 	=> 'Checkout',
 						'post_content'	=> "Response: ".$content."\nToken: ".$token,
 						'post_status'	=> 'publish',
-						'post_type'		=> 'mpesaipn',
-						'post_author'	=> $author,
+						'post_type'		=> 'c2b_payment',
+						'post_author'	=> is_user_logged_in() ? get_current_user_id() : $this->get_option( 'accountant' ),
 				 	) 
 				);
 
@@ -458,7 +375,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 		public function change_payment_complete_order_status( $status, $order_id = 0, $order = false )
 		{
 			if ( $order && 'mpesa' === $order->get_payment_method() ) {
-				$status = 'completed';
+				$status = $this->get_option( 'completion' );
 			}
 			return $status;
 		}
@@ -477,57 +394,5 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 				echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 			}
 		}
-	}
-}
-
-add_filter( 'manage_edit-shop_order_columns', 'wcmpesa_new_order_column' );
-function wcmpesa_new_order_column( $columns ) 
-{
-    $columns['mpesa'] = 'Reinitiate Mpesa';
-    return $columns;
-}
-
-add_filter( 'woocommerce_email_attachments', 'woocommerce_emails_attach_downloadables', 10, 3);
-function woocommerce_emails_attach_downloadables($attachments, $status, $order) 
-{
-    if ( ! is_object( $order ) || ! isset( $status ) ) {
-        return $attachments;
-    }
-    if ( empty( $order ) ) {
-        return $attachments;
-    }
-    if ( ! $order->has_downloadable_item() ) {
-        return $attachments;
-    }
-    $allowed_statuses = array( 'customer_invoice', 'customer_completed_order' );
-    if ( isset( $status ) && in_array( $status, $allowed_statuses ) ) {
-        foreach ( $order->get_items() as $item_id => $item ) {
-            foreach ( $order->get_item_downloads( $item ) as $download ) {
-                $attachments[] = str_replace( content_url(), WP_CONTENT_DIR, $download['file'] );
-            }
-        }
-    }
-    return $attachments;
-}
-
-add_action('woocommerce_email_order_details', 'wcmpesa_email_order_mpesa_receipt', 1, 4);
-function wcmpesa_email_order_mpesa_receipt($order, $admin, $plain, $email) 
-{
-	$post = get_post_id_by_meta_key_and_value( '_order_id', $merchantRequestID );
-    $receipt = get_post_meta( $post, '_receipt', true );
-  	if( !empty( $receipt ) ){ 
-  		__( '<strong>MPESA RECEIPT NUMBER: </strong> '.$receipt, 'woocommerce' );
-  	}
-}
-
-add_action( 'woocommerce_before_email_order', 'add_order_instruction_email', 10, 2 ); 
-function add_order_instruction_email( $order, $sent_to_admin )
-{  
-	if ( ! $sent_to_admin ) {
-
-		if ( 'mpesa' == $order->payment_method ) {
-			echo wpautop( wptexturize( $instructions ) ) . PHP_EOL;
-		}
-
 	}
 }
