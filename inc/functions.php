@@ -10,10 +10,9 @@ add_action( 'plugins_loaded', 'wc_mpesa_config', 11 );
 function wc_mpesa_config() 
 {
 	$mpesa = new \WC_MPESA_Gateway();
-	\MpesaC2BWP::set(
+	\MpesaC2B::set(
 		array(
 			'env' 			=> $mpesa->get_option( 'env' ),
-			'business' 		=> $mpesa->get_option( 'business' ),
 			'appkey' 		=> $mpesa->get_option( 'key' ),
 			'appsecret' 	=> $mpesa->get_option( 'secret' ),
 			'headoffice' 	=> $mpesa->get_option( 'headoffice', '174379' ),
