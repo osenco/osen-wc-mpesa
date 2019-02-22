@@ -108,8 +108,9 @@ function wcmpesab2cw_options_page_html() {
             <button class="button button-primary" >Withdraw</button>
         </form>
         <?php 
-                        //add_settings_error( 'wcmpesab2cw_messages', 'wcmpesab2cw_message', __( 'WPay C2B Settings Updated', 'woocommerce' ), 'updated' );
-                        //settings_errors( 'wcmpesab2cw_messages' ); ?>
+            //add_settings_error( 'wcmpesab2cw_messages', 'wcmpesab2cw_message', __( 'WPay C2B Settings Updated', 'woocommerce' ), 'updated' );
+            //settings_errors( 'wcmpesab2cw_messages' ); 
+        ?>
         <script id="wcmpesab2cw-ajax" type="text/javascript">
             jQuery(document).ready(function($) {
               $('#wcmpesab2cw_ajax_form').submit(function(e) {
@@ -119,11 +120,11 @@ function wcmpesab2cw_options_page_html() {
                 
                 $.post(form.attr('action'), form.serialize(), function(data) {
                   if ( data['errorCode'] ) {
-                    $('#wpbody-content').prepend('<div class="error notice notice-error is-dismissible"><p>Error: '+data['errorMessage']+'</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
+                    $('#wpbody-content .wrap h1').after('<div class="error settings-error notice is-dismissible"><p>Error: '+data['errorMessage']+'</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
                   } else if ( data['requestID'] ) {
-                    $('#wpbody-content').prepend('<div class="notice notice-success is-dismissible"><p>'+data['success']+'</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
+                    $('#wpbody-content .wrap h1').after('<div class="updated settings-error notice is-dismissible"><p>'+data['success']+'</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
                   } else {
-                    $('#wpbody-content').prepend('<div class="notice notice-error is-dismissible"><p>Sorry, could not connect to Daraja.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
+                    $('#wpbody-content .wrap h1').after('<div class="error settings-error notice is-dismissible"><p>Sorry, could not connect to Daraja.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
                   }
                 }, 'json');
               });

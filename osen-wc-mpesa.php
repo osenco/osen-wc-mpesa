@@ -13,6 +13,23 @@
  *
  * Requires at least: 4.4
  * Tested up to: 4.9.5
+ * License: GPLv3
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+
+ * Copyright 2019  Osen Concepts 
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, version 3, as
+ * published by the Free Software Foundation.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USAv
  */
 
 // Exit if accessed directly.
@@ -20,27 +37,30 @@ if ( !defined( 'ABSPATH' ) ){
 	exit;
 }
 
-define( 'WCM_VER', '1.9.0' );
+define( 'WCM_VER', '1.19.0' );
+if ( ! defined( 'WCM_PLUGIN_FILE' ) ) {
+	define( 'WCM_PLUGIN_FILE', __FILE__ );
+}
 
-if ( !in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
+if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
 	exit('Please install WooCommerce for this extension to work');
 }
 
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check() 
 {
-    if ( !is_plugin_active( 'woocommerce/woocommerce.php' ) ){
+    if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ){
         deactivate_plugins( plugin_basename( __FILE__ ) );
     }
 }
 
+add_action( 'deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2 );
 function wc_mpesa_detect_woocommerce_deactivation( $plugin, $network_activation )
 {
-    if ( $plugin == "woocommerce/woocommerce.php" ){
+    if ( $plugin == 'woocommerce/woocommerce.php' ){
         deactivate_plugins( plugin_basename( __FILE__ ) );
     }
 }
-add_action( 'deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2 );
 
 add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'mpesa_action_links' );
 function mpesa_action_links( $links )

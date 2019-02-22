@@ -65,7 +65,7 @@ function mpesa_ke_woocommerce_counties( $counties )
 	return $counties;
 }
 
-add_filter( 'manage_edit-shop_order_columns', 'wcmpesa_new_order_column' );
+//add_filter( 'manage_edit-shop_order_columns', 'wcmpesa_new_order_column' );
 function wcmpesa_new_order_column( $columns ) 
 {
     $columns['mpesa'] = 'Reinitiate Mpesa';

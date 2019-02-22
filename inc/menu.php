@@ -51,12 +51,19 @@ function wc_mpesa_menu_about()
     <div class="wrap">
         <h1>About MPesa for WooCommerce</h1>
 
-        <h4>Version <?php echo WCM_VER; ?> introduces many changes.</h4>
-
         <h3>The Plugin</h3>
         <article>
             <p>This plugin builds on the work of <a href="https://github.com/moshthepitt/woocommerce-lipa-na-mmpesa">Kelvin Jayanoris</a>, the <a href="https://osen.co.ke">Osen Concepts </a> developers and others to provide a simple plug-n-play implementation for integrating MPesa Payments into online stores built with WooCommerce and WordPress.</p>
         </article>
+
+        <h4>Version <?php echo WCM_VER; ?> introduces many changes:</h4>
+        <?php $logs = file_get_contents( dirname( WCM_PLUGIN_FILE ).'/CHANGELOG');
+        $logs = explode("\n", $logs); ?>
+        <ol>
+            <?php foreach ($logs as $log): ?>
+                <li><?php echo $log; ?></li>
+            <?php endforeach; ?>
+        </ol>
 
         <h3>Integration(Going Live)</h3>
         <article>

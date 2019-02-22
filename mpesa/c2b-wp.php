@@ -7,9 +7,6 @@
  * @since 0.18.01
  */
 
-/* Setup CORS */
-header('Access-Control-Allow-Origin: *');
-
 /**
  * 
  */
@@ -70,6 +67,14 @@ class MpesaC2BWP
    */
   public static $timeout;
 
+  function __construct()
+  {
+    /**
+     * Setup CORS 
+     */
+    header( 'Access-Control-Allow-Origin: *' );
+  }
+
   /**  
    * @param Array $config - Key-value pairs of settings
    */
@@ -103,7 +108,7 @@ class MpesaC2BWP
 
   /**
    * Function to process response data for validation
-   * @param String $callback - Optional callback function to process the response - must return boolean
+   * @param String $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
   public static function validate( $callback, $data )
@@ -133,7 +138,7 @@ class MpesaC2BWP
 
   /**
    * Function to process response data for confirmation
-   * @param String $callback - Optional callback function to process the response - must return boolean
+   * @param String $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
   public static function confirm( $callback, $data )
@@ -208,12 +213,12 @@ class MpesaC2BWP
     $timestamp  = date( 'YmdHis' );
     $password   = base64_encode( self::$headoffice.self::$passkey.$timestamp );
 
-    $post_data = array( 
+    $post_data  = array( 
       'BusinessShortCode'   => self::$headoffice,
       'Password'            => $password,
       'Timestamp'           => $timestamp,
       'TransactionType'     => ( self::$type == 4 ) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
-      'Amount'              => round( $total ),
+      'Amount'              => round( $amount ),
       'PartyA'              => $phone,
       'PartyB'              => self::$shortcode,
       'PhoneNumber'         => $phone,
@@ -223,8 +228,8 @@ class MpesaC2BWP
       'Remark'              => $remark
     );
 
-    $data_string = json_encode( $post_data );
-    $response = wp_remote_post( 
+    $data_string  = json_encode( $post_data );
+    $response     = wp_remote_post( 
       $endpoint, 
       array(
         'headers' => array(
@@ -239,7 +244,7 @@ class MpesaC2BWP
 
 /**
    * Function to process response data for reconciliation
-   * @param String $callback - Optional callback function to process the response - must return boolean
+   * @param String $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
    */            
   public static function reconcile( $callback, $data )
@@ -251,12 +256,12 @@ class MpesaC2BWP
       $response = $data;
     }
     
-    return is_null( $callback ) ? array( 'resultCode' => 0, 'resultDesc' => 'Success' ) : call_user_func_array( $callback, array( $response ) );
+    return is_null( $callback ) ? array( 'resultCode' => 0, 'resultDesc' => 'Reconciliation successful' ) : call_user_func_array( $callback, array( $response ) );
   }
 
   /**
    * Function to process response data if system times out
-   * @param String $callback - Optional callback function to process the response - must return boolean
+   * @param String $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
    */ 
   public static function timeout( $callback = null, $data = null )

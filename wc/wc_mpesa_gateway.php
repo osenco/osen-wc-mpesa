@@ -53,7 +53,7 @@ function wc_mpesa_gateway_init()
 			$this->icon               		= apply_filters( 'woocommerce_mpesa_icon', plugins_url( 'mpesa.png', __FILE__ ) );
 			$this->method_title       		= __( 'Lipa Na MPesa', 'woocommerce' );
 			$this->method_description 		= __( '<h4 style="color: red;">IMPORTANT!</h4>
-				<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url( 'edit.php?post_type=c2b_payment&page=wc_mpesa_b2c_preferences' ).'">&nbsp; Setup Business-2-Customer</a>.</strong><li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred ).'<li>Peter Njeru has a <a href="https://peternjeru.co.ke/safdaraja/ui/#go_live_tutorial">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254705459494">+254705459494</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
+				<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url( 'edit.php?post_type=c2b_payment&page=wc_mpesa_b2c_preferences' ).'">Setup Business-2-Customer</a>.</strong><li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred ).'<li>Peter Njeru has a <a href="https://peternjeru.co.ke/safdaraja/ui/#go_live_tutorial">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254705459494">+254705459494</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
 			$this->has_fields         		= false;
 
 			// Load settings
@@ -296,7 +296,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce' ),
 
 			$reference = ( $this->get_option( 'account' ) == 'WC' ) ? 'WC'.$order_id : $this->get_option( 'account' );
 
-			$result = \MpesaC2B::request( $phone, $amount, $reference, bloginfo('name').' Purchase', 'WCMPesa' );
+			$result = \MpesaC2BWP::request( $phone, $amount, $reference, bloginfo('name').' Purchase', 'WCMPesa' );
 
 			if ( isset( $result['errorCode'] ) ) {
 				$error_message = 'MPesa Error '.$result['errorCode'].': '.$result['errorMessage'];

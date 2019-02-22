@@ -10,7 +10,7 @@ add_action( 'plugins_loaded', 'wc_mpesa_config', 11 );
 function wc_mpesa_config() 
 {
 	$mpesa = new \WC_MPESA_Gateway();
-	\MpesaC2B::set(
+	\MpesaC2BWP::set(
 		array(
 			'env' 			=> $mpesa->get_option( 'env' ),
 			'business' 		=> $mpesa->get_option( 'business' ),
@@ -19,10 +19,10 @@ function wc_mpesa_config()
 			'headoffice' 	=> $mpesa->get_option( 'headoffice', '174379' ),
 			'shortcode' 	=> $mpesa->get_option( 'shortcode', '174379' ),
 			'type'	 		=> $mpesa->get_option( 'idtype', 4 ),
-			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/baseapi/c2b/',
-			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/baseapi/c2b/',
-			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/baseapi/c2b/',
-			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/baseapi/c2b/'
+			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
+			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
+			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
+			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
 		)
 	);
 
@@ -37,10 +37,10 @@ function wc_mpesa_config()
 			'type'	 		=> $b2c['type'],
 			'username'	 	=> $b2c['username'],
 			'password'	 	=> $b2c['password'],
-			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/baseapi/b2c/',
-			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/baseapi/b2c/',
-			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/baseapi/b2c/',
-			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/baseapi/b2c/'
+			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/b2c/',
+			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/b2c/',
+			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/b2c/',
+			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/b2c/'
 		)
 	);
 }
@@ -166,7 +166,7 @@ add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
         array(
         	'wcmpesa/([\w+]*)' => 'index.php?wcmpesa=$matches[1]', 
         	'wcmpesa/([\w+]*)/action/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 
-        	'wcmpesa/([\w+]*)/action/([\w+]*)/baseapi/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]&baseapi=$matches[3]'
+        	'wcmpesa/([\w+]*)/action/([\w+]*)/base/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]&base=$matches[3]'
         ),
         $wp_rewrite->rules
     );
@@ -175,19 +175,19 @@ add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
 add_filter( 'query_vars', function( $query_vars ) {
     $query_vars[] = 'wcmpesa';
     $query_vars[] = 'action';
-    $query_vars[] = 'baseapi';
+    $query_vars[] = 'base';
     return $query_vars;
 } );
 
 add_action( 'template_redirect', function() {
-    $route 	= get_query_var( 'wcmpesa' );
-    $action = get_query_var( 'action', null );
-    $api 	= get_query_var( 'baseapi', 'c2b' );
+    $route 			= get_query_var( 'wcmpesa' );
+    $action 		= get_query_var( 'action', null );
+    $api 			= get_query_var( 'base', 'c2b' );
 
-    if ( $route ) {
+    if ( !empty( $route ) ) {
 		$response 	= json_decode( file_get_contents( 'php://input' ), true );
 		$data 		= isset( $response['Body'] ) ? $response['Body'] : array();
-    	$action 	= $action == '0' ? null : $action;
+    	$action 	= ( $action == '0' ) ? null : $action;
 
     	wp_send_json( 
     		call_user_func_array( 

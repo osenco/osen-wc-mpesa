@@ -7,9 +7,6 @@
  * @since 0.18.01
  */
 
-/* Setup CORS */
-header('Access-Control-Allow-Origin: *');
-
 /**
  * 
  */
@@ -28,6 +25,14 @@ class MpesaB2C
   public static $confirm;
   public static $reconcile;
   public static $timeout;
+
+  function __construct()
+  {
+    /**
+     * Setup CORS 
+     */
+    header('Access-Control-Allow-Origin: *');
+  }
 
   public static function set( $config )
   {
