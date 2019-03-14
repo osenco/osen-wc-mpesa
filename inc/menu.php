@@ -9,14 +9,16 @@
 add_action( 'admin_menu', 'wc_mpesa_menu' );
 function wc_mpesa_menu()
 {
-    add_submenu_page( 
-        'edit.php?post_type=mpesaipn', 
-        'B2C Payments', 
-        'B2C Payments', 
-        'manage_options',
-        'wc_mpesa_b2c', 
-        'wc_mpesa_menu_b2c' 
-    );
+    if( ( get_option( 'woocommerce_mpesa_settings' )["enable_b2c"] == 'yes' ) ){
+        add_submenu_page( 
+            'edit.php?post_type=mpesaipn', 
+            'B2C Payments', 
+            'B2C Payments', 
+            'manage_options',
+            'wc_mpesa_b2c', 
+            'wc_mpesa_menu_b2c' 
+        );
+    }
 
     add_submenu_page( 
         'edit.php?post_type=mpesaipn', 
@@ -36,14 +38,16 @@ function wc_mpesa_menu()
         'wc_mpesa_menu_settings' 
     );
 
-    add_submenu_page( 
-        'edit.php?post_type=mpesaipn', 
-        'MPesa B2C Preferences', 
-        'Configure B2C', 
-        'manage_options',
-        'wc_mpesa_b2c_preferences', 
-        'wc_mpesa_b2c_settings' 
-    );
+    if( ( get_option( 'woocommerce_mpesa_settings' )["enable_b2c"] == 'yes' ) ){
+        add_submenu_page( 
+            'edit.php?post_type=mpesaipn', 
+            'MPesa B2C Preferences', 
+            'Configure B2C', 
+            'manage_options',
+            'wc_mpesa_b2c_preferences', 
+            'wc_mpesa_b2c_settings' 
+        );
+    }
 }
 
 function wc_mpesa_menu_about()

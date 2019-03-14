@@ -28,19 +28,6 @@ function b2c_settings_init() {
     );
     
     add_settings_field(
-        'type',
-        __( 'Identifier Type', 'woocommerce' ),
-        'b2c_fields_b2c_mpesa_cb',
-        'wcmpesab2c',
-        'b2c_section_mpesa',
-        [
-        'label_for' => 'type',
-        'class' => 'b2c_row',
-        'b2c_custom_data' => 'custom',
-        ]
-    );
-    
-    add_settings_field(
         'shortcode',
         __( 'Mpesa Shortcode', 'woocommerce' ),
         'b2c_fields_b2c_mpesa_shortcode_cb',
@@ -208,26 +195,6 @@ function b2c_fields_b2c_mpesa_password_cb( $args ) {
     <?php
 }
 
-function b2c_fields_b2c_mpesa_cb( $args ) {
-    $options = get_option( 'b2c_wcmpesa_options' );
-    ?>
-    <select id="<?php echo esc_attr( $args['label_for'] ); ?>"
-    data-custom="<?php echo esc_attr( $args['b2c_custom_data'] ); ?>"
-    name="b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
-    >
-        <option value="4" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], '4', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'Paybill Number', 'woocommerce' ); ?>
-        </option>
-        <option value="2" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], '2', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'Till Number', 'woocommerce' ); ?>
-        </option>
-    </select>
-    <p class="description">
-    <?php esc_html_e( 'Business identifier type', 'woocommerce' ); ?>
-    </p>
-    <?php
-}
-
 function b2c_fields_b2c_mpesa_ck_cb( $args ) {
     $options = get_option( 'b2c_wcmpesa_options' );
     ?>
@@ -278,7 +245,7 @@ function b2c_fields_b2c_mpesa_w_cb( $args ) {
     ?>
     <textarea id="<?php echo esc_attr( $args['label_for'] ); ?>" 
         name='b2c_wcmpesa_options[<?php echo esc_attr( $args['label_for'] ); ?>]' 
-        rows='2' 
+        rows='5' 
         cols='50' 
         type='textarea'
         class="large-text code"><?php echo esc_attr( isset( $options[ $args['label_for'] ] ) ? $options[ $args['label_for'] ] : '' ); ?></textarea>

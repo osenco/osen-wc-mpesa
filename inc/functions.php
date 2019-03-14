@@ -6,7 +6,7 @@
  * @since 0.18.01
  */
 
-add_action( 'plugins_loaded', 'wc_mpesa_config', 11 );
+add_action( 'wp', 'wc_mpesa_config', 11 );
 function wc_mpesa_config() 
 {
 	$c2b = get_option( 'woocommerce_mpesa_settings' );
@@ -33,7 +33,7 @@ function wc_mpesa_config()
 			'appkey' 		=> $b2c['appkey'],
 			'appsecret' 	=> $b2c['appsecret'],
 			'shortcode' 	=> $b2c['shortcode'],
-			'type'	 		=> $b2c['type'],
+			'type'	 		=> 4,
 			'username'	 	=> $b2c['username'],
 			'password'	 	=> $b2c['password'],
 			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/b2c/',
