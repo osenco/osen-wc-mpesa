@@ -11,7 +11,7 @@
 add_action('admin_menu', 'wcmpesab2cw_options_page');
 function wcmpesab2cw_options_page()
 {
-  add_submenu_page('edit.php?post_type=c2b_payment', __('Withdraw to Mpesa', 'woocommerce' ), __('Withdraw', 'woocommerce' ), 'manage_options', 'wcmpesab2cw', 'wcmpesab2cw_options_page_html');
+  add_submenu_page('edit.php?post_type=mpesaipn', __('Withdraw to Mpesa', 'woocommerce' ), __('Withdraw', 'woocommerce' ), 'manage_options', 'wcmpesab2cw', 'wcmpesab2cw_options_page_html');
 }
 add_action( 'admin_init', 'wcmpesab2cw_settings_init' );
 function wcmpesab2cw_settings_init() {

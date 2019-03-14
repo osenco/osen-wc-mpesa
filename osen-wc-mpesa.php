@@ -65,7 +65,7 @@ function wc_mpesa_detect_woocommerce_deactivation( $plugin, $network_activation 
 add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'mpesa_action_links' );
 function mpesa_action_links( $links )
 {
-	return array_merge( $links, [ '<a href="'.admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ).'">&nbsp;Setup C2B</a>', '<a href="'.admin_url( 'edit.php?post_type=c2b_payment&page=wc_mpesa_b2c_preferences' ).'">&nbsp;Setup B2C</a>' ] );
+	return array_merge( $links, [ '<a href="'.admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ).'">&nbsp;Setup C2B</a>', '<a href="'.admin_url( 'edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences' ).'">&nbsp;Setup B2C</a>' ] );
 } 
 
 add_filter( 'plugin_row_meta', 'mpesa_row_meta', 10, 2 );

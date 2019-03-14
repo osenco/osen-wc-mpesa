@@ -9,15 +9,15 @@
 add_action( 'plugins_loaded', 'wc_mpesa_config', 11 );
 function wc_mpesa_config() 
 {
-	$mpesa = new \WC_MPESA_Gateway();
+	$c2b = get_option( 'woocommerce_mpesa_settings' );
 	\MpesaC2B::set(
 		array(
-			'env' 			=> $mpesa->get_option( 'env' ),
-			'appkey' 		=> $mpesa->get_option( 'key' ),
-			'appsecret' 	=> $mpesa->get_option( 'secret' ),
-			'headoffice' 	=> $mpesa->get_option( 'headoffice', '174379' ),
-			'shortcode' 	=> $mpesa->get_option( 'shortcode', '174379' ),
-			'type'	 		=> $mpesa->get_option( 'idtype', 4 ),
+			'env' 			=> $c2b['env'],
+			'appkey' 		=> $c2b['key'],
+			'appsecret' 	=> $c2b['secret'],
+			'headoffice' 	=> $c2b['headoffice'],
+			'shortcode' 	=> $c2b['shortcode'],
+			'type'	 		=> $c2b['idtype'],
 			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
 			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
 			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',

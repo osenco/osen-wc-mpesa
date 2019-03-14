@@ -6,10 +6,10 @@
  * @since 0.18.01
  */
 
-add_action( 'init', 'c2b_payments_post_type', 0 );
+add_action( 'init', 'mpesaipn_post_type', 0 );
 
 // Register Custom Post - C2B Payments
-function c2b_payments_post_type() {
+function mpesaipn_post_type() {
 
     $labels = array(
         'name'                  => _x( 'C2B Payments', 'C2B Payment General Name', 'woocommerce' ),
@@ -59,7 +59,7 @@ function c2b_payments_post_type() {
         'rewrite'               => false,
     );
 
-    register_post_type( 'c2b_payment', $args );
+    register_post_type( 'mpesaipn', $args );
 }
 
 /**
@@ -70,8 +70,8 @@ function c2b_payments_post_type() {
  * @param Array $columns The existing columns
  * @return Array $filtered_columns The filtered columns
  */
-add_filter( 'manage_c2b_payment_posts_columns', 'filter_c2b_payments_table_columns' );
-function filter_c2b_payments_table_columns( $columns )
+add_filter( 'manage_mpesaipn_posts_columns', 'filter_mpesaipn_table_columns' );
+function filter_mpesaipn_table_columns( $columns )
 {
     $columns['title'] = "Type";
     $columns['customer'] = "Customer";
@@ -92,8 +92,8 @@ function filter_c2b_payments_table_columns( $columns )
  * @param String $column The name of the column being acted upon
  * @return void
  */
-add_action( 'manage_posts_custom_column','c2b_payments_table_column_content', 10, 2 );
-function c2b_payments_table_column_content( $column_id, $post_id )
+add_action( 'manage_posts_custom_column','mpesaipn_table_column_content', 10, 2 );
+function mpesaipn_table_column_content( $column_id, $post_id )
 {
     $order_id = get_post_meta( $post_id, '_order_id', true );
     switch ( $column_id ) {
@@ -143,8 +143,8 @@ function c2b_payments_table_column_content( $column_id, $post_id )
  * @param Array $columns The original columns
  * @return Array $columns The filtered columns
  */
-add_filter( 'manage_edit-c2b_payment_sortable_columns', 'c2b_payments_columns_sortable' );
-function c2b_payments_columns_sortable( $columns ) 
+add_filter( 'manage_edit-mpesaipn_sortable_columns', 'mpesaipn_columns_sortable' );
+function mpesaipn_columns_sortable( $columns ) 
 {
     $columns['title'] = "Type";
     $columns['customer'] = "Customer";

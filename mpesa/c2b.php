@@ -173,7 +173,7 @@ class MpesaC2B
    */
   public static function register( $env = 'sandbox' )
   {
-    $endpoint = ( $env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2bwp/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2bwp/v1/registerurl';
+    $endpoint = ( $env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2bwp/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
     $post_data = array( 
       'ShortCode'         => self::$shortcode,
       'ResponseType'      => 'Cancelled',

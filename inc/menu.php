@@ -10,7 +10,7 @@ add_action( 'admin_menu', 'wc_mpesa_menu' );
 function wc_mpesa_menu()
 {
     add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
+        'edit.php?post_type=mpesaipn', 
         'B2C Payments', 
         'B2C Payments', 
         'manage_options',
@@ -19,7 +19,7 @@ function wc_mpesa_menu()
     );
 
     add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
+        'edit.php?post_type=mpesaipn', 
         'About this Plugin', 
         'About Plugin', 
         'manage_options',
@@ -28,7 +28,7 @@ function wc_mpesa_menu()
     );
 
     add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
+        'edit.php?post_type=mpesaipn', 
         'MPesa C2B Preferences', 
         'Configure C2B', 
         'manage_options',
@@ -37,7 +37,7 @@ function wc_mpesa_menu()
     );
 
     add_submenu_page( 
-        'edit.php?post_type=c2b_payment', 
+        'edit.php?post_type=mpesaipn', 
         'MPesa B2C Preferences', 
         'Configure B2C', 
         'manage_options',
