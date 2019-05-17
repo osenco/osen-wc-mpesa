@@ -34,9 +34,9 @@ class MpesaB2C
     header('Access-Control-Allow-Origin: *');
   }
 
-  public static function set( $config )
+  public static function set($config)
   {
-    foreach ( $config as $key => $value ) {
+    foreach ($config as $key => $value) {
       self::$$key = $value;
     }
   }
@@ -46,18 +46,18 @@ class MpesaB2C
    */
   public static function token()
   {
-    $endpoint = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+    $endpoint = (self::$env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-    $credentials = base64_encode( self::$appkey.':'.self::$appsecret );
+    $credentials = base64_encode(self::$appkey.':'.self::$appsecret);
     $curl = curl_init();
-    curl_setopt( $curl, CURLOPT_URL, $endpoint );
-    curl_setopt( $curl, CURLOPT_HTTPHEADER, array( 'Authorization: Basic '.$credentials ) );
-    curl_setopt( $curl, CURLOPT_HEADER, false );
-    curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-    curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
-    $curl_response = curl_exec( $curl );
+    curl_setopt($curl, CURLOPT_URL, $endpoint);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Basic '.$credentials));
+    curl_setopt($curl, CURLOPT_HEADER, false);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    $curl_response = curl_exec($curl);
 
-    $data = json_decode( $curl_response );
+    $data = json_decode($curl_response);
     
     return $data->access_token ?? '';
   }
@@ -65,27 +65,27 @@ class MpesaB2C
   /**
    * 
    */
-  public static function validate( $callback, $data )
+  public static function validate($callback, $data)
   {
-    if( is_null( $callback) ){
-      return array( 
+    if(is_null($callback)){
+      return array(
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
         'ThirdPartyTransID'       => $data['transID'] ?? 0
-       );
+      );
     } else {
-        if ( !call_user_func_array( $callback, array( $data ) ) ) {
-          return array( 
+        if (!call_user_func_array($callback, array($data))) {
+          return array(
             'ResponseCode'        => 1, 
             'ResponseDesc'        => 'Failed',
             'ThirdPartyTransID'   => $data['transID'] ?? 0
-           );
+          );
         } else {
-          return array( 
+          return array(
             'ResponseCode'        => 0, 
             'ResponseDesc'        => 'Success',
             'ThirdPartyTransID'   => $data['transID'] ?? 0
-           );
+          );
         }
     }
   }
@@ -93,39 +93,39 @@ class MpesaB2C
   /**
    * 
    */
-  public static function timeout( $callback = null, $data = null )
+  public static function timeout($callback = null, $data = null)
   {
-    if( is_null( $callback ) ){
+    if(is_null($callback)){
       return true;
     } else {
-      return call_user_func_array( $callback, array( $data ) );
+      return call_user_func_array($callback, array($data));
     }
   }
 
   /**
    * 
    */
-  public static function confirm( $callback, $data )
+  public static function confirm($callback, $data)
   {
-    if( is_null( $callback) ){
-      return array( 
+    if(is_null($callback)){
+      return array(
         'ResponseCode'          => 0, 
         'ResponseDesc'          => 'Success',
         'ThirdPartyTransID'     => $data['transID'] ?? 0
-       );
+      );
     } else {
-      if ( !call_user_func_array( $callback, array( $data ) ) ) {
-        return array( 
+      if (!call_user_func_array($callback, array($data))) {
+        return array(
           'ResponseCode'        => 1, 
           'ResponseDesc'        => 'Failed',
           'ThirdPartyTransID'   => $data['transID'] ?? 0
-         );
+        );
       } else {
-        return array( 
+        return array(
           'ResponseCode'        => 0, 
           'ResponseDesc'        => 'Success',
           'ThirdPartyTransID'   => $data['transID'] ?? 0
-         );
+        );
       }
     }
   }
@@ -133,16 +133,16 @@ class MpesaB2C
   /**
    * 
    */
-  public static function request( $phone, $amount, $reference, $trxdesc = '', $remark = '' )
+  public static function request($phone, $amount, $reference, $trxdesc = '', $remark = '')
   {
-    $phone      = str_replace( "+", "", $phone );
+    $phone      = str_replace("+", "", $phone);
     $phone      = preg_replace('/^0/', '254', $phone);
     $token      = self::token();
-    $endpoint   = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/paymentrequest' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest';
-    $timestamp  = date( 'YmdHis' );
+    $endpoint   = (self::$env == 'live') ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/paymentrequest' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest';
+    $timestamp  = date('YmdHis');
     $env        = self::$env;
     $plaintext  = self::$password;
-    $publicKey  = file_get_contents( '../cert/'.$env.'/cert.cr' );
+    $publicKey  = file_get_contents('../cert/'.$env.'/cert.cr');
 
     openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
 
@@ -151,65 +151,65 @@ class MpesaB2C
     $curl_post_data = array(
       'InitiatorName'       => self::$username,
       'SecurityCredential'  => $password,
-      'CommandID'           => ( self::$type == 4 ) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
-      'Amount'              => round( $amount ),
+      'CommandID'           => (self::$type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+      'Amount'              => round($amount),
       'PartyA'              => self::$shortcode,
       'PartyB'              => $phone,
       'Remarks'             => $remark,
       'QueueTimeOutURL'     => self::$timeout,
       'ResultURL'           => self::$reconcile,
       'Occasion'            => $reference
-    );
+   );
 
     $data_string = json_encode($curl_post_data);
 
-    $response = wp_remote_post( 
+    $response = wp_remote_post(
       $endpoint, 
       array(
         'headers' => array(
           'Content-Type' => 'application/json', 
           'Authorization' => 'Bearer ' . self::token()
-        ), 
+       ), 
         'body'    => $data_string
-      )
-    );
-    return is_wp_error( $response ) ? array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' ) : json_decode( $response['body'], true );
+     )
+   );
+    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
   }
 
   /**
    * 
    */          
-  public static function reconcile( $callback, $data )
+  public static function reconcile($callback, $data)
   {
-    $response = is_null( $data ) ? json_decode( file_get_contents( 'php://input' ), true ) : $data;
+    $response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
     
-    return is_null( $callback ) ? array( 'resultCode' => 0, 'resultDesc' => 'Success' ) : call_user_func_array( $callback, array( $response ) );
+    return is_null($callback) ? array('resultCode' => 0, 'resultDesc' => 'Success') : call_user_func_array($callback, array($response));
   }
 
   /**
    * 
    */
-  public static function register( $env = 'sandbox' )
+  public static function register($env = 'sandbox')
   {
-    $endpoint = ( $env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/registerurl';
+    $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/registerurl';
     $curl = curl_init();
-    curl_setopt( $curl, CURLOPT_URL, $endpoint );
-    curl_setopt( $curl, CURLOPT_HTTPHEADER, array( 'Content-Type:application/json','Authorization:Bearer '.self::token() ) );
+    curl_setopt($curl, CURLOPT_URL, $endpoint);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:Bearer '.self::token()));
         
-    $curl_post_data = array( 
+    $curl_post_data = array(
       'ShortCode'         => self::$shortcode,
       'ResponseType'      => 'Cancelled',
       'ConfirmationURL'   => self::$confirm,
       'ValidationURL'     => self::$validate
-    );
-    $data_string = json_encode( $curl_post_data );
-    curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
-    curl_setopt( $curl, CURLOPT_POST, true );
-    curl_setopt( $curl, CURLOPT_POSTFIELDS, $data_string );
-    curl_setopt( $curl, CURLOPT_HEADER, false );
+   );
+    $data_string = json_encode($curl_post_data);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
+    curl_setopt($curl, CURLOPT_HEADER, false);
 
-    $response = curl_exec( $curl );
-    return curl_exec( $curl ) ? json_decode( $response, true ) : array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' );
+    $response = curl_exec($curl);
+    return curl_exec($curl) ? json_decode($response, true) : array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja');
   }
 }
 
@@ -227,9 +227,9 @@ class MpesaB2C
  *  reconcile   |   string  | Reconciliation URI    | lipia/reconcile
  * @return bool
  */ 
-function b2c_config( $config = array() )
+function b2c_config($config = array())
 {
-  return MpesaB2C::set( $config );
+  return MpesaB2C::set($config);
 }
 
 /**
@@ -237,9 +237,9 @@ function b2c_config( $config = array() )
  * @param String $callback - Optional callback function to process the response
  * @return bool
  */ 
-function b2c_validate( $callback = null, $data = null )
+function b2c_validate($callback = null, $data = null)
 {
-  return MpesaB2C::validate( $callback, $data );
+  return MpesaB2C::validate($callback, $data);
 }
 
 /**
@@ -247,9 +247,9 @@ function b2c_validate( $callback = null, $data = null )
  * @param String $callback - Optional callback function to process the response
  * @return bool
  */ 
-function b2c_confirm( $callback = null, $data = null  )
+function b2c_confirm($callback = null, $data = null )
 {
-  return MpesaB2C::confirm( $callback, $data );
+  return MpesaB2C::confirm($callback, $data);
 }
 
 /**
@@ -261,9 +261,9 @@ function b2c_confirm( $callback = null, $data = null  )
  * @param String $remark    - Remarks about transaction(optional)
  * @return array
  */ 
-function b2c_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = 'Mpesa Transaction' )
+function b2c_request($phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = 'Mpesa Transaction')
 {
-  return MpesaB2C::request( $phone, $amount, $reference, $trxdesc, $remark );
+  return MpesaB2C::request($phone, $amount, $reference, $trxdesc, $remark);
 }
 
 /**
@@ -271,9 +271,9 @@ function b2c_request( $phone, $amount, $reference, $trxdesc = 'Mpesa Transaction
  * @param String $callback - Optional callback function to process the response
  * @return bool
  */          
-function b2c_reconcile( $callback = null, $data = null )
+function b2c_reconcile($callback = null, $data = null)
 {
-  return MpesaB2C::reconcile( $callback, $data );
+  return MpesaB2C::reconcile($callback, $data);
 }
 
 /**
@@ -281,16 +281,16 @@ function b2c_reconcile( $callback = null, $data = null )
  * @param String $callback - Optional callback function to process the response
  * @return bool
  */          
-function b2c_timeout( $callback = null, $data = null )
+function b2c_timeout($callback = null, $data = null)
 {
-  return MpesaB2C::timeout( $callback, $data );
+  return MpesaB2C::timeout($callback, $data);
 }
 
 /**
  * Wrapper function to register URLs
  * @return array
  */
-function b2c_register( $env = 'sandbox' )
+function b2c_register($env = 'sandbox')
 {
-  return MpesaB2C::register( $env );
+  return MpesaB2C::register($env);
 }

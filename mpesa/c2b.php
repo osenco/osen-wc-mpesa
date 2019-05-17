@@ -72,15 +72,16 @@ class MpesaC2B
     /**
      * Setup CORS 
      */
-    header( 'Access-Control-Allow-Origin: *' );
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type:Application/json');
   }
 
   /**  
    * @param Array $config - Key-value pairs of settings
    */
-  public static function set( $config )
+  public static function set($config)
   {
-    foreach ( $config as $key => $value ) {
+    foreach ($config as $key => $value) {
       self::$$key = $value;
     }
   }
@@ -91,19 +92,19 @@ class MpesaC2B
    */
   public static function token()
   {
-    $endpoint = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+    $endpoint = (self::$env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-    $credentials = base64_encode( self::$appkey.':'.self::$appsecret );
-    $response = wp_remote_get( 
+    $credentials = base64_encode(self::$appkey.':'.self::$appsecret);
+    $response = wp_remote_get(
       $endpoint, 
       array(
         'headers' => array(
           'Authorization' => 'Basic ' . $credentials
-        )
-      )
-    ); 
+       )
+     )
+   ); 
 
-    return is_wp_error( $response ) ? 'Invalid' : json_decode( $response['body'] )->access_token;
+    return is_wp_error($response) ? 'Invalid' : json_decode($response['body'])->access_token;
   }
 
   /**
@@ -111,27 +112,27 @@ class MpesaC2B
    * @param String $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
-  public static function validate( $callback, $data )
+  public static function validate($callback, $data)
   {
-    if( is_null( $callback) ){
-      return array( 
+    if(is_null($callback) || empty($callback)){
+      return array(
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => isset( $data['transID'] ) ? $data['transID'] : 0
-       );
+        'ThirdPartyTransID'       => isset($data['transID']) ? $data['transID'] : 0
+      );
     } else {
-        if ( !call_user_func_array( $callback, array( $data ) ) ) {
-          return array( 
+        if (!call_user_func_array($callback, array($data))) {
+          return array(
             'ResponseCode'        => 1, 
             'ResponseDesc'        => 'Failed',
-            'ThirdPartyTransID'   => isset( $data['transID'] ) ? $data['transID'] : 0
-           );
+            'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+          );
         } else {
-          return array( 
+          return array(
             'ResponseCode'        => 0, 
             'ResponseDesc'        => 'Success',
-            'ThirdPartyTransID'   => isset( $data['transID'] ) ? $data['transID'] : 0
-           );
+            'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+          );
         }
     }
   }
@@ -141,27 +142,27 @@ class MpesaC2B
    * @param String $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
-  public static function confirm( $callback, $data )
+  public static function confirm($callback, $data)
   {
-    if( is_null( $callback) ){
-      return array( 
+    if(is_null($callback) || empty($callback)){
+      return array(
         'ResponseCode'          => 0, 
         'ResponseDesc'          => 'Success',
-        'ThirdPartyTransID'     =>  isset( $data['transID'] ) ? $data['transID'] : 0
-       );
+        'ThirdPartyTransID'     =>  isset($data['transID']) ? $data['transID'] : 0
+      );
     } else {
-      if ( !call_user_func_array( $callback, array( $data ) ) ) {
-        return array( 
+      if (!call_user_func_array($callback, array($data))) {
+        return array(
           'ResponseCode'        => 1, 
           'ResponseDesc'        => 'Failed',
-          'ThirdPartyTransID'   => isset( $data['transID'] ) ? $data['transID'] : 0
-         );
+          'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+        );
       } else {
-        return array( 
+        return array(
           'ResponseCode'        => 0, 
           'ResponseDesc'        => 'Success',
-          'ThirdPartyTransID'   => isset( $data['transID'] ) ? $data['transID'] : 0
-         );
+          'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+        );
       }
     }
   }
@@ -171,28 +172,28 @@ class MpesaC2B
    * @param String $env - Environment for which to register URLs
    * @return bool/array
    */
-  public static function register( $env = 'sandbox' )
+  public static function register($env = 'sandbox')
   {
-    $endpoint = ( $env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/c2bwp/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
-    $post_data = array( 
+    $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/c2bwp/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+    $post_data = array(
       'ShortCode'         => self::$shortcode,
       'ResponseType'      => 'Cancelled',
       'ConfirmationURL'   => self::$confirm,
       'ValidationURL'     => self::$validate
-    );
-    $data_string = json_encode( $post_data );
+   );
+    $data_string = json_encode($post_data);
 
-    $response = wp_remote_post( 
+    $response = wp_remote_post(
       $endpoint, 
       array(
         'headers'           => array(
           'Content-Type'    => 'application/json', 
           'Authorization'   => 'Bearer ' . self::token()
-        ), 
+       ), 
         'body'              => $data_string
-      )
-    );
-    return is_wp_error( $response ) ? array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' ) : json_decode( $response['body'], true );
+     )
+   );
+    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
   }
 
   /**
@@ -204,21 +205,21 @@ class MpesaC2B
    * @param String $remark    - Remarks about transaction(optional)
    * @return array
    */ 
-  public static function request( $phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment' )
+  public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
   {
-    $phone      = preg_replace( '/^0/', '254', str_replace( "+", "", $phone ) );
+    $phone      = preg_replace('/^0/', '254', str_replace("+", "", $phone));
 
-    $endpoint   = ( self::$env == 'live' ) ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+    $endpoint   = (self::$env == 'live') ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
-    $timestamp  = date( 'YmdHis' );
-    $password   = base64_encode( self::$headoffice.self::$passkey.$timestamp );
+    $timestamp  = date('YmdHis');
+    $password   = base64_encode(self::$headoffice.self::$passkey.$timestamp);
 
-    $post_data  = array( 
+    $post_data  = array(
       'BusinessShortCode'   => self::$headoffice,
       'Password'            => $password,
       'Timestamp'           => $timestamp,
-      'TransactionType'     => ( self::$type == 4 ) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
-      'Amount'              => round( $amount ),
+      'TransactionType'     => (self::$type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+      'Amount'              => round($amount),
       'PartyA'              => $phone,
       'PartyB'              => self::$shortcode,
       'PhoneNumber'         => $phone,
@@ -226,20 +227,20 @@ class MpesaC2B
       'AccountReference'    => $reference,
       'TransactionDesc'     => $trxdesc,
       'Remark'              => $remark
-    );
+   );
 
-    $data_string  = json_encode( $post_data );
-    $response     = wp_remote_post( 
+    $data_string  = json_encode($post_data);
+    $response     = wp_remote_post(
       $endpoint, 
       array(
         'headers' => array(
           'Content-Type' => 'application/json', 
           'Authorization' => 'Bearer ' . self::token()
-        ), 
+       ), 
         'body'    => $data_string
-      )
-    );
-    return is_wp_error( $response ) ? array( 'errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja' ) : json_decode( $response['body'], true );
+     )
+   );
+    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
   }
 
 /**
@@ -247,16 +248,19 @@ class MpesaC2B
    * @param String $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
    */            
-  public static function reconcile( $callback, $data )
+  public static function reconcile($args)
   {
-    if( is_null( $data ) ){
-      $response = json_decode( file_get_contents( 'php://input' ), true );
-      $response = isset( $response['Body'] ) ? $response['Body'] : array();
+    $callback   = isset($args[0]) ? $args[0] : 'wc_mpesa_reconcile';
+    $data       = isset($args[1]) ? $args[1] : null;
+
+    if(is_null($data)){
+      $response = json_decode(file_get_contents('php://input'), true);
+      $response = isset($response['Body']) ? $response['Body'] : array();
     } else {
       $response = $data;
     }
     
-    return is_null( $callback ) ? array( 'resultCode' => 0, 'resultDesc' => 'Reconciliation successful' ) : call_user_func_array( $callback, array( $response ) );
+    return is_null($callback) ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful') : call_user_func($callback, $response);
   }
 
   /**
@@ -264,19 +268,19 @@ class MpesaC2B
    * @param String $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
    */ 
-  public static function timeout( $callback = null, $data = null )
+  public static function timeout($callback = null, $data = null)
   {
-    if( is_null( $data ) ){
-      $response = json_decode( file_get_contents( 'php://input' ), true );
-      $response = isset( $response['Body'] ) ? $response['Body'] : array();
+    if(is_null($data)){
+      $response = json_decode(file_get_contents('php://input'), true);
+      $response = isset($response['Body']) ? $response['Body'] : array();
     } else {
       $response = $data;
     }
 
-    if( is_null( $callback ) ){
+    if(is_null($callback)){
       return true;
     } else {
-      return call_user_func_array( $callback, array( $response ) );
+      return call_user_func_array($callback, array($response));
     }
   }
 }

@@ -33,89 +33,97 @@
  */
 
 // Exit if accessed directly.
-if ( !defined( 'ABSPATH' ) ){
+if (!defined('ABSPATH')){
 	exit;
 }
 
-define( 'WCM_VER', '1.19.0' );
-if ( ! defined( 'WCM_PLUGIN_FILE' ) ) {
-	define( 'WCM_PLUGIN_FILE', __FILE__ );
+define('WCM_VER', '1.19.0');
+if (! defined('WCM_PLUGIN_FILE')) {
+	define('WCM_PLUGIN_FILE', __FILE__);
 }
 
-if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
-	exit('Please install WooCommerce for this extension to work');
-}
+add_action('wp', function (){
+	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
+		deactivate_plugins(plugin_basename(__FILE__));
+	}
+});
 
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check() 
 {
-    if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ){
-        deactivate_plugins( plugin_basename( __FILE__ ) );
+
+	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
+		deactivate_plugins(plugin_basename(__FILE__));
+		exit('Please Install/Activate WooCommerce for the MPesa extension to work');
+	}
+
+    if (! is_plugin_active('woocommerce/woocommerce.php')){
+        deactivate_plugins(plugin_basename(__FILE__));
     }
 
 }
 
-add_action( 'activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2 );
-function wc_mpesa_detect_plugin_activation( $plugin, $network_activation ) {
-    if( $plugin == 'osen-wc-mpesa/osen-wc-mpesa.php' ){
-        exit( wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ) ) );
+add_action('activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2);
+function wc_mpesa_detect_plugin_activation($plugin, $network_activation) {
+    if($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php'){
+        exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
     }
 }
 
-add_action( 'deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2 );
-function wc_mpesa_detect_woocommerce_deactivation( $plugin, $network_activation )
+add_action('deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2);
+function wc_mpesa_detect_woocommerce_deactivation($plugin, $network_activation)
 {
-    if ( $plugin == 'woocommerce/woocommerce.php' ){
-        deactivate_plugins( plugin_basename( __FILE__ ) );
+    if ($plugin == 'woocommerce/woocommerce.php'){
+        deactivate_plugins(plugin_basename(__FILE__));
     }
 }
 
-add_filter( 'plugin_action_links_'.plugin_basename( __FILE__ ), 'mpesa_action_links' );
-function mpesa_action_links( $links )
+add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'mpesa_action_links');
+function mpesa_action_links($links)
 {
-	return array_merge( 
+	return array_merge(
 		$links, 
-		array( 
-			'<a href="'.admin_url( 'admin.php?page=wc-settings&tab=checkout&section=mpesa' ).'">&nbsp;Setup C2B</a>', 
-			'<a href="'.admin_url( 'edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences' ).'">&nbsp;Setup B2C</a>' 
+		array(
+			'<a href="'.admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa').'">&nbsp;Setup C2B</a>', 
+			'<a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">&nbsp;Setup B2C</a>' 
 		)
 	);
 } 
 
-add_filter( 'plugin_row_meta', 'mpesa_row_meta', 10, 2 );
-function mpesa_row_meta( $links, $file )
+add_filter('plugin_row_meta', 'mpesa_row_meta', 10, 2);
+function mpesa_row_meta($links, $file)
 {
-	$plugin = plugin_basename( __FILE__ );
+	$plugin = plugin_basename(__FILE__);
 
-	if ( $plugin == $file ) {
-		$row_meta = array( 
-			'github'    => '<a href="' . esc_url( 'https://github.com/osenco/osen-wc-mpesa/' ) . '" target="_blank" aria-label="' . esc_attr__( 'Contribute on Github', 'woocommerce' ) . '">' . esc_html__( 'Github', 'woocommerce' ) . '</a>',
-			'apidocs' => '<a href="' . esc_url( 'https://developer.safaricom.co.ke/docs/' ) . '" target="_blank" aria-label="' . esc_attr__( 'MPesa API Docs ( Daraja )', 'woocommerce' ) . '">' . esc_html__( 'API docs', 'woocommerce' ) . '</a>'
-		 );
+	if ($plugin == $file) {
+		$row_meta = array(
+			'github'    => '<a href="' . esc_url('https://github.com/osenco/osen-wc-mpesa/') . '" target="_blank" aria-label="' . esc_attr__('Contribute on Github', 'woocommerce') . '">' . esc_html__('Github', 'woocommerce') . '</a>',
+			'apidocs' => '<a href="' . esc_url('https://developer.safaricom.co.ke/docs/') . '" target="_blank" aria-label="' . esc_attr__('MPesa API Docs (Daraja)', 'woocommerce') . '">' . esc_html__('API docs', 'woocommerce') . '</a>'
+		);
 
-		return array_merge( $links, $row_meta );
+		return array_merge($links, $row_meta);
 	}
 
-	return ( array ) $links;
+	return (array) $links;
 }
 
 /**
  * Load Mpesa Functions
  */
-foreach ( glob( plugin_dir_path( __FILE__) . 'mpesa/*.php' ) as $filename ) {
+foreach (glob(plugin_dir_path(__FILE__) . 'mpesa/*.php') as $filename) {
 	require_once $filename;
 }
 
 /**
  * Load WooCommerce Functions
  */
-foreach ( glob( plugin_dir_path( __FILE__) . 'wc/*.php' ) as $filename ) {
+foreach (glob(plugin_dir_path(__FILE__) . 'wc/*.php') as $filename) {
 	require_once $filename;
 }
 
 /**
  * Load Custom Plugin Functions
  */
-foreach ( glob( plugin_dir_path( __FILE__) . 'inc/*.php' ) as $filename ) {
+foreach (glob(plugin_dir_path(__FILE__) . 'inc/*.php') as $filename) {
 	require_once $filename;
 }

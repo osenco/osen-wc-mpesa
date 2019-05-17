@@ -6,10 +6,10 @@
  * @since 0.18.01
  */
 
-add_action( 'wp', 'wc_mpesa_config', 11 );
+add_action('plugins_loaded', 'wc_mpesa_config', 15);
 function wc_mpesa_config() 
 {
-	$c2b = get_option( 'woocommerce_mpesa_settings' );
+	$c2b = get_option('woocommerce_mpesa_settings');
 	\MpesaC2B::set(
 		array(
 			'env' 			=> $c2b['env'],
@@ -18,15 +18,16 @@ function wc_mpesa_config()
 			'headoffice' 	=> $c2b['headoffice'],
 			'shortcode' 	=> $c2b['shortcode'],
 			'type'	 		=> $c2b['idtype'],
-			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
-			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
-			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
-			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
+			'passkey'	 	=> $c2b['passkey'],
+			'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
+			'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
+			'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
+			'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
 		)
 	);
 
 	//b2c
-	$b2c = get_option( 'b2c_wcmpesa_options' );
+	$b2c = get_option('b2c_wcmpesa_options');
 	\MpesaB2C::set(
 		array(
 			'env' 			=> $b2c['env'],
@@ -36,15 +37,15 @@ function wc_mpesa_config()
 			'type'	 		=> 4,
 			'username'	 	=> $b2c['username'],
 			'password'	 	=> $b2c['password'],
-			'validate' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/b2c/',
-			'confirm' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/b2c/',
-			'reconcile' 	=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/b2c/',
-			'timeout' 		=> rtrim( home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/b2c/'
+			'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/b2c/',
+			'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/b2c/',
+			'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/b2c/',
+			'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/b2c/'
 		)
 	);
 }
 
-function get_post_id_by_meta_key_and_value( $key, $value ) {
+function get_post_id_by_meta_key_and_value($key, $value) {
     global $wpdb;
     $meta = $wpdb->get_results("SELECT * FROM `".$wpdb->postmeta."` WHERE meta_key='".$key."' AND meta_value='".$value."'");
     if (is_array($meta) && !empty($meta) && isset($meta[0])) {
@@ -58,8 +59,8 @@ function get_post_id_by_meta_key_and_value( $key, $value ) {
     }
 }
 
-function wc_mpesa_reconcile( $response ){
-	if( empty( $response ) ){
+function wc_mpesa_reconcile($response){
+	if(empty($response)){
     	return array(
     		'errorCode' 	=> 1,
     		'errorMessage' 	=> 'Empty reconciliation response data' 
@@ -71,23 +72,23 @@ function wc_mpesa_reconcile( $response ){
 	$merchantRequestID 					= $response['stkCallback']['MerchantRequestID'];
 	$checkoutRequestID 					= $response['stkCallback']['CheckoutRequestID'];
 
-	$post = get_post_id_by_meta_key_and_value( '_request_id', $merchantRequestID );
-	wp_update_post( [ 'post_content' => file_get_contents( 'php://input' ), 'ID' => $post ] );
+	$post = get_post_id_by_meta_key_and_value('_request_id', $merchantRequestID);
+	wp_update_post([ 'post_content' => file_get_contents('php://input'), 'ID' => $post ]);
 
-    $order_id 							= get_post_meta( $post, '_order_id', true );
-	$amount_due 						=  get_post_meta( $post, '_amount', true );
-	$before_ipn_paid 					= get_post_meta( $post, '_paid', true );
+    $order_id 							= get_post_meta($post, '_order_id', true);
+	$amount_due 						=  get_post_meta($post, '_amount', true);
+	$before_ipn_paid 					= get_post_meta($post, '_paid', true);
 
-	if( wc_get_order( $order_id ) ){
-		$order 							= new WC_Order( $order_id );
+	if(wc_get_order($order_id)){
+		$order 							= new WC_Order($order_id);
 		$first_name 					= $order->get_billing_first_name();
 		$last_name 						= $order->get_billing_last_name();
-		$customer 						= "{$first_name} {$last_name}";
+		$customer 						= $first_name." ".$last_name;
 	} else {
 		$customer 						= "MPesa Customer";
 	}
 
-	if( isset( $response['stkCallback']['CallbackMetadata'] ) ){
+	if(isset($response['stkCallback']['CallbackMetadata'])){
 		$amount 						= $response['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
 		$mpesaReceiptNumber 			= $response['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
 		$balance 						= $response['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
@@ -97,45 +98,47 @@ function wc_mpesa_reconcile( $response ){
 		$after_ipn_paid = round($before_ipn_paid)+round($amount);
 		$ipn_balance = $after_ipn_paid-$amount_due;
 
-	    if( wc_get_order( $order_id ) ){
-	    	$order = new WC_Order( $order_id );
+	    if(wc_get_order($order_id)){
+	    	$order = new WC_Order($order_id);
 	    	
-	    	if ( $ipn_balance == 0 ) {
-				$mpesa = new WC_MPESA_Gateway();
-	            $order->update_status( $mpesa->get_option('completion') );
-	        	$order->add_order_note( __( "Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}" ) );
-				update_post_meta( $post, '_order_status', 'complete' );
-	        } elseif ( $ipn_balance < 0 ) {
+	    	if ($ipn_balance == 0) {
+				$mpesa = get_option('woocommerce_mpesa_settings');
+				if ('processing' == $order->status){ $order->update_status('completed'); }
+				$order->update_status('completed');
+				$order->payment_complete();
+	        	$order->add_order_note(__("Full MPesa Payment Received From {$phone} With Receipt Number {$mpesaReceiptNumber}"));
+				update_post_meta($post, '_order_status', 'complete');
+	        } elseif ($ipn_balance < 0) {
 	        	$currency = get_woocommerce_currency();
 	        	$order->payment_complete();
-	            $order->add_order_note( __( "{$phone} has overpayed by {$currency} {$balance}. Receipt Number {$mpesaReceiptNumber}" ) );
-				update_post_meta( $post, '_order_status', 'complete' );
+	            $order->add_order_note(__("{$phone} Has Overpayed By {$currency} {$balance}. Receipt Number {$mpesaReceiptNumber}"));
+				update_post_meta($post, '_order_status', 'complete');
 	        } else {
-	            $order->update_status( 'on-hold' );
-	            $order->add_order_note( __( "MPesa Payment from {$phone} Incomplete" ) );
-				update_post_meta( $post, '_order_status', 'on-hold' );
+	            $order->update_status('on-hold');
+	            $order->add_order_note(__("MPesa Payment from {$phone} Incomplete"));
+				update_post_meta($post, '_order_status', 'on-hold');
 	        }
 	    }
 
-		update_post_meta( $post, '_paid', $after_ipn_paid );
-		update_post_meta( $post, '_amount', $amount_due );
-		update_post_meta( $post, '_balance', $balance );
-		update_post_meta( $post, '_phone', $phone );
-		update_post_meta( $post, '_customer', $customer );
-		update_post_meta( $post, '_order_id', $order_id );
-		update_post_meta( $post, '_receipt', $mpesaReceiptNumber );
+		update_post_meta($post, '_paid', $after_ipn_paid);
+		update_post_meta($post, '_amount', $amount_due);
+		update_post_meta($post, '_balance', $balance);
+		update_post_meta($post, '_phone', $phone);
+		update_post_meta($post, '_customer', $customer);
+		update_post_meta($post, '_order_id', $order_id);
+		update_post_meta($post, '_receipt', $mpesaReceiptNumber);
 	} else {
-	    if( wc_get_order( $order_id ) ){
-	    	$order = new WC_Order( $order_id );
-	        $order->update_status( 'on-hold' );
-	        $order->add_order_note( __( "MPesa Error {$resultCode}: {$resultDesc}" ) );
+	    if(wc_get_order($order_id)){
+	    	$order = new WC_Order($order_id);
+	        $order->update_status('on-hold');
+	        $order->add_order_note(__("MPesa Error {$resultCode}: {$resultDesc}"));
 	    }
 	}
 }
 
-function wc_mpesa_timeout( $response )
+function wc_mpesa_timeout($response)
 {
-	if( empty( $response ) ){
+	if(empty($response)){
     	return array(
     		'errorCode' 	=> 1,
     		'errorMessage' 	=> 'Empty timeout response data' 
@@ -147,60 +150,69 @@ function wc_mpesa_timeout( $response )
 	$merchantRequestID 				= $response['stkCallback']['MerchantRequestID'];
 	$checkoutRequestID 				= $response['stkCallback']['CheckoutRequestID'];
 
-	$post = get_post_id_by_meta_key_and_value( '_request_id', $merchantRequestID );
-	wp_update_post( [ 'post_content' => file_get_contents( 'php://input' ), 'ID' => $post ] );
-	update_post_meta( $post, '_order_status', 'pending' );
+	$post = get_post_id_by_meta_key_and_value('_request_id', $merchantRequestID);
+	wp_update_post([ 'post_content' => file_get_contents('php://input'), 'ID' => $post ]);
+	update_post_meta($post, '_order_status', 'pending');
 
-    $order_id = get_post_meta( $post, '_order_id', true );
-    if( wc_get_order( $order_id ) ){
-    	$order = new WC_Order( $order_id );
+    $order_id = get_post_meta($post, '_order_id', true);
+    if(wc_get_order($order_id)){
+    	$order = new WC_Order($order_id);
     	
-        $order->update_status( 'pending' );
-        $order->add_order_note( __( "MPesa Payment Timed Out", 'woocommerce' ) );
+        $order->update_status('pending');
+        $order->add_order_note(__("MPesa Payment Timed Out", 'woocommerce'));
     }
 }
 
-add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
-    $wp_rewrite->rules = array_merge(
-        array(
-        	'wcmpesa/([\w+]*)' => 'index.php?wcmpesa=$matches[1]', 
-        	'wcmpesa/([\w+]*)/action/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 
-        	'wcmpesa/([\w+]*)/action/([\w+]*)/base/([\w+]*)' => 'index.php?wcmpesa=$matches[1]&action=$matches[2]&base=$matches[3]'
-        ),
-        $wp_rewrite->rules
-    );
-} );
+add_action( 'init', 'pmg_rewrite_add_rewrites' );
+function pmg_rewrite_add_rewrites()
+{
+    add_rewrite_rule('wcmpesa/([^/]*)/?', 'index.php?wcmpesa=$matches[1]', 'top' );
+    add_rewrite_rule('wcmpesa/([^/]*)/action/([^/]*)', 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 'top' );
+    add_rewrite_rule('wcmpesa/([^/]*)/action/([^/]*)/base/([^/]*)', 'index.php?wcmpesa=$matches[1]&action=$matches[2]&base=$matches[3]', 'top' );
+}
+// add_filter('generate_rewrite_rules', function ($wp_rewrite) {
+//     $wp_rewrite->rules = array_merge(
+//         array(
+//         	'wcmpesa/([^/]*)/?' 								=> 'index.php?wcmpesa=$matches[1]', 
+//         	'wcmpesa/([^/]*)/action/([^/]*)' 				=> 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 
+//         	'wcmpesa/([^/]*)/action/([^/]*)/base/([^/]*)' 	=> 'index.php?wcmpesa=$matches[1]&action=$matches[2]&base=$matches[3]'
+//        ),
+//         $wp_rewrite->rules
+//    );
+// });
 
-add_filter( 'query_vars', function( $query_vars ) {
+add_filter('query_vars', function($query_vars) {
     $query_vars[] = 'wcmpesa';
     $query_vars[] = 'action';
     $query_vars[] = 'base';
     return $query_vars;
-} );
+});
 
-add_action( 'template_redirect', function() {
-    $route 			= get_query_var( 'wcmpesa' );
-    $action 		= get_query_var( 'action', null );
-    $api 			= get_query_var( 'base', 'c2b' );
+add_action('template_redirect', function() {
+	header('Access-Control-Allow-Origin: *');
+	
+    $route 			= get_query_var('wcmpesa');
+    $action 		= get_query_var('action');
+    $api 			= get_query_var('base', 'c2b');
 
-    if ( !empty( $route ) ) {
-		$response 	= json_decode( file_get_contents( 'php://input' ), true );
-		$data 		= isset( $response['Body'] ) ? $response['Body'] : array();
-    	$action 	= ( $action == '0' ) ? null : $action;
+    if (!empty($route)) {
+		$response 	= json_decode(file_get_contents('php://input'), true);
+		$data 		= isset($response['Body']) ? $response['Body'] : array();
+    	$action 	= ($action == '0') ? null : $action;
 
-    	wp_send_json( 
-    		call_user_func_array( 
-      			array( 
-      				'Mpesa'.strtoupper( $api ),
-      				$route
-      			), 
-      			array( 
-      				$action, 
-      				$data 
-      			) 
-      		)
+    	exit(
+    		wp_send_json(
+	    		call_user_func_array(
+	      			array(
+	      				'Mpesa'.strtoupper($api),
+	      				$route
+	      			), 
+	      			array(
+	      				$action, 
+	      				$data 
+	      			) 
+	      		)
+	    	)
     	);
-
-        die;
     }
-} );
+});

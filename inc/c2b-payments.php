@@ -6,40 +6,40 @@
  * @since 0.18.01
  */
 
-add_action( 'init', 'mpesaipn_post_type', 0 );
+add_action('init', 'mpesaipn_post_type', 0);
 
 // Register Custom Post - C2B Payments
 function mpesaipn_post_type() {
 
     $labels = array(
-        'name'                  => _x( 'C2B Payments', 'C2B Payment General Name', 'woocommerce' ),
-        'singular_name'         => _x( 'C2B Payment', 'C2B Payment Singular Name', 'woocommerce' ),
-        'menu_name'             => __( 'MPESA', 'woocommerce' ),
-        'name_admin_bar'        => __( 'C2B Payment', 'woocommerce' ),
-        'archives'              => __( 'Payment Archives', 'woocommerce' ),
-        'attributes'            => __( 'Payment Attributes', 'woocommerce' ),
-        'parent_item_colon'     => __( 'Parent Payment:', 'woocommerce' ),
-        'all_items'             => __( 'C2B Payments', 'woocommerce' ),
-        'add_new_item'          => __( 'Add New Manual C2B Payment', 'woocommerce' ),
-        'add_new'               => __( 'Add Payment', 'woocommerce' ),
-        'new_item'              => __( 'New Manual C2B', 'woocommerce' ),
-        'edit_item'             => __( 'Edit Payment', 'woocommerce' ),
-        'update_item'           => __( 'Update Payment', 'woocommerce' ),
-        'view_item'             => __( 'View Payment', 'woocommerce' ),
-        'view_items'            => __( 'View Payments', 'woocommerce' ),
-        'search_items'          => __( 'Search Payments', 'woocommerce' ),
-        'not_found'             => __( 'Not found', 'woocommerce' ),
-        'not_found_in_trash'    => __( 'Not found in Trash', 'woocommerce' ),
-        'items_list'            => __( 'Payments list', 'woocommerce' ),
-        'items_list_navigation' => __( 'Payments list navigation', 'woocommerce' ),
-        'filter_items_list'     => __( 'Filter payments list', 'woocommerce' ),
-    );
+        'name'                  => _x('C2B Payments', 'C2B Payment General Name', 'woocommerce'),
+        'singular_name'         => _x('C2B Payment', 'C2B Payment Singular Name', 'woocommerce'),
+        'menu_name'             => __('MPESA', 'woocommerce'),
+        'name_admin_bar'        => __('C2B Payment', 'woocommerce'),
+        'archives'              => __('Payment Archives', 'woocommerce'),
+        'attributes'            => __('Payment Attributes', 'woocommerce'),
+        'parent_item_colon'     => __('Parent Payment:', 'woocommerce'),
+        'all_items'             => __('C2B Payments', 'woocommerce'),
+        'add_new_item'          => __('Add New Manual C2B Payment', 'woocommerce'),
+        'add_new'               => __('Add Payment', 'woocommerce'),
+        'new_item'              => __('New Manual C2B', 'woocommerce'),
+        'edit_item'             => __('Edit Payment', 'woocommerce'),
+        'update_item'           => __('Update Payment', 'woocommerce'),
+        'view_item'             => __('View Payment', 'woocommerce'),
+        'view_items'            => __('View Payments', 'woocommerce'),
+        'search_items'          => __('Search Payments', 'woocommerce'),
+        'not_found'             => __('Not found', 'woocommerce'),
+        'not_found_in_trash'    => __('Not found in Trash', 'woocommerce'),
+        'items_list'            => __('Payments list', 'woocommerce'),
+        'items_list_navigation' => __('Payments list navigation', 'woocommerce'),
+        'filter_items_list'     => __('Filter payments list', 'woocommerce'),
+   );
 
-    $supports = (  get_option( 'woocommerce_mpesa_settings' )["env"] == 'live' ) ? array( 'revisions' ) : array( 'revisions', 'editor' );
+    $supports = ( get_option('woocommerce_mpesa_settings')["env"] == 'live') ? array('revisions') : array('revisions', 'editor');
     
     $args = array(
-        'label'                 => __( 'C2B Payment', 'woocommerce' ),
-        'description'           => __( 'C2B Payment Description', 'woocommerce' ),
+        'label'                 => __('C2B Payment', 'woocommerce'),
+        'description'           => __('C2B Payment Description', 'woocommerce'),
         'labels'                => $labels,
         'supports'              => $supports,
         'taxonomies'            => array(),
@@ -55,11 +55,11 @@ function mpesaipn_post_type() {
         'publicly_queryable'    => false,
         'capability_type'       => 'page',
         'menu_icon'             => 'dashicons-money',
-        // 'menu_icon'             => apply_filters( 'woocommerce_mpesa_icon', plugins_url( 'mpesa.png', __FILE__ ) ),
+        // 'menu_icon'             => apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__)),
         'rewrite'               => false,
-    );
+   );
 
-    register_post_type( 'mpesaipn', $args );
+    register_post_type('mpesaipn', $args);
 }
 
 /**
@@ -70,8 +70,8 @@ function mpesaipn_post_type() {
  * @param Array $columns The existing columns
  * @return Array $filtered_columns The filtered columns
  */
-add_filter( 'manage_mpesaipn_posts_columns', 'filter_mpesaipn_table_columns' );
-function filter_mpesaipn_table_columns( $columns )
+add_filter('manage_mpesaipn_posts_columns', 'filter_mpesaipn_table_columns');
+function filter_mpesaipn_table_columns($columns)
 {
     $columns['title'] = "Type";
     $columns['customer'] = "Customer";
@@ -81,7 +81,7 @@ function filter_mpesaipn_table_columns( $columns )
     $columns['request'] = "Request";
     $columns['receipt'] = "Receipt";
     $columns['status'] = "Status";
-    unset( $columns['date'] );
+    unset($columns['date']);
     return $columns;
 }
 
@@ -92,33 +92,33 @@ function filter_mpesaipn_table_columns( $columns )
  * @param String $column The name of the column being acted upon
  * @return void
  */
-add_action( 'manage_posts_custom_column','mpesaipn_table_column_content', 10, 2 );
-function mpesaipn_table_column_content( $column_id, $post_id )
+add_action('manage_posts_custom_column','mpesaipn_table_column_content', 10, 2);
+function mpesaipn_table_column_content($column_id, $post_id)
 {
-    $order_id = get_post_meta( $post_id, '_order_id', true );
-    switch ( $column_id ) {
+    $order_id = get_post_meta($post_id, '_order_id', true);
+    switch ($column_id) {
         case 'customer':
-            echo ( $value = get_post_meta( $post_id, '_customer', true ) ) ? $value : "N/A";
+            echo ($value = get_post_meta($post_id, '_customer', true)) ? $value : "N/A";
             break;
 
         case 'amount':
-            echo ( $value = get_post_meta( $post_id, '_amount', true ) ) ? $value : "0";
+            echo ($value = get_post_meta($post_id, '_amount', true)) ? $value : "0";
             break;
 
         case 'paid':
-            echo ( $value = get_post_meta( $post_id, '_paid', true ) ) ? $value : "0";
+            echo ($value = get_post_meta($post_id, '_paid', true)) ? $value : "0";
             break;
 
         case 'request':
-            echo ( $value = get_post_meta( $post_id, '_request_id', true ) ) ? $value : "N/A";
+            echo ($value = get_post_meta($post_id, '_request_id', true)) ? $value : "N/A";
             break;
 
         case 'receipt':
-            echo ( $value = get_post_meta( $post_id, '_receipt', true ) ) ? $value : "N/A";
+            echo ($value = get_post_meta($post_id, '_receipt', true)) ? $value : "N/A";
             break;
 
         case 'balance':
-            echo ( $value = get_post_meta( $post_id, '_balance', true ) ) ? $value : "0";
+            echo ($value = get_post_meta($post_id, '_balance', true)) ? $value : "0";
             break;
 
         case 'status':
@@ -129,9 +129,9 @@ function mpesaipn_table_column_content( $column_id, $post_id )
                 "cancelled" => "This Order Is Cancelled",
                 "refunded" => "This Order Is Refunded",
                 "failed" => "This Order Failed"
-            );
+           );
 
-            echo ( $value = get_post_meta( $post_id, '_order_status', true ) ) ? '<a href="'.admin_url( 'post.php?post='.esc_attr( trim( $order_id ) ).'&action=edit">'.esc_attr( $statuses[$value] ).'</a>' ) : '<a href="'.admin_url( 'post.php?post='.esc_attr( trim($order_id) ).'&action=edit"' ).'>Set Status</a>';
+            echo ($value = get_post_meta($post_id, '_order_status', true)) ? '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit">'.esc_attr($statuses[$value]).'</a>') : '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit"').'>Set Status</a>';
             break;
     }
 }
@@ -143,8 +143,8 @@ function mpesaipn_table_column_content( $column_id, $post_id )
  * @param Array $columns The original columns
  * @return Array $columns The filtered columns
  */
-add_filter( 'manage_edit-mpesaipn_sortable_columns', 'mpesaipn_columns_sortable' );
-function mpesaipn_columns_sortable( $columns ) 
+add_filter('manage_edit-mpesaipn_sortable_columns', 'mpesaipn_columns_sortable');
+function mpesaipn_columns_sortable($columns) 
 {
     $columns['title'] = "Type";
     $columns['customer'] = "Customer";
