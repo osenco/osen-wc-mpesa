@@ -304,7 +304,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 
 			$reference = ($this->get_option('account') == 'WC') ? 'WC'.$order_id : $this->get_option('account');
 
-			$result = \MpesaC2B::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
+			$result = Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
 
 			if (isset($result['errorCode'])) {
 				$error_message = 'MPesa Error '.$result['errorCode'].': '.$result['errorMessage'];

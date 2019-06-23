@@ -1,4 +1,6 @@
 <?php
+namespace Osen\Mpesa;
+
 /**
  * @package MPesa For WooCommerce
  * @subpackage B2C Library
@@ -10,7 +12,7 @@
 /**
  * 
  */
-class MpesaB2C
+class B2C
 {
   public static $env = 'sandbox';
   public static $username;
@@ -27,12 +29,7 @@ class MpesaB2C
   public static $timeout;
 
   function __construct()
-  {
-    /**
-     * Setup CORS 
-     */
-    header('Access-Control-Allow-Origin: *');
-  }
+  {}
 
   public static function set($config)
   {
@@ -142,7 +139,7 @@ class MpesaB2C
     $timestamp  = date('YmdHis');
     $env        = self::$env;
     $plaintext  = self::$password;
-    $publicKey  = file_get_contents('../cert/'.$env.'/cert.cr');
+    $publicKey  = file_get_contents('cert/'.$env.'/cert.cr');
 
     openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
 
@@ -185,112 +182,4 @@ class MpesaB2C
     
     return is_null($callback) ? array('resultCode' => 0, 'resultDesc' => 'Success') : call_user_func_array($callback, array($response));
   }
-
-  /**
-   * 
-   */
-  public static function register($env = 'sandbox')
-  {
-    $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/registerurl';
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $endpoint);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:Bearer '.self::token()));
-        
-    $curl_post_data = array(
-      'ShortCode'         => self::$shortcode,
-      'ResponseType'      => 'Cancelled',
-      'ConfirmationURL'   => self::$confirm,
-      'ValidationURL'     => self::$validate
-   );
-    $data_string = json_encode($curl_post_data);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_HEADER, false);
-
-    $response = curl_exec($curl);
-    return curl_exec($curl) ? json_decode($response, true) : array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja');
-  }
-}
-
-### WRAPPER FUNCTIONS
-/**
- * Wrapper function to process response data for reconcilliation
- * @param Array $configuration - Key-value pairs of settings
- *   KEY        |   TYPE    |   DESCRIPTION         | POSSIBLE VALUES
- *  env         |   string  | Environment in use    | live/sandbox
- *  parent      |   number  | Head Office Shortcode | 123456
- *  shortcode   |   number  | Business Paybill/Till | 123456
- *  type        |   integer | Identifier Type       | 1(MSISDN)/2(Till)/4(Paybill)
- *  validate    |   string  | Validation URI        | lipia/validate
- *  confirm     |   string  | Confirmation URI      | lipia/confirm
- *  reconcile   |   string  | Reconciliation URI    | lipia/reconcile
- * @return bool
- */ 
-function b2c_config($config = array())
-{
-  return MpesaB2C::set($config);
-}
-
-/**
- * Wrapper function to process response data for validation
- * @param String $callback - Optional callback function to process the response
- * @return bool
- */ 
-function b2c_validate($callback = null, $data = null)
-{
-  return MpesaB2C::validate($callback, $data);
-}
-
-/**
- * Wrapper function to process response data for confirmation
- * @param String $callback - Optional callback function to process the response
- * @return bool
- */ 
-function b2c_confirm($callback = null, $data = null )
-{
-  return MpesaB2C::confirm($callback, $data);
-}
-
-/**
- * Wrapper function to process request for payment
- * @param String $phone     - Phone Number to send STK Prompt Request to
- * @param String $amount    - Amount of money to charge
- * @param String $reference - Account to show in STK Prompt
- * @param String $trxdesc   - Transaction Description(optional)
- * @param String $remark    - Remarks about transaction(optional)
- * @return array
- */ 
-function b2c_request($phone, $amount, $reference, $trxdesc = 'Mpesa Transaction', $remark = 'Mpesa Transaction')
-{
-  return MpesaB2C::request($phone, $amount, $reference, $trxdesc, $remark);
-}
-
-/**
- * Wrapper function to process response data for reconcilliation
- * @param String $callback - Optional callback function to process the response
- * @return bool
- */          
-function b2c_reconcile($callback = null, $data = null)
-{
-  return MpesaB2C::reconcile($callback, $data);
-}
-
-/**
- * Wrapper function to process response data for reconcilliation
- * @param String $callback - Optional callback function to process the response
- * @return bool
- */          
-function b2c_timeout($callback = null, $data = null)
-{
-  return MpesaB2C::timeout($callback, $data);
-}
-
-/**
- * Wrapper function to register URLs
- * @return array
- */
-function b2c_register($env = 'sandbox')
-{
-  return MpesaB2C::register($env);
 }

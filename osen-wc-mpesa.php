@@ -107,19 +107,92 @@ function mpesa_row_meta($links, $file)
 	return (array) $links;
 }
 
-/**
- * Load Mpesa Functions
- */
-foreach (glob(plugin_dir_path(__FILE__) . 'mpesa/*.php') as $filename) {
-	require_once $filename;
-}
+spl_autoload_register(function ($class)
+{
+	if (substr($class, 0, 4) == 'Osen') {
+		$class = str_replace('Osen\\', '', $class);
+		$file = str_replace('\\', '/', $class);
+
+		require_once plugin_dir_path(__FILE__)."src/{$file}.php";
+	}
+});
 
 /**
- * Load WooCommerce Functions
+ * Initialize all our custom post types
  */
-foreach (glob(plugin_dir_path(__FILE__) . 'wc/*.php') as $filename) {
-	require_once $filename;
-}
+Osen\Post\Types\C2B::init();
+Osen\Post\Types\B2C::init();
+
+/**
+ * Initialize our admin menus
+ */
+Osen\Menus\Menu::init();
+
+/**
+ * Initialize settings pages for B2C API
+ */
+Osen\Settings\B2C::init();
+Osen\Settings\Withdraw::init();
+
+/**
+ * Initialize metaboxes for C2B API
+ */
+Osen\Post\Metaboxes\C2B::init();
+
+// Stk
+$c2b = get_option('woocommerce_mpesa_settings');
+Osen\Mpesa\STK::set(
+	array(
+		'env' 			=> isset($c2b['env']) ? $c2b['env'] : 'sandbox',
+		'appkey' 		=> isset($c2b['key']) ? $c2b['key'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+		'appsecret' 	=> isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+		'headoffice' 	=> isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
+		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
+		'type'	 		=> isset($c2b['idtype']) ? $c2b['idtype'] : 4,
+		'passkey'	 	=> isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+		'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
+		'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
+		'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
+		'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
+	)
+);
+
+// c2b
+Osen\Mpesa\C2B::set(
+	array(
+		'env' 			=> isset($c2b['env']) ? $c2b['env'] : 'sandbox',
+		'appkey' 		=> isset($c2b['key']) ? $c2b['key'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+		'appsecret' 	=> isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+		'headoffice' 	=> isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
+		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
+		'type'	 		=> isset($c2b['idtype']) ? $c2b['idtype'] : 4,
+		'passkey'	 	=> isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+		'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
+		'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
+		'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
+		'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
+	)
+);
+
+//b2c
+$b2c = get_option('b2c_wcmpesa_options');
+Osen\Mpesa\B2C::set(
+	array(
+		'env' 			=> isset($b2c['env']) ? $b2c['env'] : 'sandbox',
+		'appkey' 		=> isset($b2c['key']) ? $b2c['key'] : '',
+		'appsecret' 	=> isset($b2c['secret']) ? $b2c['secret'] : '',
+		'headoffice' 	=> isset($b2c['headoffice']) ? $b2c['headoffice'] : '',
+		'shortcode' 	=> isset($b2c['shortcode']) ? $b2c['shortcode'] : '',
+		'type'	 		=> isset($b2c['idtype']) ? $b2c['idtype'] : 4,
+		'passkey'	 	=> isset($b2c['passkey']) ? $b2c['passkey'] : '',
+		'username'	 	=> isset($b2c['username']) ? $b2c['username'] : '',
+		'password'	 	=> isset($b2c['password']) ? $b2c['password'] : '',
+		'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/b2c/',
+		'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/b2c/',
+		'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/b2c/',
+		'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/b2c/'
+	)
+);
 
 /**
  * Load Custom Plugin Functions

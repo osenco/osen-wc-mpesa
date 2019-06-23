@@ -1,4 +1,6 @@
 <?php
+namespace Osen\Mpesa;
+
 /**
  * @package MPesa For WooCommerce
  * @subpackage C2B Library
@@ -10,7 +12,7 @@
 /**
  * 
  */
-class MpesaC2B
+class STK
 {
   /**
    * @param string  | Environment in use    | live/sandbox
@@ -33,12 +35,12 @@ class MpesaC2B
   public static $passkey;
 
   /** 
-   * @param number  | Head Office Shortcode | 123456
+   * @param string  | Head Office Shortcode | 123456
    */
   public static $headoffice;
 
   /** 
-   * @param number  | Business Paybill/Till | 123456
+   * @param string  | Business Paybill/Till | 123456
    */
   public static $shortcode;
 
@@ -68,16 +70,10 @@ class MpesaC2B
   public static $timeout;
 
   function __construct()
-  {
-    /**
-     * Setup CORS 
-     */
-    header('Access-Control-Allow-Origin: *');
-    header('Content-Type:Application/json');
-  }
+  {}
 
   /**  
-   * @param Array $config - Key-value pairs of settings
+   * @param array $config - Key-value pairs of settings
    */
   public static function set($config)
   {
@@ -109,7 +105,7 @@ class MpesaC2B
 
   /**
    * Function to process response data for validation
-   * @param String $callback - Optional callable function to process the response - must return boolean
+   * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
   public static function validate($callback, $data)
@@ -139,7 +135,7 @@ class MpesaC2B
 
   /**
    * Function to process response data for confirmation
-   * @param String $callback - Optional callable function to process the response - must return boolean
+   * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
   public static function confirm($callback, $data)
@@ -168,41 +164,12 @@ class MpesaC2B
   }
 
   /**
-   * Function to register validation and confirmation URLs
-   * @param String $env - Environment for which to register URLs
-   * @return bool/array
-   */
-  public static function register($env = 'sandbox')
-  {
-    $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/c2bwp/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
-    $post_data = array(
-      'ShortCode'         => self::$shortcode,
-      'ResponseType'      => 'Cancelled',
-      'ConfirmationURL'   => self::$confirm,
-      'ValidationURL'     => self::$validate
-   );
-    $data_string = json_encode($post_data);
-
-    $response = wp_remote_post(
-      $endpoint, 
-      array(
-        'headers'           => array(
-          'Content-Type'    => 'application/json', 
-          'Authorization'   => 'Bearer ' . self::token()
-       ), 
-        'body'              => $data_string
-     )
-   );
-    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
-  }
-
-  /**
    * Function to process request for payment
-   * @param String $phone     - Phone Number to send STK Prompt Request to
-   * @param String $amount    - Amount of money to charge
-   * @param String $reference - Account to show in STK Prompt
-   * @param String $trxdesc   - Transaction Description(optional)
-   * @param String $remark    - Remarks about transaction(optional)
+   * @param string $phone     - Phone Number to send STK Prompt Request to
+   * @param string $amount    - Amount of money to charge
+   * @param string $reference - Account to show in STK Prompt
+   * @param string $trxdesc   - Transaction Description(optional)
+   * @param string $remark    - Remarks about transaction(optional)
    * @return array
    */ 
   public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
@@ -245,7 +212,7 @@ class MpesaC2B
 
 /**
    * Function to process response data for reconciliation
-   * @param String $callback - Optional callable function to process the response - must return boolean
+   * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
    */            
   public static function reconcile($args)
@@ -265,7 +232,7 @@ class MpesaC2B
 
   /**
    * Function to process response data if system times out
-   * @param String $callback - Optional callable function to process the response - must return boolean
+   * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
    */ 
   public static function timeout($callback = null, $data = null)

@@ -6,11 +6,11 @@
  * @since 0.18.01
  */
 
-add_action('plugins_loaded', 'wc_mpesa_config', 15);
+//add_action('plugins_loaded', 'wc_mpesa_config', 15);
 function wc_mpesa_config() 
 {
 	$c2b = get_option('woocommerce_mpesa_settings');
-	\MpesaC2B::set(
+	Osen\Mpesa\C2B::set(
 		array(
 			'env' 			=> $c2b['env'],
 			'appkey' 		=> $c2b['key'],
@@ -28,7 +28,7 @@ function wc_mpesa_config()
 
 	//b2c
 	$b2c = get_option('b2c_wcmpesa_options');
-	\MpesaB2C::set(
+	Osen\Mpesa\B2C::set(
 		array(
 			'env' 			=> $b2c['env'],
 			'appkey' 		=> $b2c['appkey'],
@@ -95,8 +95,8 @@ function wc_mpesa_reconcile($response){
 		$transactionDate 				= $response['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
 		$phone 							= $response['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
 
-		$after_ipn_paid = round($before_ipn_paid)+round($amount);
-		$ipn_balance = $after_ipn_paid-$amount_due;
+		$after_ipn_paid 				= round($before_ipn_paid)+round($amount);
+		$ipn_balance 					= $after_ipn_paid-$amount_due;
 
 	    if(wc_get_order($order_id)){
 	    	$order = new WC_Order($order_id);
@@ -170,16 +170,6 @@ function pmg_rewrite_add_rewrites()
     add_rewrite_rule('wcmpesa/([^/]*)/action/([^/]*)', 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 'top' );
     add_rewrite_rule('wcmpesa/([^/]*)/action/([^/]*)/base/([^/]*)', 'index.php?wcmpesa=$matches[1]&action=$matches[2]&base=$matches[3]', 'top' );
 }
-// add_filter('generate_rewrite_rules', function ($wp_rewrite) {
-//     $wp_rewrite->rules = array_merge(
-//         array(
-//         	'wcmpesa/([^/]*)/?' 								=> 'index.php?wcmpesa=$matches[1]', 
-//         	'wcmpesa/([^/]*)/action/([^/]*)' 				=> 'index.php?wcmpesa=$matches[1]&action=$matches[2]', 
-//         	'wcmpesa/([^/]*)/action/([^/]*)/base/([^/]*)' 	=> 'index.php?wcmpesa=$matches[1]&action=$matches[2]&base=$matches[3]'
-//        ),
-//         $wp_rewrite->rules
-//    );
-// });
 
 add_filter('query_vars', function($query_vars) {
     $query_vars[] = 'wcmpesa';
@@ -193,18 +183,18 @@ add_action('template_redirect', function() {
 	
     $route 			= get_query_var('wcmpesa');
     $action 		= get_query_var('action');
-    $api 			= get_query_var('base', 'c2b');
+    $api 			= get_query_var('base', 'stk');
 
     if (!empty($route)) {
 		$response 	= json_decode(file_get_contents('php://input'), true);
-		$data 		= isset($response['Body']) ? $response['Body'] : array();
+		$data 		= isset($response['Body']) ? $response['Body'] : $response;
     	$action 	= ($action == '0') ? null : $action;
 
     	exit(
     		wp_send_json(
 	    		call_user_func_array(
 	      			array(
-	      				'Mpesa'.strtoupper($api),
+	      				'Osen\\Mpesa\\'.strtoupper($api),
 	      				$route
 	      			), 
 	      			array(

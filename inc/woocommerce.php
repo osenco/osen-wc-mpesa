@@ -78,7 +78,7 @@ function wcmpesa_new_order_column($columns)
  * Render custom column content within edit.php table on event post types.
  * 
  * @access public
- * @param String $column The name of the column being acted upon
+ * @param string $column The name of the column being acted upon
  * @return void
  */
 add_action('manage_shop_order_custom_column','shop_order_payments_table_column_content', 10);
