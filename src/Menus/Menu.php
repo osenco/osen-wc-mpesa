@@ -109,8 +109,7 @@ class Menu
                 <p>To help improve and support our effort to make such solutions as this one, you can start by contributing here:</p>
                 <div style="padding-left: 20px;">
                     <li><a href="https://github.com/osenco/osen-wc-mpesa">This Plugin's Github Repo</a></li>
-                    <li><a href="https://github.com/osenco/osen-mpesa-php">MPesa PHP SDK</a></li>
-                    <li><a href="https://github.com/osenco/osen-laravel-mpesa">MPesa For Laravel</a></li>
+                    <li><a href="https://github.com/osenco/mpesa">MPesa PHP SDK</a></li>
                     <li><a href="https://github.com/osenco/osen-oc-mpesa">MPesa For Open Cart</a></li>
                     <li><a href="https://github.com/osenco/osen-presta-mpesa">MPesa For PrestaShop</a></li>
                 </div>

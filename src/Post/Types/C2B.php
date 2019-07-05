@@ -60,18 +60,18 @@ class C2B
             'hierarchical'          => false,
             'public'                => false,
             'show_ui'               => true,
-            'show_in_rest'          => true,
             'show_in_menu'          => true,
             'show_in_admin_bar'     => false,
             'show_in_nav_menus'     => false,
             'can_export'            => true,
             'has_archive'           => false,
             'exclude_from_search'   => true,
-            'publicly_queryable'    => false,
+            'publicly_queryable'    => true,
             'capability_type'       => 'page',
             'menu_icon'             => 'dashicons-money',
             // 'menu_icon'             => apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__)),
             'rewrite'               => false,
+            'show_in_rest'          => true,
         );
 
         register_post_type('mpesaipn', $args);
