@@ -59,8 +59,11 @@ function wc_mpesa_activation_check()
     if (! is_plugin_active('woocommerce/woocommerce.php')){
         deactivate_plugins(plugin_basename(__FILE__));
     }
+	
+	flush_rewrite_rules();
 }
 
+add_action( 'after_switch_theme', 'flush_rewrite_rules' );
 add_action('activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2);
 function wc_mpesa_detect_plugin_activation($plugin, $network_activation) {
     if($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php'){

@@ -72,8 +72,6 @@ function wcmpesa_new_order_column($columns)
     return $columns;
 }
 
-
-
 /**
  * Render custom column content within edit.php table on event post types.
  * 

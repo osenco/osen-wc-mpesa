@@ -9,7 +9,7 @@ class Menu
         add_action('admin_menu', [new self, 'wc_mpesa_menu']);
     }
     /**
-     * @package MPesa For WooCommerce
+     * @package M-Pesa For WooCommerce
      * @subpackage Plugin Functions
      * @author Mauko Maunde < hi@mauko.co.ke >
      * @since 0.18.01
@@ -48,7 +48,7 @@ class Menu
         if((get_option('woocommerce_mpesa_settings')["enable_b2c"] == 'yes')){
             add_submenu_page(
                 'edit.php?post_type=mpesaipn', 
-                __('MPesa B2C Preferences', 'woocommerce'), 
+                __('M-Pesa B2C Preferences', 'woocommerce'), 
                 __('Configure B2C', 'woocommerce'), 
                 'manage_options',
                 'wc_mpesa_b2c_preferences', 
@@ -78,21 +78,22 @@ class Menu
     public static function wc_mpesa_menu_about()
     { ?>
         <div class="wrap">
-            <h1>About MPesa for WooCommerce</h1>
+            <h1>About M-Pesa for WooCommerce</h1>
 
             <h3>The Plugin</h3>
             <article>
-                <p>This plugin builds on the work of <a href="https://github.com/moshthepitt/woocommerce-lipa-na-mmpesa">Kelvin Jayanoris</a>, the <a href="https://osen.co.ke" target="_blank">Osen Concepts </a> developers and others to provide a simple plug-n-play implementation for integrating MPesa Payments into online stores built with WooCommerce and WordPress.</p>
+                <p>This plugin seeks to provide a simple plug-n-play implementation for integrating M-Pesa Payments into online stores built with WooCommerce and WordPress.</p>
             </article>
 
-            <h4>Version <?php echo WCM_VER; ?> introduces many changes:</h4>
-            <?php $logs = file_get_contents(dirname(WCM_PLUGIN_FILE).'/CHANGELOG');
-            $logs = explode("\n", $logs); ?>
-            <ol>
-                <?php foreach ($logs as $log): ?>
-                    <li><?php echo $log; ?></li>
-                <?php endforeach; ?>
-            </ol>
+            <h3>Pre-requisites</h3>
+            <article>
+                <ol>
+                    <li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven't. Fill in the app's consumer key and secret below.</li>
+                    <li>Ensure you have access to the <a href="https://ke.mpesa.org">M-Pesa Web Portal</a>. You'll need this for when you go LIVE.</li>
+                    <li>For security purposes, and for the M-Pesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>
+                    <li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>
+                </ol>
+            </article>
 
             <h3>Integration(Going Live)</h3>
             <article>
@@ -104,19 +105,27 @@ class Menu
                 </p>
             </article>
 
-            <h3>Development</h3>
+            <h3>C2B Confirmation and Validation URLs</h3>
+            <article>
+                <p>Whenever M-Pesa receives a transaction on your shortcode, a validation request is sent to the validation URL registered above. M-Pesa completes or cancels the transaction depending on the validation response it receives.</p>
+                <p>These URLs must be HTTPS in production. Validation is an optional feature that needs to be activated on M-Pesa, the owner of the shortcode needs to make this request for activation. This can be done by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal</a>.</p>
+            </article>
+
+            <h3>Development & Contribution</h3>
             <article>
                 <p>To help improve and support our effort to make such solutions as this one, you can start by contributing here:</p>
                 <div style="padding-left: 20px;">
                     <li><a href="https://github.com/osenco/osen-wc-mpesa">This Plugin's Github Repo</a></li>
-                    <li><a href="https://github.com/osenco/mpesa">MPesa PHP SDK</a></li>
-                    <li><a href="https://github.com/osenco/osen-oc-mpesa">MPesa For Open Cart</a></li>
-                    <li><a href="https://github.com/osenco/osen-presta-mpesa">MPesa For PrestaShop</a></li>
+                    <li><a href="https://github.com/osenco/mpesa">M-Pesa PHP SDK</a></li>
+                    <li><a href="https://github.com/osenco/osen-oc-mpesa">M-Pesa For Open Cart</a></li>
+                    <li><a href="https://github.com/osenco/osen-presta-mpesa">M-Pesa For PrestaShop</a></li>
                 </div>
             </article>
 
             <h3>Contact</h3>
             <h4>Get in touch with us either via email (<a href="mail-to:hi@osen.co.ke">hi@osen.co.ke</a>) or via phone(<a href="tel:+254204404993">+254204404993</a>)</h4>
+            
+            <img src="<?php echo plugins_url('osen-wc-mpesa/mpesa.png'); ?>">
         </div><?php
     }
 

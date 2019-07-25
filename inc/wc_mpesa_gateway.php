@@ -55,14 +55,14 @@ function wc_mpesa_gateway_init()
 				: '';
 
 			$test_cred 		= ($env == 'sandbox') 
-				? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>' : 
+				? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>' 
+				:  
 				'';
 
 			$this->id                 		= 'mpesa';
 			$this->icon               		= apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__));
 			$this->method_title       		= __('Lipa Na MPesa', 'woocommerce');
-			$this->method_description 		= __('<h4 style="color: red;">IMPORTANT!</h4>
-				'.$b2c_settings.'<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://ke.mpesa.org">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred).'<li>We have a <a href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
+			$this->method_description 		= __('<h4 style="color: red;">IMPORTANT!</h4>'.$b2c_settings.'<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://ke.mpesa.org">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred).'<li>We have a <a href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
 			$this->has_fields         		= false;
 
 			// Load settings
@@ -75,8 +75,6 @@ function wc_mpesa_gateway_init()
 			$this->instructions       		= $this->get_option('instructions');
 			$this->enable_for_methods 		= $this->get_option('enable_for_methods', array());
 			$this->enable_for_virtual 		= $this->get_option('enable_for_virtual', 'yes') === 'yes' ? true : false;
-
-			
 
 			add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
 			
@@ -101,74 +99,74 @@ function wc_mpesa_gateway_init()
 
 			$this->form_fields = array(
 				'enabled' => array(
-					'title'       => __('Enable/Disable', 'woocommerce'),
-					'label'       => __('Enable '.$this->method_title, 'woocommerce'),
-					'type'        => 'checkbox',
-					'description' => '',
-					'default'     => 'no',
+					'title'       	=> __('Enable/Disable', 'woocommerce'),
+					'label'       	=> __('Enable '.$this->method_title, 'woocommerce'),
+					'type'        	=> 'checkbox',
+					'description' 	=> '',
+					'default'     	=> 'no',
 				),
 				'enable_c2b' => array(
-					'title'       => __('Accept C2B', 'woocommerce'),
-					'label'       => __('Enable C2B API. This allows customers to pay manually if the STK Prompt fails during checkout.', 'woocommerce'),
-					'type'        => 'checkbox',
-					'description' => '',
-					'default'     => 'no',
+					'title'       	=> __('Accept C2B', 'woocommerce'),
+					'label'       	=> __('Enable C2B API. This allows customers to pay manually if the STK Prompt fails during checkout.', 'woocommerce'),
+					'type'        	=> 'checkbox',
+					'description' 	=> '',
+					'default'     	=> 'no',
 				),
 				'title' => array(
-					'title'       => __('Method Title', 'woocommerce'),
-					'type'        => 'text',
-					'description' => __('Payment method name that the customer will see on your checkout.', 'woocommerce'),
-					'default'     => __('Lipa Na MPesa', 'woocommerce'),
-					'desc_tip'    => true,
+					'title'       	=> __('Method Title', 'woocommerce'),
+					'type'        	=> 'text',
+					'description' 	=> __('Payment method name that the customer will see on your checkout.', 'woocommerce'),
+					'default'     	=> __('Lipa Na MPesa', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'env' => array(
-					'title'       => __('Environment', 'woocommerce'),
-					'type'        => 'select',
-					'options' 		=> array(
+					'title'       	=> __('Environment', 'woocommerce'),
+					'type'        	=> 'select',
+					'options'		=> array(
 				     	'sandbox' 	=> __('Sandbox', 'woocommerce'),
 				      	'live' 		=> __('Live', 'woocommerce'),
 				   ),
-					'description' => __('MPesa Environment', 'woocommerce'),
-					'desc_tip'    => true,
+					'description' 	=> __('MPesa Environment', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'idtype' => array(
-					'title'       => __('Identifier Type', 'woocommerce'),
-					'type'        => 'select',
+					'title'       	=> __('Identifier Type', 'woocommerce'),
+					'type'        	=> 'select',
 					'options' => array(
 				      	/**1 => __('MSISDN', 'woocommerce'),*/
-				      	4 => __('Paybill Number', 'woocommerce'),
-				     	2 => __('Till Number', 'woocommerce')
+				      	4 			=> __('Paybill Number', 'woocommerce'),
+				     	2 			=> __('Till Number', 'woocommerce')
 				   ),
-					'description' => __('MPesa Identifier Type', 'woocommerce'),
-					'desc_tip'    => true,
+					'description' 	=> __('MPesa Identifier Type', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'headoffice' => array(
-					'title'       => __('Head Office Number', 'woocommerce'),
-					'type'        => 'text',
-					'description' => __('Store Number (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
-					'default'     => __('174379', 'woocommerce'),
-					'desc_tip'    => true,
+					'title'       	=> __('Head Office Number', 'woocommerce'),
+					'type'        	=> 'text',
+					'description' 	=> __('Store Number (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
+					'default'     	=> __('174379', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'shortcode' => array(
-					'title'       => __('Business Shortcode', 'woocommerce'),
-					'type'        => 'text',
-					'description' => __('Your MPesa Business Till/Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
-					'default'     => __('174379', 'woocommerce'),
-					'desc_tip'    => true,
+					'title'       	=> __('Business Shortcode', 'woocommerce'),
+					'type'        	=> 'text',
+					'description' 	=> __('Your MPesa Business Till/Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
+					'default'     	=> __('174379', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'key' => array(
-					'title'       => __('App Consumer Key', 'woocommerce'),
-					'type'        => 'text',
-					'description' => __('Your App Consumer Key From Safaricom Daraja.', 'woocommerce'),
-					'default'     => __('9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG', 'woocommerce'),
-					'desc_tip'    => true,
+					'title'       	=> __('App Consumer Key', 'woocommerce'),
+					'type'        	=> 'text',
+					'description' 	=> __('Your App Consumer Key From Safaricom Daraja.', 'woocommerce'),
+					'default'     	=> __('9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'secret' => array(
-					'title'       => __('App Consumer Secret', 'woocommerce'),
-					'type'        => 'text',
-					'description' => __('Your App Consumer Secret From Safaricom Daraja.', 'woocommerce'),
-					'default'     => __('bclwIPkcRqw61yUt', 'woocommerce'),
-					'desc_tip'    => true,
+					'title'       	=> __('App Consumer Secret', 'woocommerce'),
+					'type'        	=> 'text',
+					'description' 	=> __('Your App Consumer Secret From Safaricom Daraja.', 'woocommerce'),
+					'default'     	=> __('bclwIPkcRqw61yUt', 'woocommerce'),
+					'desc_tip'    	=> true,
 				),
 				'passkey' => array(
 					'title'       => __('Online Pass Key', 'woocommerce'),
@@ -310,16 +308,16 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 		 */
 		public function process_payment($order_id)
 		{
-			$order = new WC_Order($order_id);
+			$order 		= new WC_Order($order_id);
 			
-			$total = $order->get_total();
-			$phone = $order->get_billing_phone();
-			$first_name = $order->get_billing_first_name();
-			$last_name = $order->get_billing_last_name();
+			$total 		= $order->get_total();
+			$phone 		= $order->get_billing_phone();
+			$first_name	= $order->get_billing_first_name();
+			$last_name 	= $order->get_billing_last_name();
 
-			$reference = 'ORDER#'.$order_id;
+			$reference 	= 'ORDER#'.$order_id;
 
-			$result = Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
+			$result 	= Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
 
 			if($result){
 				$request_id = $result['MerchantRequestID'];
@@ -377,8 +375,11 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					);
 				}
 			} else {
-				$order->update_status('failed', __('Could not connect to Daraja', 'woocommerce'));
+				$error_message = __('Could not connect to Daraja', 'woocommerce');
+
+				$order->update_status('failed', $error_message);
 				wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
+				
 				return array(
 					'result' 	=> 'fail',
 					'redirect'	=> ''
@@ -396,24 +397,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 				echo wpautop(wptexturize($this->instructions));
 			}
 		}
-
-		/**
-		 * Change payment complete order status to completed for MPesa orders.
-		 *
-		 * @since  3.1.0
-		 * @param  string $status
-		 * @param  int $order_id
-		 * @param  WC_Order $order
-		 * @return string
-		 */
-		public function change_payment_complete_order_status($status, $order_id = 0, $order = false)
-		{
-			if ($order && 'mpesa' === $order->get_payment_method()) {
-				$status = $this->get_option('completion');
-			}
-			return $status;
-		}
-
+		
 		/**
 		 * Add content to the WC emails.
 		 *

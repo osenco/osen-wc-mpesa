@@ -43,6 +43,7 @@ class C2B{
     public static function mpesa_status($post)
     {
         $status = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
+        $request = ($value = get_post_meta($post->ID, '_request', true)) ? $value : 0;
 
         $statuses = array(
             "processing"    => "This Order Is Processing",
@@ -63,11 +64,11 @@ class C2B{
                 <td>
                     <button type="submit" id="mpesaipn_status" name="mpesaipn_status" class="button button-large">Check Payment Status</button>
                     <script>
-                    jQuery(document).ready(function($){
-                        $("#mpesaipn_status").click(function(e){
-                            e.preventDefault();
-                            $.post("#", [], function(data){
-                                $("#mpesaipn_status_result").html(data);
+                        jQuery(document).ready(function($){
+                            $("#mpesaipn_status").click(function(e){
+                                e.preventDefault();
+                                $.post("'.admin_url("admin-ajax.php").'", [request: '.$request.'], function(data){
+                                    $("#mpesaipn_status_result").html(data);
                                 });
                             });
                         });

@@ -56,9 +56,9 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id) {
 							<li>Select <b><?php echo $type; ?></b>.</li>
 							<?php if ($idtype== 4): ?>
 							<li>Enter <b><?php echo $reference; ?></b> as Account no.</li>
-							<li>Enter <b><?php echo Osen\Mpesa\C2B::$shortcode; ?></b> as business no.</li>
+							<li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as business no.</li>
 							<?php else: ?>
-							<li>Enter <b><?php echo Osen\Mpesa\C2B::$shortcode; ?></b> as till no.</li>
+							<li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as till no.</li>
 							<?php endif; ?>
 							<li>Enter Amount <b><?php echo round($total); ?></b>.</li>
 							<li>Enter your M-PESA PIN</li>
@@ -262,41 +262,44 @@ function wc_mpesa_process_ipn()
                 break;
 				
             case "status":
-				// $response = Osen\Mpesa\STK::status($transaction);
-
-				// $result = $response['Result'];
-
-				// $ResultType = $result['ResultType'];
-				// $ResultCode = $result['ResultType'];
-				// $ResultDesc = $result['ResultType'];
-				// $OriginatorConversationID = $result['ResultType'];
-				// $ConversationID = $result['ResultType'];
-				// $TransactionID = $result['ResultType'];
-				// $ResultParameters = $result['ResultType'];
-
-				// $ResultParameter = $result['ResultType'];
-
-				// $ReceiptNo = $ResultParameter[0]['Value'];
-				// $ConversationID = $ResultParameter[0]['Value'];
-				// $FinalisedTime = $ResultParameter[0]['Value'];
-				// $Amount = $ResultParameter[0]['Value'];
-				// $ReceiptNo = $ResultParameter[0]['Value'];
-				// $TransactionStatus = $ResultParameter[0]['Value'];
-				// $ReasonType = $ResultParameter[0]['Value'];
-				// $TransactionReason = $ResultParameter[0]['Value'];
-				// $DebitPartyCharges = $ResultParameter[0]['Value'];
-				// $DebitAccountType = $ResultParameter[0]['Value'];
-				// $InitiatedTime = $ResultParameter[0]['Value'];
-				// $OriginatorConversationID = $ResultParameter[0]['Value'];
-				// $CreditPartyName = $ResultParameter[0]['Value'];
-				// $DebitPartyName = $ResultParameter[0]['Value'];
-
-
-				// $ReferenceData = $result['ReferenceData'];
-				// $ReferenceItem = $ReferenceData['ReferenceItem'];
-				// $Occasion = $ReferenceItem[0]['Value'];
 				$transaction = $_POST['transaction'];
                 exit(wp_send_json(Osen\Mpesa\STK::status($transaction)));
+                break;
+				
+            case "result":
+				$response = json_decode(file_get_contents('php://input'), true);
+
+				$result = $response['Result'];
+
+				$ResultType = $result['ResultType'];
+				$ResultCode = $result['ResultType'];
+				$ResultDesc = $result['ResultType'];
+				$OriginatorConversationID = $result['ResultType'];
+				$ConversationID = $result['ResultType'];
+				$TransactionID = $result['ResultType'];
+				$ResultParameters = $result['ResultType'];
+
+				$ResultParameter = $result['ResultType'];
+
+				$ReceiptNo = $ResultParameter[0]['Value'];
+				$ConversationID = $ResultParameter[0]['Value'];
+				$FinalisedTime = $ResultParameter[0]['Value'];
+				$Amount = $ResultParameter[0]['Value'];
+				$ReceiptNo = $ResultParameter[0]['Value'];
+				$TransactionStatus = $ResultParameter[0]['Value'];
+				$ReasonType = $ResultParameter[0]['Value'];
+				$TransactionReason = $ResultParameter[0]['Value'];
+				$DebitPartyCharges = $ResultParameter[0]['Value'];
+				$DebitAccountType = $ResultParameter[0]['Value'];
+				$InitiatedTime = $ResultParameter[0]['Value'];
+				$OriginatorConversationID = $ResultParameter[0]['Value'];
+				$CreditPartyName = $ResultParameter[0]['Value'];
+				$DebitPartyName = $ResultParameter[0]['Value'];
+
+				$ReferenceData = $result['ReferenceData'];
+				$ReferenceItem = $ReferenceData['ReferenceItem'];
+				$Occasion = $ReferenceItem[0]['Value'];
+                exit(wp_send_json(Osen\Mpesa\STK::validate()));
                 break;
 
 			case "timeout":
