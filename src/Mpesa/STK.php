@@ -100,7 +100,9 @@ class STK
      )
    ); 
 
-    return is_wp_error($response) ? 'Invalid' : json_decode($response['body'])->access_token;
+    return is_wp_error($response) 
+      ? 'Invalid' 
+      : json_decode($response['body'])->access_token;
   }
 
   /**
@@ -108,7 +110,7 @@ class STK
    * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
-  public static function validate($callback, $data)
+  public static function validate($callback = null, $data = [])
   {
     if(is_null($callback) || empty($callback)){
       return array(
@@ -138,7 +140,7 @@ class STK
    * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return array
    */ 
-  public static function confirm($callback, $data)
+  public static function confirm($callback = null, $data = [])
   {
     if(is_null($callback) || empty($callback)){
       return array(
@@ -206,11 +208,13 @@ class STK
        ), 
         'body'    => $data_string
      )
-   );
-    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
+    );
+    return is_wp_error($response) 
+      ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') 
+      : json_decode($response['body'], true);
   }
 
-/**
+  /**
    * Function to process response data for reconciliation
    * @param callable $callback - Optional callable function to process the response - must return boolean
    * @return bool/array
@@ -227,7 +231,9 @@ class STK
       $response = $data;
     }
     
-    return is_null($callback) ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful') : call_user_func($callback, $response);
+    return is_null($callback) 
+      ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful') 
+      : call_user_func($callback, $response);
   }
 
   /**
@@ -249,5 +255,42 @@ class STK
     } else {
       return call_user_func_array($callback, array($response));
     }
+  }
+
+  public static function status(int $transaction, string $command = 'TransactionStatusQuery', string $remarks = 'Transaction Status Query', string $occassion = '')
+  {
+		$token = self::token();
+    $endpoint = (self::$env == 'live') 
+      ? 'https://api.safaricom.co.ke/mpesa/transactionstatus/v1/query' 
+      : 'https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query';
+
+    $post_data = array(
+      'Initiator'           => self::$username,
+      'SecurityCredential'  => self::$credentials,
+      'CommandID'           => $command,
+      'TransactionID'       => $transaction,
+      'PartyA'              => self::$shortcode,
+      'IdentifierType'      => self::$type,
+      'ResultURL'           => self::$results_url,
+      'QueueTimeOutURL'     => self::$timeout_url,
+      'Remarks'             => $remarks,
+      'Occasion'            => $occasion
+    );
+
+    $data_string  = json_encode($post_data);
+    $response     = wp_remote_post(
+      $endpoint, 
+      array(
+        'headers' => array(
+          'Content-Type' => 'application/json', 
+          'Authorization' => 'Bearer ' . self::token()
+       ), 
+        'body'    => $data_string
+     )
+    );
+
+    return is_wp_error($response) 
+      ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') 
+      : json_decode($response['body'], true);
   }
 }

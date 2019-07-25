@@ -18,7 +18,7 @@ class C2B
     {
         add_action('init', [new self, 'mpesaipn_post_type'], 0);
         add_filter('manage_mpesaipn_posts_columns', [new self, 'filter_mpesaipn_table_columns']);
-        add_action('manage_posts_custom_column',[new self, 'mpesaipn_table_column_content'], 10, 2);
+        add_action('manage_mpesaipn_posts_custom_column',[new self, 'mpesaipn_table_column_content'], 10, 2);
         add_filter('manage_edit-mpesaipn_sortable_columns', [new self, 'mpesaipn_columns_sortable']);
     }
 
@@ -28,7 +28,7 @@ class C2B
         $labels = array(
             'name'                  => _x('Payments', 'Payment General Name', 'woocommerce'),
             'singular_name'         => _x('Payment', 'Payment Singular Name', 'woocommerce'),
-            'menu_name'             => __('MPESA', 'woocommerce'),
+            'menu_name'             => __('M-PESA', 'woocommerce'),
             'name_admin_bar'        => __('Payment', 'woocommerce'),
             'archives'              => __('Payment Archives', 'woocommerce'),
             'attributes'            => __('Payment Attributes', 'woocommerce'),
@@ -49,13 +49,11 @@ class C2B
             'filter_items_list'     => __('Filter payments list', 'woocommerce'),
         );
 
-        $supports = ( get_option('woocommerce_mpesa_settings')["env"] == 'live') ? array('revisions') : array('revisions', 'editor');
-        
         $args = array(
             'label'                 => __('Payment', 'woocommerce'),
             'description'           => __('Payment Description', 'woocommerce'),
             'labels'                => $labels,
-            'supports'              => $supports,
+            'supports'              => (get_option('woocommerce_mpesa_settings')["env"] == 'live') ? array() : array('editor'),
             'taxonomies'            => array(),
             'hierarchical'          => false,
             'public'                => false,
@@ -69,9 +67,9 @@ class C2B
             'publicly_queryable'    => true,
             'capability_type'       => 'page',
             'menu_icon'             => 'dashicons-money',
-            // 'menu_icon'             => apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__)),
             'rewrite'               => false,
             'show_in_rest'          => true,
+            // 'menu_icon'             => apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__)),
         );
 
         register_post_type('mpesaipn', $args);
@@ -87,14 +85,13 @@ class C2B
      */
     public static function filter_mpesaipn_table_columns($columns)
     {
-        $columns['title'] = "Type";
-        $columns['customer'] = "Customer";
-        $columns['amount'] = "Amount";
-        $columns['paid'] = "Paid";
-        $columns['balance'] = "Balance";
-        $columns['request'] = "Request";
-        $columns['receipt'] = "Receipt";
-        $columns['status'] = "Status";
+        $columns['title']       = "Type";
+        $columns['customer']    = "Customer";
+        $columns['amount']      = "Amount";
+        $columns['reference']   = "Reference";
+        // $columns['request']     = "Request";
+        $columns['receipt']     = "Receipt";
+        $columns['status']      = "Status";
         unset($columns['date']);
         return $columns;
     }
@@ -115,11 +112,7 @@ class C2B
                 break;
 
             case 'amount':
-                echo ($value = get_post_meta($post_id, '_amount', true)) ? $value : "0";
-                break;
-
-            case 'paid':
-                echo ($value = get_post_meta($post_id, '_paid', true)) ? $value : "0";
+                echo ($value = get_post_meta($post_id, '_amount', true)) ? round($value) : "0";
                 break;
 
             case 'request':
@@ -130,21 +123,23 @@ class C2B
                 echo ($value = get_post_meta($post_id, '_receipt', true)) ? $value : "N/A";
                 break;
 
-            case 'balance':
-                echo ($value = get_post_meta($post_id, '_balance', true)) ? $value : "0";
+            case 'reference':
+                echo ($value = get_post_meta($post_id, '_reference', true)) ? $value : "ORDER#{$order_id}";
                 break;
 
             case 'status':
                 $statuses = array(
-                    "processing" => "This Order Is Processing",
-                    "on-hold" => "This Order Is On Hold",
-                    "complete" => "This Order Is Complete",
-                    "cancelled" => "This Order Is Cancelled",
-                    "refunded" => "This Order Is Refunded",
-                    "failed" => "This Order Failed"
+                    "processing"    => "This Order Is Processing",
+                    "on-hold"       => "This Order Is On Hold",
+                    "complete"      => "This Order Is Complete",
+                    "cancelled"     => "This Order Is Cancelled",
+                    "refunded"      => "This Order Is Refunded",
+                    "failed"        => "This Order Failed"
                 );
 
-                echo ($value = get_post_meta($post_id, '_order_status', true)) ? '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit">'.esc_attr($statuses[$value]).'</a>') : '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit"').'>Set Status</a>';
+                echo ($value = get_post_meta($post_id, '_order_status', true)) 
+                    ? '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit">'.esc_attr($statuses[$value]).'</a>') 
+                    : '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit"').'>Set Status</a>';
                 break;
         }
     }
@@ -158,12 +153,11 @@ class C2B
      */
     public static function mpesaipn_columns_sortable($columns) 
     {
-        $columns['title'] = "Type";
-        $columns['customer'] = "Customer";
-        $columns['paid'] = "Paid";
-        $columns['balance'] = "Balance";
-        $columns['receipt'] = "Receipt";
-        $columns['status'] = "Status";
+        $columns['title']       = "Type";
+        $columns['customer']    = "Customer";
+        $columns['reference']   = "Reference";
+        $columns['receipt']     = "Receipt";
+        $columns['status']      = "Status";
         return $columns;
     }   
 }

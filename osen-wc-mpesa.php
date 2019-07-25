@@ -12,7 +12,7 @@
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.4
- * Tested up to: 4.9.5
+ * Tested up to: 5.2
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -51,7 +51,6 @@ add_action('wp', function (){
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check() 
 {
-
 	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
 		deactivate_plugins(plugin_basename(__FILE__));
 		exit('Please Install/Activate WooCommerce for the MPesa extension to work');
@@ -60,7 +59,6 @@ function wc_mpesa_activation_check()
     if (! is_plugin_active('woocommerce/woocommerce.php')){
         deactivate_plugins(plugin_basename(__FILE__));
     }
-
 }
 
 add_action('activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2);
@@ -150,10 +148,10 @@ Osen\Mpesa\STK::set(
 		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
 		'type'	 		=> isset($c2b['idtype']) ? $c2b['idtype'] : 4,
 		'passkey'	 	=> isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-		'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
-		'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
-		'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
-		'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
+		'validate' 		=> home_url('wcpesa/validate/'),
+		'confirm' 		=> home_url('wcpesa/confirm/'),
+		'reconcile' 	=> home_url('wcpesa/reconcile/'),
+		'timeout' 		=> home_url('wcpesa/timeout/')
 	)
 );
 
@@ -167,10 +165,10 @@ Osen\Mpesa\C2B::set(
 		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
 		'type'	 		=> isset($c2b['idtype']) ? $c2b['idtype'] : 4,
 		'passkey'	 	=> isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-		'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/c2b/',
-		'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/c2b/',
-		'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/c2b/',
-		'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/c2b/'
+		'validate' 		=> home_url('wcpesa/validate/'),
+		'confirm' 		=> home_url('wcpesa/confirm/'),
+		'reconcile' 	=> home_url('wcpesa/reconcile/'),
+		'timeout' 		=> home_url('wcpesa/timeout/')
 	)
 );
 
@@ -187,10 +185,10 @@ Osen\Mpesa\B2C::set(
 		'passkey'	 	=> isset($b2c['passkey']) ? $b2c['passkey'] : '',
 		'username'	 	=> isset($b2c['username']) ? $b2c['username'] : '',
 		'password'	 	=> isset($b2c['password']) ? $b2c['password'] : '',
-		'validate' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/validate/action/0/base/b2c/',
-		'confirm' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/confirm/action/0/base/b2c/',
-		'reconcile' 	=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/reconcile/action/wc_mpesa_reconcile/base/b2c/',
-		'timeout' 		=> rtrim(home_url(), '/').':'.$_SERVER['SERVER_PORT'].'/wcmpesa/timeout/action/wc_mpesa_timeout/base/b2c/'
+		'validate' 		=> home_url('wcpesa/validate/'),
+		'confirm' 		=> home_url('wcpesa/confirm/'),
+		'reconcile' 	=> home_url('wcpesa/reconcile/'),
+		'timeout' 		=> home_url('wcpesa/timeout/')
 	)
 );
 

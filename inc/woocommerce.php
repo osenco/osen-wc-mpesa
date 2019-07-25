@@ -125,7 +125,7 @@ function woocommerce_emails_attach_downloadables($attachments, $status, $order)
     return $attachments;
 }
 
-add_action('woocommerce_email_order_details', 'wcmpesa_email_order_mpesa_receipt', 1, 4);
+//add_action('woocommerce_email_order_details', 'wcmpesa_email_order_mpesa_receipt', 1, 4);
 function wcmpesa_email_order_mpesa_receipt($order, $admin, $plain, $email) 
 {
 	$post = get_post_id_by_meta_key_and_value('_order_id', $order);

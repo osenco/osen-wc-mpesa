@@ -45,10 +45,18 @@ function wc_mpesa_gateway_init()
 		 */
 		public function __construct() 
 		{
-			$env = get_option('woocommerce_mpesa_settings')["env"];
-			$b2c_settings = (get_option('woocommerce_mpesa_settings')["enable_b2c"] == 'yes') ? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">Setup Business-2-Customer</a>.</strong>' : '';
-			$reg_notice = '<li>If Seting up B2C, <a href="'.home_url('wcmpesa/register/action/'.$env).'/baseapi/c2b" target="_blank">Click here to register '.$env.' confirmation & validation URLs</a>. You only need to do this once.</li>';
-			$test_cred = ($env == 'sandbox') ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >generate sandbox test credentials here</a>.</li>' : '';
+			$env 			= get_option('woocommerce_mpesa_settings')["env"];
+			$b2c_settings	= (get_option('woocommerce_mpesa_settings')['enable_b2c'] == 'yes') 
+				? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">Setup Business-2-Customer</a>.</strong>' 
+				: '';
+
+			$reg_notice 	= ($env == 'live') 
+				? '<li>If Seting up B2C, <a href="'.home_url('wcpesa/register/').'" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once.</li>' 
+				: '';
+
+			$test_cred 		= ($env == 'sandbox') 
+				? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>' : 
+				'';
 
 			$this->id                 		= 'mpesa';
 			$this->icon               		= apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__));
@@ -95,6 +103,13 @@ function wc_mpesa_gateway_init()
 				'enabled' => array(
 					'title'       => __('Enable/Disable', 'woocommerce'),
 					'label'       => __('Enable '.$this->method_title, 'woocommerce'),
+					'type'        => 'checkbox',
+					'description' => '',
+					'default'     => 'no',
+				),
+				'enable_c2b' => array(
+					'title'       => __('Accept C2B', 'woocommerce'),
+					'label'       => __('Enable C2B API. This allows customers to pay manually if the STK Prompt fails during checkout.', 'woocommerce'),
 					'type'        => 'checkbox',
 					'description' => '',
 					'default'     => 'no',
@@ -180,13 +195,13 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'default'     => __('Thank you for buying from us. You will receive a confirmation message from MPesa shortly.', 'woocommerce'),
 					'desc_tip'    => true,
 				),
-				'account' => array(
-					'title'       => __('Account Name', 'woocommerce'),
-					'type'        => 'text',
-					'description' => __('Account Name to show to customer in STK Push.', 'woocommerce'),
-					'default'     => __('WC', 'woocommerce'),
-					'desc_tip'    => true,
-				),
+				// 'account' => array(
+				// 	'title'       => __('Account Name', 'woocommerce'),
+				// 	'type'        => 'text',
+				// 	'description' => __('Account Name to show to customer in STK Push.', 'woocommerce'),
+				// 	'default'     => __('WC', 'woocommerce'),
+				// 	'desc_tip'    => true,
+				// ),
 				'accountant' => array(
 					'title'       => __('Accountant', 'woocommerce'),
 					'type'        => 'number',
@@ -302,64 +317,75 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 			$first_name = $order->get_billing_first_name();
 			$last_name = $order->get_billing_last_name();
 
-			$reference = ($this->get_option('account') == 'WC') ? 'WC'.$order_id : $this->get_option('account');
+			$reference = 'ORDER#'.$order_id;
 
 			$result = Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
 
-			if (isset($result['errorCode'])) {
-				$error_message = 'MPesa Error '.$result['errorCode'].': '.$result['errorMessage'];
-				$order->update_status('failed', __($error_message, 'woocommerce'));
+			if($result){
+				$request_id = $result['MerchantRequestID'];
+
+				if (isset($result['errorCode'])) {
+					$error_message = 'MPesa Error '.$result['errorCode'].': '.$result['errorMessage'];
+					$order->update_status('failed', __($error_message, 'woocommerce'));
+					wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
+					return array(
+						'result' 	=> 'fail',
+						'redirect'	=> ''
+					);
+				} else {
+					/**
+					 * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
+					 */
+					$order->update_status('on-hold', __('Awaiting MPesa confirmation of payment from '.$phone.'.', 'woocommerce'));
+
+					/** 
+					 * Reduce stock levels
+					 */
+					wc_reduce_stock_levels($order_id);
+
+					/** 
+					 * Remove contents from cart
+					 */
+					WC()->cart->empty_cart(); 
+
+					// Insert the payment into the database
+					$post_id = wp_insert_post(
+						array(
+							'post_title' 	=> 'Checkout',
+							'post_content'	=> "Response: ".json_encode($result),
+							'post_status'	=> 'publish',
+							'post_type'		=> 'mpesaipn',
+							'post_author'	=> is_user_logged_in() ? get_current_user_id() : $this->get_option('accountant'),
+						) 
+					);
+
+					update_post_meta($post_id, '_customer', "{$first_name} {$last_name}");
+					update_post_meta($post_id, '_phone', $phone);
+					update_post_meta($post_id, '_order_id', $order_id);
+					update_post_meta($post_id, '_request_id', $request_id);
+					update_post_meta($post_id, '_amount', $total);
+					update_post_meta($post_id, '_reference', $reference);
+					update_post_meta($post_id, '_receipt', '');
+					update_post_meta($post_id, '_order_status', 'on-hold');
+
+					$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>';
+
+					// Return thankyou redirect
+					return array(
+						'result' 	=> 'success',
+						'redirect'	=> $this->get_return_url($order),
+					);
+				}
+			} else {
+				$order->update_status('failed', __('Could not connect to Daraja', 'woocommerce'));
 				wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
 				return array(
-		        	'result' 	=> 'fail',
+					'result' 	=> 'fail',
 					'redirect'	=> ''
-		       );
-			} else {
-				/**
-				 * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
-				 */
-				$order->update_status('on-hold', __('Awaiting MPesa confirmation of payment from '.$phone.'.', 'woocommerce'));
-
-				/** 
-				 * Reduce stock levels
-				 */
-				wc_reduce_stock_levels($order_id);
-
-				/** 
-				 * Remove contents from cart
-				 */
-				WC()->cart->empty_cart(); 
-
-				// Insert the payment into the database
-				$post_id = wp_insert_post(
-					array(
-		    			'post_title' 	=> 'Checkout',
-						'post_content'	=> "Response: ".$content."\nToken: ".$token,
-						'post_status'	=> 'publish',
-						'post_type'		=> 'mpesaipn',
-						'post_author'	=> is_user_logged_in() ? get_current_user_id() : $this->get_option('accountant'),
-				 	) 
-				);
-
-				update_post_meta($post_id, '_customer', "{$first_name} {$last_name}");
-				update_post_meta($post_id, '_phone', $phone);
-				update_post_meta($post_id, '_order_id', $order_id);
-				update_post_meta($post_id, '_request_id', $request_id);
-				update_post_meta($post_id, '_amount', $total);
-				update_post_meta($post_id, '_paid', $total-$total);
-				update_post_meta($post_id, '_balance', $total);
-				update_post_meta($post_id, '_receipt', '');
-				update_post_meta($post_id, '_order_status', 'on-hold');
-
-				$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>';
-
-				// Return thankyou redirect
-				return array(
-					'result' 	=> 'success',
-					'redirect'	=> $this->get_return_url($order),
 				);
 			}
 		}
+		
 
 		/**
 		 * Output for the order received page.

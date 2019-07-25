@@ -10,9 +10,7 @@ namespace Osen\Post\Types;
 class B2C
 {
     function __construct()
-    {
-
-    }
+    {}
 
     public static function init()
     {

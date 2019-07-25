@@ -19,7 +19,7 @@ class C2B{
         add_meta_box('c2b-payment-customer_details', 'Customer Details', [new self, 'customer_details'], [ 'mpesaipn', 'b2c_payment'], 'normal', 'high');
         add_meta_box('c2b-payment-order_details', 'Order Details', [new self, 'order_details'], [ 'mpesaipn', 'b2c_payment'], 'normal', 'high');
         add_meta_box('c2b-payment-payment_details', 'Payment Details', [new self, 'payment_details'], [ 'mpesaipn', 'b2c_payment'], 'side', 'high');
-        add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [new self, 'mpesa_status'], [ 'mpesaipn', 'shop_order' ], 'side', 'low');
+        //add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [new self, 'mpesa_status'], [ 'mpesaipn', 'shop_order' ], 'side', 'low');
         add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [new self, 'order_notes'],'mpesaipn', 'normal', 'default');
         add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [new self, 'mpesa_payment'], 'shop_order', 'side', 'low');
     }
@@ -82,7 +82,7 @@ class C2B{
         $customer   = get_post_meta($post->ID, '_customer', true);
         $phone      = get_post_meta($post->ID, '_phone', true);
         if(isset($_GET['order'])){
-            $order 		= new WC_Order($_GET['order']);
+            $order 		= new \WC_Order($_GET['order']);
             $total 		= wc_format_decimal($order->get_total(), 2);
             $phone 		= $order->get_billing_phone();
             $first_name = $order->get_billing_first_name();
@@ -119,7 +119,7 @@ class C2B{
         $balance    = get_post_meta($post->ID, '_balance', true);
 
         if(isset($_GET['order'])){
-            $order_details  = new WC_Order($_GET['order']);
+            $order_details  = new \WC_Order($_GET['order']);
             $amount         = wc_format_decimal($order_details->get_total(), 2);
             $phone          = $order_details->get_billing_phone();
             $first_name     = $order_details->get_billing_first_name();
@@ -138,11 +138,7 @@ class C2B{
             </tr>
             <tr valign="top" >
                 <th scope="row">Order Amount</th>
-                <td><input type="text" name="amount" value="'. esc_attr($amount) .' " class="regular-text" /> </td>
-            </tr>
-            <tr valign="top" >
-                <th scope="row">Amount Paid</th>
-                <td><input type="text" name="paid" value="'. esc_attr($paid) .' " class="regular-text" /> </td>
+                <td><input type="text" name="amount" value="'. esc_attr(round($amount)) .' " class="regular-text" /> </td>
             </tr>
         </table>';
     }
@@ -173,8 +169,7 @@ class C2B{
             "refunded"      => "This Order Is Refunded",
             "failed"        => "This Order Failed"
         ); ?>
-        <h4>Request ID: <?php echo $request; ?></h4>
-        Add here the MPesa confirmation code received and set the appropriate order status.
+        <p>Add here the MPesa confirmation code received and set the appropriate order status for <b>Request ID: <?php echo $request; ?></b>.</p>
         <?php echo '<p>MPesa Receipt Number <input type="text" name="receipt" value="'. esc_attr($receipt) .' " /></p>'; ?>
         <p>Set Order(Payment) Status
             <select name="status">
@@ -211,7 +206,7 @@ class C2B{
             update_post_meta($post_id, '_order_status', strip_tags($order_status));
 
             if(wc_get_order($order_id !== false)){
-                $order = new WC_Order($order_id);
+                $order = new \WC_Order($order_id);
                 $order->update_status(strip_tags($order_status));
 
                 if($order_note !== ""){

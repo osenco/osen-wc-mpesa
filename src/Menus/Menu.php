@@ -68,7 +68,7 @@ class Menu
         add_submenu_page(
             'edit.php?post_type=mpesaipn', 
             __('Analytics', 'woocommerce'),
-            __('MPesa Analytics', 'woocommerce'), 
+            __('M-Pesa Analytics', 'woocommerce'), 
             'manage_options',
             'wc_mpesa_analytics', 
             [new self, 'wc_mpesa_menu_analytics'] 
