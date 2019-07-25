@@ -50,10 +50,6 @@ function wc_mpesa_gateway_init()
 				? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">Setup Business-2-Customer</a>.</strong>' 
 				: '';
 
-			$reg_notice 	= ($env == 'live') 
-				? '<li>If Seting up B2C, <a href="'.home_url('wcpesa/register/').'" target="_blank">Click here to register confirmation & validation URLs</a>. You only need to do this once.</li>' 
-				: '';
-
 			$test_cred 		= ($env == 'sandbox') 
 				? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>' 
 				:  
@@ -62,7 +58,7 @@ function wc_mpesa_gateway_init()
 			$this->id                 		= 'mpesa';
 			$this->icon               		= apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__));
 			$this->method_title       		= __('Lipa Na MPesa', 'woocommerce');
-			$this->method_description 		= __('<h4 style="color: red;">IMPORTANT!</h4>'.$b2c_settings.'<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://ke.mpesa.org">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$reg_notice.$test_cred).'<li>We have a <a href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment. We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
+			$this->method_description 		= __('<h4 style="color: red;">IMPORTANT!</h4>'.$b2c_settings.'<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. Fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://ke.mpesa.org">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$test_cred).'<li>We have a <a href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>';
 			$this->has_fields         		= false;
 
 			// Load settings
@@ -103,14 +99,7 @@ function wc_mpesa_gateway_init()
 					'label'       	=> __('Enable '.$this->method_title, 'woocommerce'),
 					'type'        	=> 'checkbox',
 					'description' 	=> '',
-					'default'     	=> 'no',
-				),
-				'enable_c2b' => array(
-					'title'       	=> __('Accept C2B', 'woocommerce'),
-					'label'       	=> __('Enable C2B API. This allows customers to pay manually if the STK Prompt fails during checkout.', 'woocommerce'),
-					'type'        	=> 'checkbox',
-					'description' 	=> '',
-					'default'     	=> 'no',
+					'default'     	=> 'yes',
 				),
 				'title' => array(
 					'title'       	=> __('Method Title', 'woocommerce'),
@@ -236,13 +225,20 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'type'              => 'checkbox',
 					'default'           => 'yes',
 				),
-				'enable_b2c' => array(
-					'title'       => __('Enable/Disable B2C', 'woocommerce'),
-					'label'       => __('Enable B2C API', 'woocommerce'),
-					'type'        => 'checkbox',
-					'description' => '',
-					'default'     => 'no',
-				)
+				'enable_c2b' => array(
+					'title'       	=> __('Manual Payments', 'woocommerce'),
+					'label'       	=> __('Enable C2B API', 'woocommerce'),
+					'type'        	=> 'checkbox',
+					'description' 	=> '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>Once enabled, <a class="button button-link" href="'.home_url('wcpesa/register/').'" target="_blank">Click here to register confirmation & validation URLs</a></small>',
+					'default'     	=> 'no',
+				),
+				// 'enable_b2c' => array(
+				// 	'title'       => __('Enable/Disable B2C', 'woocommerce'),
+				// 	'label'       => __('Enable B2C API', 'woocommerce'),
+				// 	'type'        => 'checkbox',
+				// 	'description' => '',
+				// 	'default'     => 'no',
+				// )
 			);
 		}
 
@@ -379,7 +375,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 
 				$order->update_status('failed', $error_message);
 				wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
-				
+
 				return array(
 					'result' 	=> 'fail',
 					'redirect'	=> ''

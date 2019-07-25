@@ -203,6 +203,11 @@ class Menu
         wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa'));
     }
 
+    public static function wc_mpesa_b2c_settings()
+    {
+        wp_redirect(admin_url('admin.php?post_type=b2c_payment&page=wcmpesab2c'));
+    }
+
     public static function wc_mpesa_menu_b2c()
     {
         wp_redirect(admin_url('edit.php?post_type=b2c_payment'));
