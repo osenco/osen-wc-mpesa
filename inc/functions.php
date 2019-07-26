@@ -223,8 +223,6 @@ function wc_mpesa_process_ipn()
 						$order = new WC_Order($order_id);
 						
 						if ($ipn_balance == 0) {
-							$mpesa = new WC_Gateway_MPESA();
-							$order->update_status('complete');
 							$order->payment_complete();
 							$order->add_order_note(__("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
 							update_post_meta($post, '_order_status', 'complete');

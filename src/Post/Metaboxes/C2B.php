@@ -96,6 +96,8 @@ class C2B{
             $phone = str_replace("+", "", $phone);
         }
 
+        $title = empty(get_the_title($post)) ? 'Manual' : get_the_title($post);
+
         echo '<table class="form-table" >
             <tr valign="top" >
                 <th scope="row" >Full Names</th>
@@ -105,7 +107,7 @@ class C2B{
                 <th scope="row">Phone Number</th>
                 <td><input type="text" name="phone" value="'. esc_attr($phone) .' " class="regular-text" / >
                 <input type="hidden" name="ipnmb">
-                <input type="hidden" name="post_title", value="Manual">
+                <input type="hidden" name="post_title" value="'.$title.'">
                 </td>
             </tr>
         </table>';
