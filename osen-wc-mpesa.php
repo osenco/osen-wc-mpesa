@@ -13,6 +13,10 @@
  *
  * Requires at least: 4.4
  * Tested up to: 5.2
+ * 
+ * WC requires at least: 3.0.0
+ * WC tested up to: 3.6.5
+ * 
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
