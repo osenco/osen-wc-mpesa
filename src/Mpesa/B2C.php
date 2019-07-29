@@ -39,93 +39,88 @@ class B2C
   }
 
   /**
-   * 
+   * Function to generate access token
+   * @return string/mixed
    */
   public static function token()
   {
     $endpoint = (self::$env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
     $credentials = base64_encode(self::$appkey.':'.self::$appsecret);
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $endpoint);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Basic '.$credentials));
-    curl_setopt($curl, CURLOPT_HEADER, false);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    $curl_response = curl_exec($curl);
+    $response = wp_remote_get(
+      $endpoint, 
+      array(
+        'headers' => array(
+          'Authorization' => 'Basic ' . $credentials
+       )
+     )
+   ); 
 
-    $data = json_decode($curl_response);
-    
-    return $data->access_token ?? '';
+    return is_wp_error($response) 
+      ? 'Invalid' 
+      : json_decode($response['body'])->access_token;
   }
 
   /**
-   * 
-   */
-  public static function validate($callback, $data)
+   * Function to process response data for validation
+   * @param callable $callback - Optional callable function to process the response - must return boolean
+   * @return array
+   */ 
+  public static function validate($callback = null, $data = [])
   {
-    if(is_null($callback)){
+    if(is_null($callback) || empty($callback)){
       return array(
         'ResponseCode'            => 0, 
         'ResponseDesc'            => 'Success',
-        'ThirdPartyTransID'       => $data['transID'] ?? 0
+        'ThirdPartyTransID'       => isset($data['transID']) ? $data['transID'] : 0
       );
     } else {
         if (!call_user_func_array($callback, array($data))) {
           return array(
             'ResponseCode'        => 1, 
             'ResponseDesc'        => 'Failed',
-            'ThirdPartyTransID'   => $data['transID'] ?? 0
+            'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         } else {
           return array(
             'ResponseCode'        => 0, 
             'ResponseDesc'        => 'Success',
-            'ThirdPartyTransID'   => $data['transID'] ?? 0
+            'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         }
     }
   }
 
   /**
-   * 
-   */
-  public static function timeout($callback = null, $data = null)
+   * Function to process response data for confirmation
+   * @param callable $callback - Optional callable function to process the response - must return boolean
+   * @return array
+   */ 
+  public static function confirm($callback = null, $data = [])
   {
-    if(is_null($callback)){
-      return true;
-    } else {
-      return call_user_func_array($callback, array($data));
-    }
-  }
-
-  /**
-   * 
-   */
-  public static function confirm($callback, $data)
-  {
-    if(is_null($callback)){
+    if(is_null($callback) || empty($callback)){
       return array(
         'ResponseCode'          => 0, 
         'ResponseDesc'          => 'Success',
-        'ThirdPartyTransID'     => $data['transID'] ?? 0
+        'ThirdPartyTransID'     =>  isset($data['transID']) ? $data['transID'] : 0
       );
     } else {
       if (!call_user_func_array($callback, array($data))) {
         return array(
           'ResponseCode'        => 1, 
           'ResponseDesc'        => 'Failed',
-          'ThirdPartyTransID'   => $data['transID'] ?? 0
+          'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
         );
       } else {
         return array(
           'ResponseCode'        => 0, 
           'ResponseDesc'        => 'Success',
-          'ThirdPartyTransID'   => $data['transID'] ?? 0
+          'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
         );
       }
     }
   }
+
 
   /**
    * 
