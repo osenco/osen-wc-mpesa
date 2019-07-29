@@ -55,8 +55,8 @@ add_action('wp', function (){
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check() 
 {
-	if ( ! get_option( 'wc_mpesa_flush_rewrite_rules_flag' ) ) {
-		add_option( 'wc_mpesa_flush_rewrite_rules_flag', true );
+	if (! get_option('wc_mpesa_flush_rewrite_rules_flag')) {
+		add_option('wc_mpesa_flush_rewrite_rules_flag', true);
 	}
 
 	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
@@ -69,11 +69,11 @@ function wc_mpesa_activation_check()
     }
 }
 
-add_action( 'init', 'wc_mpesa_flush_rewrite_rules_maybe', 20 );
+add_action('init', 'wc_mpesa_flush_rewrite_rules_maybe', 20);
 function wc_mpesa_flush_rewrite_rules_maybe() {
-    if ( get_option( 'wc_mpesa_flush_rewrite_rules_flag' ) ) {
+    if (get_option('wc_mpesa_flush_rewrite_rules_flag')) {
         flush_rewrite_rules();
-        delete_option( 'wc_mpesa_flush_rewrite_rules_flag' );
+        delete_option('wc_mpesa_flush_rewrite_rules_flag');
     }
 }
 
@@ -124,9 +124,9 @@ function mpesa_row_meta($links, $file)
 
 spl_autoload_register(function ($class)
 {
-	if (substr($class, 0, 4) == 'Osen') {
-		$class = str_replace('Osen\\', '', $class);
-		$file = str_replace('\\', '/', $class);
+	if (strpos($class, 'Osen')) {
+		$class	= str_replace('Osen\\', '', $class);
+		$file 	= str_replace('\\', '/', $class);
 
 		require_once plugin_dir_path(__FILE__)."src/{$file}.php";
 	}
