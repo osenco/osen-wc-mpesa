@@ -124,7 +124,7 @@ function mpesa_row_meta($links, $file)
 
 spl_autoload_register(function ($class)
 {
-	if (strpos($class, 'Osen')) {
+	if (strpos($class, 'Osen') !== false) {
 		$class	= str_replace('Osen\\', '', $class);
 		$file 	= str_replace('\\', '/', $class);
 
