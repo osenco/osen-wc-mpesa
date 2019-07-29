@@ -124,12 +124,12 @@ function mpesa_row_meta($links, $file)
 
 spl_autoload_register(function ($class)
 {
-	if (strpos($class, 'Osen') !== false) {
-		$class	= str_replace('Osen\\', '', $class);
-		$file 	= str_replace('\\', '/', $class);
+	if (strpos($class, 'Osen') === false) { return; }
+	$class 	= ltrim($class, '\\');
+	$class	= str_replace('Osen\\', '', $class);
+	$file 	= str_replace('\\', '/', $class);
 
-		require_once plugin_dir_path(__FILE__)."src/{$file}.php";
-	}
+	require_once plugin_dir_path(__FILE__)."src/{$file}.php";
 });
 
 /**
