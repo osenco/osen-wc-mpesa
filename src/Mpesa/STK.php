@@ -257,7 +257,7 @@ class STK
     }
   }
 
-  public static function status(int $transaction, string $command = 'TransactionStatusQuery', string $remarks = 'Transaction Status Query', string $occassion = '')
+  public static function status($transaction, $command = 'TransactionStatusQuery', $remarks = 'Transaction Status Query', $occassion = '')
   {
 		$token = self::token();
     $endpoint = (self::$env == 'live') 
