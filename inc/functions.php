@@ -431,9 +431,7 @@ function wc_mpesa_process_ipn()
 add_action('wp_footer', 'ajax_polling');
 function ajax_polling()
 { ?><script>
-		//var found;
 		var checker = setInterval(() => {
-			//found = false;
 			if (document.getElementById("payment_method").value !== 'mpesa') {
 				clearInterval(checker);
 			}

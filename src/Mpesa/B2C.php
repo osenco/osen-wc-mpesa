@@ -170,7 +170,9 @@ class B2C
         'body'    => $data_string
      )
    );
-    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
+    return is_wp_error($response) 
+      ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') 
+      : json_decode($response['body'], true);
   }
 
   /**
