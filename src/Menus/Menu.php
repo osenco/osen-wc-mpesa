@@ -134,27 +134,36 @@ class Menu
         $payments = array();
         $months = array();
         $monthly = array();
+        $posts = array();
+
         foreach (get_posts(['post_type' => 'mpesaipn']) as $post) {
-            for ($i=1; $i < 13 ; $i++) { 
+            \setup_postdata($post);
+            for ($i=1; $i <= 12 ; $i++) { 
                 if (date('Y', strtotime($post->post_date)) == date('Y')) {
-                    $months[$i][] = (int)get_post_meta( $post->ID, '_amount', true );
-
-                    foreach ($months as $month => $values) {
-                        $payments[date('m', strtotime(date('Y-'.$i)))] = array_sum($values);
+                    if(date('m', strtotime($post->post_date)) == $i){
+                        $months[$i][] = (int)get_post_meta( $post->ID, '_amount', true );
+                    } else {
+                        $months[$i][] = 0;
                     }
-
-                    array_push($monthly, date('m', strtotime($post->post_date)));
                 }
             }
 
-            $ms = array_keys($payments);
-            $ps = array_values($payments);
+            array_push($monthly, date('m', strtotime($post->post_date)));
+
         }
+
+        foreach ($months as $month => $values) {
+            $payments[$month] = array_sum($values);
+        }
+        $ms = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $ps = array_values($payments);
+
+        //exit(json_encode($months));
         ?>
         <div class="wrap">
             <?php wp_enqueue_style('c3', plugins_url('assets/c3/c3.min.css', __FILE__)); ?>
             <h1 class="wp-heading">Payments Analytics</h1>
-            <h4>Analytics of payments received via MPESA for the year <?php echo date('Y'); ?></h4>
+            <h4>Total monthly payments received via MPESA for the year <?php echo date('Y'); ?></h4>
             <br>
             <div id="chart-bar" style="height: 500px"></div>
             <?php wp_enqueue_script('c3', plugins_url('assets/c3/c3.bundle.js', __FILE__)); ?>

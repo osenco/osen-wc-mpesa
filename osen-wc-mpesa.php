@@ -8,7 +8,7 @@
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.10.0
+ * Version: 1.19.08
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.4
@@ -55,6 +55,10 @@ add_action('wp', function (){
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check() 
 {
+	if ( ! get_option( 'wc_mpesa_flush_rewrite_rules_flag' ) ) {
+		add_option( 'wc_mpesa_flush_rewrite_rules_flag', true );
+	}
+
 	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
 		deactivate_plugins(plugin_basename(__FILE__));
 		exit('Please Install/Activate WooCommerce for the MPesa extension to work');
@@ -63,13 +67,19 @@ function wc_mpesa_activation_check()
     if (! is_plugin_active('woocommerce/woocommerce.php')){
         deactivate_plugins(plugin_basename(__FILE__));
     }
-	
-	flush_rewrite_rules();
 }
 
-add_action( 'after_switch_theme', 'flush_rewrite_rules' );
+add_action( 'init', 'wc_mpesa_flush_rewrite_rules_maybe', 20 );
+function wc_mpesa_flush_rewrite_rules_maybe() {
+    if ( get_option( 'wc_mpesa_flush_rewrite_rules_flag' ) ) {
+        flush_rewrite_rules();
+        delete_option( 'wc_mpesa_flush_rewrite_rules_flag' );
+    }
+}
+
 add_action('activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2);
 function wc_mpesa_detect_plugin_activation($plugin, $network_activation) {
+	flush_rewrite_rules();
     if($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php'){
         exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
     }

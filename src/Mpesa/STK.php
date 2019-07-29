@@ -187,7 +187,7 @@ class STK
       'BusinessShortCode'   => self::$headoffice,
       'Password'            => $password,
       'Timestamp'           => $timestamp,
-      'TransactionType'     => (self::$type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+      'TransactionType'     => (self::$type == 4) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
       'Amount'              => round($amount),
       'PartyA'              => $phone,
       'PartyB'              => self::$shortcode,
@@ -233,7 +233,7 @@ class STK
     
     return is_null($callback) 
       ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful') 
-      : call_user_func($callback, $response);
+      : call_user_func_array($callback, array($response));
   }
 
   /**

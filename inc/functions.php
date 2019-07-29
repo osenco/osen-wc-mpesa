@@ -21,7 +21,7 @@ function wc_mpesa_post_id_by_meta_key_and_value($key, $value) {
 }
 
 add_action( 'woocommerce_thankyou_mpesa', 'wc_mpesa_add_content_thankyou_mpesa' );
-function wc_mpesa_add_content_thankyou_mpesa($order_id) { 
+function wc_mpesa_add_content_thankyou_mpesa($order_id) {
 	$mpesa = get_option('woocommerce_mpesa_settings');
 	$idtype = Osen\Mpesa\C2B::$type ;
 	if(wc_get_order($order_id)){
@@ -30,10 +30,40 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id) {
 		$reference = 'ORDER#'.$order_id;
 	}
 
-	$type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services';
-	
-	if(isset($mpesa['enable_c2b']) && $mpesa['enable_c2b'] == 'yes'): ?>
+	if($order->get_payment_method() !== 'mpesa'){
+		return;
+	}
+
+	$type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services'; ?>
+	<style>
+		@keyframes wave {
+			0%, 60%, 100% { transform: initial; }
+
+			30% { transform: translateY(-15px); }
+		}
+
+		@keyframes blink {
+			0% { opacity: .2; }
+
+			20% { opacity: 1; }
+
+			100% { opacity: .2; }
+		}
+
+		.saving span { animation: blink 1.4s linear infinite; animation-fill-mode: both; }
+
+		.saving span:nth-child(2) { animation-delay: .2s; }
+
+		.saving span:nth-child(3) { animation-delay: .4s; }
+	</style>
 	<section class="woocommerce-order-details">
+		<input type="hidden" id="current_order" value="<?php echo $order_id; ?>">
+		<input type="hidden" id="payment_method" value="<?php echo $order->get_payment_method(); ?>">
+		<p class="saving" id="mpesa_receipt">Confirming receipt, please wait</p>
+	</section>
+	
+	<?php if(isset($mpesa['enable_c2b']) && $mpesa['enable_c2b'] == 'yes'): ?>
+	<section class="woocommerce-order-details" id="missed_stk">
 
 		<h2 class="woocommerce-order-details__title"></h2>
 
@@ -75,6 +105,20 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id) {
 	</section>
 	<?php endif;
 }
+
+add_action( 'admin_init', function () {
+	if (isset($_GET['mpesa-urls-registered'])) {
+		$status = $_GET['mpesa-urls-registered'];
+		if ($status == 'fail') {
+			$message 	= 'Could not register M-PESA URLs, try again later.';
+			$state 		= 'error';
+		} else {
+			$message 	= 'M-PESA URL registered successfully. You will now receive C2B Payment Notifications.';
+			$state 		= 'success';
+		}
+		echo '<div class="notice '.$state.' mpesa-urls-notice is-dismissible" ><p>'.$message.'</p></div>';
+	}
+});
 
 add_action('init', 'wc_mpesa_rewrite_add_rewrites');
 function wc_mpesa_rewrite_add_rewrites()
@@ -126,8 +170,31 @@ function wc_mpesa_process_ipn()
 				$LastName           = $response['LastName'];
 
 				$post = wc_mpesa_post_id_by_meta_key_and_value('_reference', $BillRefNumber);
-				wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
+				if ($post !== false) {
+					wp_update_post(
+						array(
+							'post_content' => file_get_contents('php://input'), 'ID' => $post
+						)
+					);
+				} else {
+					$post_id = wp_insert_post(
+						array(
+							'post_title' 	=> 'C2B',
+							'post_content'	=> "Response: ".json_encode($response),
+							'post_status'	=> 'publish',
+							'post_type'		=> 'mpesaipn',
+							'post_author'	=> 1,
+						) 
+					);
 
+					update_post_meta($post_id, '_customer', "{$FirstName} {$MiddleName} {$LastName}");
+					update_post_meta($post_id, '_phone', $phone);
+					update_post_meta($post_id, '_amount', $amount);
+					update_post_meta($post_id, '_reference', $BillRefNumber);
+					update_post_meta($post_id, '_receipt', $mpesaReceiptNumber);
+					update_post_meta($post_id, '_order_status', 'processing');
+				}
+				
 				$order_id 			= get_post_meta($post, '_order_id', true);
 				$amount_due 		=  get_post_meta($post, '_amount', true);
 				$before_ipn_paid 	= get_post_meta($post, '_paid', true);
@@ -178,7 +245,21 @@ function wc_mpesa_process_ipn()
                 break;
 
             case "register":
-				exit(wp_send_json(Osen\Mpesa\C2B::register()));
+				Osen\Mpesa\C2B::register(function ($response)
+				{
+					$message = isset($response['ResponseDescription']) ? 'success' : 'fail';
+					
+					exit(
+						wp_redirect(
+							add_query_arg(
+								'mpesa-urls-registered', 
+								$message, 
+								wp_get_referer()
+							)
+						)
+					);
+				});																																
+				
                 break;
 				
             case "reconcile":
@@ -197,7 +278,7 @@ function wc_mpesa_process_ipn()
 				wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
 
 				$order_id 							= get_post_meta($post, '_order_id', true);
-				$amount_due 						=  get_post_meta($post, '_amount', true);
+				$amount_due 						= get_post_meta($post, '_amount', true);
 				$before_ipn_paid 					= get_post_meta($post, '_paid', true);
 
 				if(wc_get_order($order_id)){
@@ -226,14 +307,16 @@ function wc_mpesa_process_ipn()
 							$order->payment_complete();
 							$order->add_order_note(__("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
 							update_post_meta($post, '_order_status', 'complete');
+							update_post_meta($post, '_receipt', $mpesaReceiptNumber);
 
-							$headers = 'From: '.get_bloginfo('name').' <'.get_bloginifo('admin_email').'>' . "\r\n";
-							wp_mail($order["billing_address"], 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. '.$amount.' on '.$transactionDate.'.', $headers);
+							$headers[] = 'From: '.get_bloginfo('name').' <'.get_bloginifo('admin_email').'>' . "\r\n";
+							wp_mail($order["billing_address"], 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. '.$amount.' on '.$transactionDate.'. Receipt number '.$mpesaReceiptNumber, $headers);
 						} elseif ($ipn_balance < 0) {
 							$currency = get_woocommerce_currency();
 							$order->payment_complete();
 							$order->add_order_note(__("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
 							update_post_meta($post, '_order_status', 'complete');
+							update_post_meta($post, '_receipt', $mpesaReceiptNumber);
 						} else {
 							$order->update_status('on-hold');
 							$order->add_order_note(__("MPesa Payment from {$phone} Incomplete"));
@@ -260,7 +343,7 @@ function wc_mpesa_process_ipn()
                 break;
 				
             case "status":
-				$transaction = $_POST['transaction'];
+				$transaction = $_POST['transaction'];																																																													
                 exit(wp_send_json(Osen\Mpesa\STK::status($transaction)));
                 break;
 				
@@ -329,5 +412,47 @@ function wc_mpesa_process_ipn()
             default:
 				exit(wp_send_json(Osen\Mpesa\C2B::register()));
         }
-    }
+    } 
+	
+	if (isset($_GET['pesaipn'])) {
+		$response = array('receipt' => '');
+
+		if (!empty($_GET['order'])) {
+			$post = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $_GET['order']);
+			$response = array(
+				'receipt' 	=> get_post_meta($post, '_receipt', true)
+			);
+		}
+
+		exit(wp_send_json($response));
+	}
+}
+
+add_action('wp_footer', 'ajax_polling');
+function ajax_polling()
+{ ?><script>
+		//var found;
+		var checker = setInterval(() => {
+			//found = false;
+			if (document.getElementById("payment_method").value !== 'mpesa') {
+				clearInterval(checker);
+			}
+
+			jQuery(function ($) {
+				var order = $("#current_order").val();
+				$.get('<?php echo home_url('?pesaipn&order='); ?>'+order, [], function (data) {
+					if (data.receipt == '' || data.receipt == 'N/A') {
+						$("#mpesa_receipt").html('Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>');
+					} else {
+						$(".woocommerce-order-overview").append('<li class="woocommerce-order-overview__payment-method method">Receipt number: <strong>'+data.receipt+'</strong></li>');
+						$(".woocommerce-table--order-details > tfoot").find('tr:last-child').prev().after('<tr><th scope="row">Receipt number:</th><td>'+data.receipt+'</td></tr>')
+						$("#mpesa_receipt").html('Payment confirmed. Receipt number: <b>'+data.receipt+'</b>');
+						$("#missed_stk").hide();
+						clearInterval(checker);
+						return false;
+					}
+				})
+			});
+		}, 3000);
+	</script><?php
 }

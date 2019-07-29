@@ -175,13 +175,13 @@ Enter your service (MPesa) PIN to proceed. In case you don\'t see the pop up on 
 You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'desc_tip'    => true,
 				),
-				'instructions' => array(
-					'title'       => __('Instructions', 'woocommerce'),
-					'type'        => 'textarea',
-					'description' => __('Instructions that will be added to the thank you page.', 'woocommerce'),
-					'default'     => __('Thank you for buying from us. You will receive a confirmation message from MPesa shortly.', 'woocommerce'),
-					'desc_tip'    => true,
-				),
+				// 'instructions' => array(
+				// 	'title'       => __('Instructions', 'woocommerce'),
+				// 	'type'        => 'textarea',
+				// 	'description' => __('Instructions that will be added to the thank you page.', 'woocommerce'),
+				// 	'default'     => __('Thank you for buying from us. You will receive a confirmation message from MPesa shortly.', 'woocommerce'),
+				// 	'desc_tip'    => true,
+				// ),
 				// 'account' => array(
 				// 	'title'       => __('Account Name', 'woocommerce'),
 				// 	'type'        => 'text',
@@ -229,7 +229,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'title'       	=> __('Manual Payments', 'woocommerce'),
 					'label'       	=> __('Enable C2B API', 'woocommerce'),
 					'type'        	=> 'checkbox',
-					'description' 	=> '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>Once enabled, <a class="button button-link" href="'.home_url('wcpesa/register/').'" target="_blank">Click here to register confirmation & validation URLs</a></small>',
+					'description' 	=> '<small>'.(($this->get_option('idtype') == 4) ? 'This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>Once enabled, ' : '').'<a class="button button-primary" href="'.home_url('wcpesa/register/').'">Click here to register confirmation & validation URLs</a></small>',
 					'default'     	=> 'no',
 				),
 				// 'enable_b2c' => array(
@@ -358,17 +358,18 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					update_post_meta($post_id, '_order_id', $order_id);
 					update_post_meta($post_id, '_request_id', $request_id);
 					update_post_meta($post_id, '_amount', $total);
+					update_post_meta($post_id, '_paid', 0);
 					update_post_meta($post_id, '_reference', $reference);
-					update_post_meta($post_id, '_receipt', '');
+					update_post_meta($post_id, '_receipt', 'N/A');
 					update_post_meta($post_id, '_order_status', 'on-hold');
 
 					$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>';
 
 					// Return thankyou redirect
-					return array(
+					return array(																																																																																																																																																														
 						'result' 	=> 'success',
 						'redirect'	=> $this->get_return_url($order),
-					);
+					);																																 
 				}
 			} else {
 				$error_message = __('Could not connect to Daraja', 'woocommerce');
@@ -389,9 +390,9 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 		 */
 		public function thankyou_page()
 		{
-			if ($this->instructions) {
-				echo wpautop(wptexturize($this->instructions));
-			}
+			// if ($this->instructions) {
+			// 	echo wpautop(wptexturize($this->instructions));
+			// }
 		}
 		
 		/**

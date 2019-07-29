@@ -168,9 +168,9 @@ class C2B
    * @param string $env - Environment for which to register URLs
    * @return bool/array
    */
-  public static function register($env = 'sandbox')
+  public static function register($callback = null)
   {
-    $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/c2bwp/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+    $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
     $post_data = array(
       'ShortCode'         => self::$shortcode,
       'ResponseType'      => 'Cancelled',
@@ -189,7 +189,13 @@ class C2B
         'body'              => $data_string
      )
    );
-    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
+    $result = is_wp_error($response) 
+      ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') 
+      : json_decode($response['body'], true);
+
+    return is_null($callback) 
+      ? $result 
+      : call_user_func($callback, $result);
   }
 
   /**
@@ -236,7 +242,9 @@ class C2B
         'body'    => $data_string
      )
    );
-    return is_wp_error($response) ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') : json_decode($response['body'], true);
+    return is_wp_error($response) 
+      ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja') 
+      : json_decode($response['body'], true);
   }
 
 /**
@@ -256,7 +264,9 @@ class C2B
       $response = $data;
     }
     
-    return is_null($callback) ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful') : call_user_func($callback, $response);
+    return is_null($callback) 
+      ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful') 
+      : call_user_func_array($callback, array($response));
   }
 
   /**
