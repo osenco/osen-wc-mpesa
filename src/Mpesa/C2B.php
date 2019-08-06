@@ -112,21 +112,21 @@ class C2B
   {
     if(is_null($callback) || empty($callback)){
       return array(
-        'ResponseCode'            => 0, 
-        'ResponseDesc'            => 'Success',
+        'ResultCode'            => 0, 
+        'ResultDesc'            => 'Success',
         'ThirdPartyTransID'       => isset($data['transID']) ? $data['transID'] : 0
       );
     } else {
         if (!call_user_func_array($callback, array($data))) {
           return array(
-            'ResponseCode'        => 1, 
-            'ResponseDesc'        => 'Failed',
+            'ResultCode'        => 1, 
+            'ResultDesc'        => 'Failed',
             'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         } else {
           return array(
-            'ResponseCode'        => 0, 
-            'ResponseDesc'        => 'Success',
+            'ResultCode'        => 0, 
+            'ResultDesc'        => 'Success',
             'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         }
@@ -142,21 +142,21 @@ class C2B
   {
     if(is_null($callback) || empty($callback)){
       return array(
-        'ResponseCode'          => 0, 
-        'ResponseDesc'          => 'Success',
+        'ResultCode'          => 0, 
+        'ResultDesc'          => 'Success',
         'ThirdPartyTransID'     =>  isset($data['transID']) ? $data['transID'] : 0
       );
     } else {
       if (!call_user_func_array($callback, array($data))) {
         return array(
-          'ResponseCode'        => 1, 
-          'ResponseDesc'        => 'Failed',
+          'ResultCode'        => 1, 
+          'ResultDesc'        => 'Failed',
           'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
         );
       } else {
         return array(
-          'ResponseCode'        => 0, 
-          'ResponseDesc'        => 'Success',
+          'ResultCode'        => 0, 
+          'ResultDesc'        => 'Success',
           'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
         );
       }
@@ -173,7 +173,7 @@ class C2B
     $endpoint = ($env == 'live') ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl' : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
     $post_data = array(
       'ShortCode'         => self::$shortcode,
-      'ResponseType'      => 'Cancelled',
+      'ResultType'      => 'Cancelled',
       'ConfirmationURL'   => self::$confirm,
       'ValidationURL'     => self::$validate
    );
