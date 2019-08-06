@@ -159,7 +159,7 @@ $c2b = get_option('woocommerce_mpesa_settings');
 Osen\Mpesa\STK::set(
 	array(
 		'env' 			=> isset($c2b['env']) ? $c2b['env'] : 'sandbox',
-		'appkey' 		=> isset($c2b['key']) ? $c2b['key'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+		'appkey' 		=> isset($c2b['key']) ? $c2b['key'] : 'bclwIPkcRqw61yUt',
 		'appsecret' 	=> isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
 		'headoffice' 	=> isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
 		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',

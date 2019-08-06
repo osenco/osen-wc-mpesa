@@ -88,7 +88,9 @@ class STK
    */
   public static function token()
   {
-    $endpoint = (self::$env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+    $endpoint = (self::$env == 'live') 
+      ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' 
+      : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
     $credentials = base64_encode(self::$appkey.':'.self::$appsecret);
     $response = wp_remote_get(
@@ -114,21 +116,21 @@ class STK
   {
     if(is_null($callback) || empty($callback)){
       return array(
-        'ResponseCode'            => 0, 
-        'ResponseDesc'            => 'Success',
+        'ResultCode'            => 0, 
+        'ResultDesc'            => 'Success',
         'ThirdPartyTransID'       => isset($data['transID']) ? $data['transID'] : 0
       );
     } else {
         if (!call_user_func_array($callback, array($data))) {
           return array(
-            'ResponseCode'        => 1, 
-            'ResponseDesc'        => 'Failed',
+            'ResultCode'        => 1, 
+            'ResultDesc'        => 'Failed',
             'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         } else {
           return array(
-            'ResponseCode'        => 0, 
-            'ResponseDesc'        => 'Success',
+            'ResultCode'        => 0, 
+            'ResultDesc'        => 'Success',
             'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         }
@@ -144,21 +146,21 @@ class STK
   {
     if(is_null($callback) || empty($callback)){
       return array(
-        'ResponseCode'          => 0, 
-        'ResponseDesc'          => 'Success',
+        'ResultCode'          => 0, 
+        'ResultDesc'          => 'Success',
         'ThirdPartyTransID'     =>  isset($data['transID']) ? $data['transID'] : 0
       );
     } else {
       if (!call_user_func_array($callback, array($data))) {
         return array(
-          'ResponseCode'        => 1, 
-          'ResponseDesc'        => 'Failed',
+          'ResultCode'        => 1, 
+          'ResultDesc'        => 'Failed',
           'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
         );
       } else {
         return array(
-          'ResponseCode'        => 0, 
-          'ResponseDesc'        => 'Success',
+          'ResultCode'        => 0, 
+          'ResultDesc'        => 'Success',
           'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
         );
       }
@@ -178,7 +180,9 @@ class STK
   {
     $phone      = preg_replace('/^0/', '254', str_replace("+", "", $phone));
 
-    $endpoint   = (self::$env == 'live') ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+    $endpoint   = (self::$env == 'live') 
+      ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' 
+      : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
     $timestamp  = date('YmdHis');
     $password   = base64_encode(self::$headoffice.self::$passkey.$timestamp);
@@ -274,7 +278,7 @@ class STK
       'ResultURL'           => self::$results_url,
       'QueueTimeOutURL'     => self::$timeout_url,
       'Remarks'             => $remarks,
-      'Occasion'            => $occasion
+      'Occasion'            => $occasion 
     );
 
     $data_string  = json_encode($post_data);

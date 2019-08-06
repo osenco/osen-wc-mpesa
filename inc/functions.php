@@ -432,7 +432,7 @@ add_action('wp_footer', 'ajax_polling');
 function ajax_polling()
 { ?><script>
 		var checker = setInterval(() => {
-			if (document.getElementById("payment_method").value !== 'mpesa') {
+			if (document.getElementById("payment_method") !== null && document.getElementById("payment_method").value !== 'mpesa') {
 				clearInterval(checker);
 			}
 

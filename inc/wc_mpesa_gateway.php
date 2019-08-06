@@ -313,7 +313,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 
 			$reference 	= 'ORDER#'.$order_id;
 
-			$result 	= Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
+			$result 	= Mpesa::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
 
 			if($result){
 				$request_id = $result['MerchantRequestID'];
