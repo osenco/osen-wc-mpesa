@@ -1,15 +1,16 @@
 <?php
 namespace Osen\Post\Types;
+
 /**
- * @package MPesa For WooCommerce
- * @subpackage Menus
- * @author Mauko Maunde < hi@mauko.co.ke >
+ * @package M-PESA For WooCommerce
+ * @author Osen Concepts < hi@osen.co.ke >
+ * @version 1.19.8
  * @since 0.18.01
  */
 
 class C2B
 {
-    function __construct()
+    public function __construct()
     {
 
     }
@@ -18,15 +19,16 @@ class C2B
     {
         add_action('init', [new self, 'mpesaipn_post_type'], 0);
         add_filter('manage_mpesaipn_posts_columns', [new self, 'filter_mpesaipn_table_columns']);
-        add_action('manage_mpesaipn_posts_custom_column',[new self, 'mpesaipn_table_column_content'], 10, 2);
+        add_action('manage_mpesaipn_posts_custom_column', [new self, 'mpesaipn_table_column_content'], 10, 2);
         add_filter('manage_edit-mpesaipn_sortable_columns', [new self, 'mpesaipn_columns_sortable']);
     }
 
     // Register Custom Post - Payments
-    public static function mpesaipn_post_type() {
+    public static function mpesaipn_post_type()
+    {
 
         $labels = array(
-            'name'                  => _x('Payments', 'Payment General Name', 'woocommerce'),
+            'name'                  => _x('M-PESA Payments', 'Payment General Name', 'woocommerce'),
             'singular_name'         => _x('Payment', 'Payment Singular Name', 'woocommerce'),
             'menu_name'             => __('M-PESA', 'woocommerce'),
             'name_admin_bar'        => __('Payment', 'woocommerce'),
@@ -50,25 +52,25 @@ class C2B
         );
 
         $args = array(
-            'label'                 => __('Payment', 'woocommerce'),
-            'description'           => __('Payment Description', 'woocommerce'),
-            'labels'                => $labels,
-            'supports'              => (get_option('woocommerce_mpesa_settings')["env"] == 'live') ? array() : array('editor'),
-            'taxonomies'            => array(),
-            'hierarchical'          => false,
-            'public'                => false,
-            'show_ui'               => true,
-            'show_in_menu'          => true,
-            'show_in_admin_bar'     => false,
-            'show_in_nav_menus'     => false,
-            'can_export'            => true,
-            'has_archive'           => false,
-            'exclude_from_search'   => true,
-            'publicly_queryable'    => true,
-            'capability_type'       => 'page',
-            'menu_icon'             => 'dashicons-money',
-            'rewrite'               => false,
-            'show_in_rest'          => true,
+            'label'               => __('Payment', 'woocommerce'),
+            'description'         => __('Payment Description', 'woocommerce'),
+            'labels'              => $labels,
+            'supports'            => (get_option('woocommerce_mpesa_settings')["env"] == 'live') ? array('title') : array('editor', 'title'),
+            'taxonomies'          => array(),
+            'hierarchical'        => false,
+            'public'              => false,
+            'show_ui'             => true,
+            'show_in_menu'        => true,
+            'show_in_admin_bar'   => false,
+            'show_in_nav_menus'   => false,
+            'can_export'          => true,
+            'has_archive'         => false,
+            'exclude_from_search' => true,
+            'publicly_queryable'  => false,
+            'capability_type'     => 'page',
+            'menu_icon'           => 'dashicons-money',
+            'rewrite'             => false,
+            'show_in_rest'        => true,
             // 'menu_icon'             => apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__)),
         );
 
@@ -78,27 +80,27 @@ class C2B
     /**
      * A filter to add custom columns and remove built-in
      * columns from the edit.php screen.
-     * 
+     *
      * @access public
      * @param array $columns The existing columns
      * @return array $filtered_columns The filtered columns
      */
     public static function filter_mpesaipn_table_columns($columns)
     {
-        $columns['title']       = "Type";
-        $columns['customer']    = "Customer";
-        $columns['amount']      = "Amount";
-        $columns['reference']   = "Reference";
+        $columns['title']     = "Type";
+        $columns['customer']  = "Customer";
+        $columns['amount']    = "Amount";
+        $columns['reference'] = "Reference";
         // $columns['request']     = "Request";
-        $columns['receipt']     = "Receipt";
-        $columns['status']      = "Status";
+        $columns['receipt'] = "Receipt";
+        $columns['status']  = "Status";
         unset($columns['date']);
         return $columns;
     }
 
     /**
      * Render custom column content within edit.php table on event post types.
-     * 
+     *
      * @access public
      * @param string $column The name of the column being acted upon
      * @return void
@@ -129,35 +131,35 @@ class C2B
 
             case 'status':
                 $statuses = array(
-                    "processing"    => "This Order Is Processing",
-                    "on-hold"       => "This Order Is On Hold",
-                    "complete"      => "This Order Is Complete",
-                    "cancelled"     => "This Order Is Cancelled",
-                    "refunded"      => "This Order Is Refunded",
-                    "failed"        => "This Order Failed"
+                    "processing" => "This Order Is Processing",
+                    "on-hold"    => "This Order Is On Hold",
+                    "complete"   => "This Order Is Complete",
+                    "cancelled"  => "This Order Is Cancelled",
+                    "refunded"   => "This Order Is Refunded",
+                    "failed"     => "This Order Failed",
                 );
 
-                echo ($value = get_post_meta($post_id, '_order_status', true)) 
-                    ? '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit">'.esc_attr($statuses[$value]).'</a>') 
-                    : '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit"').'>Set Status</a>';
+                echo ($value = get_post_meta($post_id, '_order_status', true))
+                ? '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>')
+                : '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit"') . '>Set Status</a>';
                 break;
         }
     }
 
     /**
      * Make custom columns sortable.
-     * 
+     *
      * @access public
      * @param array $columns The original columns
      * @return array $columns The filtered columns
      */
-    public static function mpesaipn_columns_sortable($columns) 
+    public static function mpesaipn_columns_sortable($columns)
     {
-        $columns['title']       = "Type";
-        $columns['customer']    = "Customer";
-        $columns['reference']   = "Reference";
-        $columns['receipt']     = "Receipt";
-        $columns['status']      = "Status";
+        $columns['title']     = "Type";
+        $columns['customer']  = "Customer";
+        $columns['reference'] = "Reference";
+        $columns['receipt']   = "Receipt";
+        $columns['status']    = "Status";
         return $columns;
-    }   
+    }
 }
