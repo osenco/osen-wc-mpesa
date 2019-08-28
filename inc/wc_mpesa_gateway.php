@@ -25,21 +25,6 @@ function wc_mpesa_gateway_init()
      */
     class WC_MPESA_Gateway extends WC_Payment_Gateway
     {
-        public $mpesa_name;
-        public $mpesa_shortcode;
-        public $mpesa_headoffice;
-        public $mpesa_type;
-        public $mpesa_key;
-        public $mpesa_secret;
-        public $mpesa_passkey;
-        public $mpesa_callback_url;
-        public $mpesa_timeout_url;
-        public $mpesa_result_url;
-        public $mpesa_confirmation_url;
-        public $mpesa_validation_url;
-
-        public $mpesa_env = 'sandbox';
-
         /**
          * Constructor for the gateway.
          */
@@ -308,15 +293,15 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
          */
         public function process_payment($order_id)
         {
-            $order      = new WC_Order($order_id);
-            
+            $order = new WC_Order($order_id);
+
             $total      = $order->get_total();
             $phone      = $order->get_billing_phone();
             $first_name = $order->get_billing_first_name();
             $last_name  = $order->get_billing_last_name();
             $reference  = 'ORDER#' . $order_id;
-
-            $result = Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name') . ' Purchase', 'WCM-PESA');
+            
+			$result     = Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name') . ' Purchase', 'WCM-PESA');
 
             if ($result) {
                 $request_id = $result['MerchantRequestID'];

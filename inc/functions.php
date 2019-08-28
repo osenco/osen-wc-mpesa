@@ -331,9 +331,8 @@ function wc_mpesa_process_ipn()
                     $balance            = $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
                     $transactionDate    = $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
                     $phone              = $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
-
-                    $after_ipn_paid = round($before_ipn_paid) + round($amount);
-                    $ipn_balance    = $after_ipn_paid - $amount_due;
+                    $after_ipn_paid     = round($before_ipn_paid) + round($amount);
+                    $ipn_balance        = $after_ipn_paid - $amount_due;
 
                     if (wc_get_order($order_id)) {
                         $order = new WC_Order($order_id);
@@ -384,8 +383,7 @@ function wc_mpesa_process_ipn()
 
             case "result":
                 $response = json_decode(file_get_contents('php://input'), true);
-
-                $result = $response['Result'];
+                $result   = $response['Result'];
 
                 $ResultType               = $result['ResultType'];
                 $ResultCode               = $result['ResultType'];
@@ -394,9 +392,8 @@ function wc_mpesa_process_ipn()
                 $ConversationID           = $result['ResultType'];
                 $TransactionID            = $result['ResultType'];
                 $ResultParameters         = $result['ResultType'];
-
-                $ResultParameter = $result['ResultParameter'];
-
+                
+                $ResultParameter          = $result['ResultParameter'];
                 $ReceiptNo                = $ResultParameter[0]['Value'];
                 $ConversationID           = $ResultParameter[1]['Value'];
                 $FinalisedTime            = $ResultParameter[2]['Value'];
@@ -411,10 +408,10 @@ function wc_mpesa_process_ipn()
                 $OriginatorConversationID = $ResultParameter[11]['Value'];
                 $CreditPartyName          = $ResultParameter[12]['Value'];
                 $DebitPartyName           = $ResultParameter[13]['Value'];
-
-                $ReferenceData = $result['ReferenceData'];
-                $ReferenceItem = $ReferenceData['ReferenceItem'];
-                $Occasion      = $ReferenceItem[0]['Value'];
+                
+                $ReferenceData            = $result['ReferenceData'];
+                $ReferenceItem            = $ReferenceData['ReferenceItem'];
+                $Occasion                 = $ReferenceItem[0]['Value'];
                 exit(wp_send_json(Osen\Mpesa\STK::validate()));
                 break;
 

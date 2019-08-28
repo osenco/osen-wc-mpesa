@@ -39,7 +39,6 @@ class Parsedown
     #
     # Multiton (http://en.wikipedia.org/wiki/Multiton_pattern)
     #
-
     public static function instance($name = 'default')
     {
         if (isset(self::$instances[$name])) {
@@ -799,7 +798,7 @@ class GitHubUpdater
      */
     private function initPluginData()
     {
-        $this->slug = plugin_basename($this->pluginFile);
+        $this->slug       = plugin_basename($this->pluginFile);
         $this->pluginData = get_plugin_data($this->pluginFile);
     }
 

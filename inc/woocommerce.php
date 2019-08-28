@@ -12,6 +12,8 @@
 add_filter('woocommerce_states', 'mpesa_ke_woocommerce_counties');
 function mpesa_ke_woocommerce_counties($counties)
 {
+    if (isset($counties['KE'])) { return; }
+
     $counties['KE'] = array(
         'BAR' => __('Baringo', 'woocommerce'),
         'BMT' => __('Bomet', 'woocommerce'),
@@ -137,10 +139,8 @@ add_action('woocommerce_before_email_order', 'add_order_instruction_email', 10, 
 function add_order_instruction_email($order, $sent_to_admin)
 {
     if (!$sent_to_admin) {
-
         if ('mpesa' == $order->payment_method) {
             echo wpautop(wptexturize($instructions)) . PHP_EOL;
         }
-
     }
 }
