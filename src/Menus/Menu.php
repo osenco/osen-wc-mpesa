@@ -15,6 +15,7 @@ class Menu
     {
         add_action('admin_menu', [new self, 'wc_mpesa_menu']);
     }
+    
     /**
      * @package M-PESA For WooCommerce
      * @subpackage Plugin Functions

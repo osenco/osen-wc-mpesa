@@ -68,7 +68,7 @@ class C2B
             'exclude_from_search' => true,
             'publicly_queryable'  => false,
             'capability_type'     => 'page',
-            'menu_icon'           => 'dashicons-money',
+            'menu_icon'           => \plugins_url('osen-wc-mpesa/assets/mpesa.png'),
             'rewrite'             => false,
             'show_in_rest'        => true,
             // 'menu_icon'             => apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__)),

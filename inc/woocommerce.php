@@ -144,3 +144,35 @@ function add_order_instruction_email($order, $sent_to_admin)
         }
     }
 }
+
+//add_action( 'woocommerce_order_status_completed', 'osen_status_custom_notification', 20, 2 );
+function osen_status_custom_notification( $order_id, $order ) {
+      
+    $heading = 'Order Completed';
+    $subject = 'Order Completed';
+  
+    // Get WooCommerce email objects
+    $mailer = WC()->mailer()->get_emails();
+  
+    // Use one of the active emails e.g. "Customer_Completed_Order"
+    // Wont work if you choose an object that is not active
+    // Assign heading & subject to chosen object
+    $mailer['WC_Email_Customer_Completed_Order']->heading = $heading;
+    $mailer['WC_Email_Customer_Completed_Order']->settings['heading'] = $heading;
+    $mailer['WC_Email_Customer_Completed_Order']->subject = $subject;
+    $mailer['WC_Email_Customer_Completed_Order']->settings['subject'] = $subject;
+  
+    // Send the email with custom heading & subject
+    $mailer['WC_Email_Customer_Completed_Order']->trigger( $order_id );
+  
+    // To add email content use https://businessbloomer.com/woocommerce-add-extra-content-order-email/
+    // You have to use the email ID chosen above and also that $order->get_status() == "refused"
+      
+}
+
+//add_action( 'woocommerce_email_before_order_table', 'osen_add_content_specific_email', 20, 4 );
+function osen_add_content_specific_email( $order, $sent_to_admin, $plain_text, $email ) {
+   if ( $email->id == 'customer_completed_order' ) {
+      echo '<h2 class="email-upsell-title">Get 20% off</h2><p class="email-upsell-p">Thank you for making this purchase! Come back and use the code "<strong>Back4More</strong>" to receive a 20% discount on your next purchase! Click here to continue shopping.</p>';
+   }
+}

@@ -121,7 +121,7 @@ class B2C
     /**
      *
      */
-    public static function request($phone, $amount, $reference, $trxdesc = '', $remark = '')
+    public static function request($phone, $amount, $command = 'BusinessPayment', $remark = 'Business Payment', $occasion = 'Business Payment')
     {
         $phone    = str_replace("+", "", $phone);
         $phone    = preg_replace('/^0/', '254', $phone);
@@ -141,14 +141,14 @@ class B2C
         $curl_post_data = array(
             'InitiatorName'      => self::$username,
             'SecurityCredential' => $password,
-            'CommandID'          => (self::$type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+            'CommandID'          => $command,
             'Amount'             => round($amount),
             'PartyA'             => self::$shortcode,
             'PartyB'             => $phone,
             'Remarks'            => $remark,
             'QueueTimeOutURL'    => self::$timeout,
             'ResultURL'          => self::$reconcile,
-            'Occasion'           => $reference,
+            'Occasion'           => $occasion,
         );
 
         $data_string = json_encode($curl_post_data);
@@ -173,7 +173,9 @@ class B2C
      */
     public static function reconcile($callback, $data)
     {
-        $response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
+        $response = is_null($data) 
+        ? json_decode(file_get_contents('php://input'), true) 
+        : $data;
 
         return is_null($callback)
         ? array('resultCode' => 0, 'resultDesc' => 'Success')

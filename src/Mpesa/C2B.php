@@ -112,8 +112,9 @@ class C2B
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return array
      */
-    public static function validate($callback, $data)
+    public static function validate($callback = null, $data = [])
     {
+        $data = empty($data) ? json_decode(file_get_contents('php://input'), true) : $data;
         if (is_null($callback) || empty($callback)) {
             return array(
                 'ResultCode'        => 0,
@@ -142,8 +143,9 @@ class C2B
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return array
      */
-    public static function confirm($callback, $data)
+    public static function confirm($callback = null, $data = [])
     {
+        $data = empty($data) ? json_decode(file_get_contents('php://input'), true) : $data;
         if (is_null($callback) || empty($callback)) {
             return array(
                 'ResultCode'        => 0,
@@ -260,21 +262,13 @@ class C2B
  * @param callable $callback - Optional callable function to process the response - must return boolean
  * @return bool/array
  */
-    public static function reconcile($args)
+    public static function reconcile($callback = null, $data = [])
     {
-        $callback = isset($args[0]) ? $args[0] : 'wc_mpesa_reconcile';
-        $data     = isset($args[1]) ? $args[1] : null;
-
-        if (is_null($data)) {
-            $response = json_decode(file_get_contents('php://input'), true);
-            $response = isset($response['Body']) ? $response['Body'] : array();
-        } else {
-            $response = $data;
-        }
+        $data = empty($data) ? json_decode(file_get_contents('php://input'), true) : $data;
 
         return is_null($callback)
         ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
-        : call_user_func_array($callback, array($response));
+        : call_user_func_array($callback, array($data));
     }
 
     /**
