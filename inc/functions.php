@@ -443,16 +443,19 @@ function wc_mpesa_process_ipn()
 
 add_action('wp_footer', 'ajax_polling');
 function ajax_polling()
-{ ?><script>
+{
+	$url = home_url('?pesaip&order='); ?>
+<script>
 var checker = setInterval(() => {
-    if (document.getElementById("payment_method") !== null && document.getElementById("payment_method")
-        .value !== 'mpesa') {
+    if (
+        document.getElementById("payment_method") !== null &&
+        document.getElementById("payment_method").value !== 'mpesa') {
         clearInterval(checker);
     }
 
     jQuery(function($) {
         var order = $("#current_order").val();
-        $.get('<?php echo home_url(' ? pesaipn & order = '); ?>' + order, [], function(data) {
+        $.get('<?php echo $url; ?>' + order, [], function(data) {
             if (data.receipt == '' || data.receipt == 'N/A') {
                 $("#mpesa_receipt").html(
                     'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
