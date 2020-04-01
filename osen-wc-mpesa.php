@@ -2,7 +2,7 @@
 /**
  * @package Mpesa For WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.10
+ * @version 1.20.04
  *
  * Plugin Name: MPesa For WooCommerce
  * Plugin URI: https://wc-mpesa.osen.co.ke/
@@ -11,16 +11,16 @@
  * Version: 1.20.04
  * Author URI: https://osen.co.ke/
  *
- * Requires at least: 4.4
+ * Requires at least: 4.6
  * Tested up to: 5.4
  * 
- * WC requires at least: 3.0.0
+ * WC requires at least: 3.5.0
  * WC tested up to: 4.0
  * 
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
- * Copyright 2019  Osen Concepts 
+ * Copyright 2020  Osen Concepts 
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 3, as
@@ -125,6 +125,7 @@ function mpesa_row_meta($links, $file)
 spl_autoload_register(function ($class)
 {
 	if (strpos($class, 'Osen') === false) { return; }
+	
 	$class 	= ltrim($class, '\\');
 	$class	= str_replace('Osen\\', '', $class);
 	$file 	= str_replace('\\', '/', $class);

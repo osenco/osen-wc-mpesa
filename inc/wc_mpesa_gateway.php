@@ -315,9 +315,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 			$first_name	= $order->get_billing_first_name();
 			$last_name 	= $order->get_billing_last_name();
 
-			$reference 	= 'ORDER#'.$order_id;
-
-			$result 	= Osen\Mpesa\STK::request($phone, $total, $reference, bloginfo('name').' Purchase', 'WCMPesa');
+			$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, bloginfo('name').' Purchase', 'WCMPesa');
 
 			if($result){
 				$request_id = $result['MerchantRequestID'];
@@ -363,7 +361,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					update_post_meta($post_id, '_request_id', $request_id);
 					update_post_meta($post_id, '_amount', $total);
 					update_post_meta($post_id, '_paid', 0);
-					update_post_meta($post_id, '_reference', $reference);
+					update_post_meta($post_id, '_reference', $order_id);
 					update_post_meta($post_id, '_receipt', 'N/A');
 					update_post_meta($post_id, '_order_status', 'on-hold');
 

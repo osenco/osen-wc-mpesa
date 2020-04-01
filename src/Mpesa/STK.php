@@ -132,21 +132,18 @@ public static $credentials;
     if(is_null($callback) || empty($callback)){
       return array(
         'ResultCode'            => 0, 
-        'ResultDesc'            => 'Success',
-        'ThirdPartyTransID'       => isset($data['transID']) ? $data['transID'] : 0
+        'ResultDesc'            => 'Success'
       );
     } else {
         if (!call_user_func_array($callback, array($data))) {
           return array(
             'ResultCode'        => 1, 
-            'ResultDesc'        => 'Failed',
-            'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+            'ResultDesc'        => 'Failed'
           );
         } else {
           return array(
             'ResultCode'        => 0, 
             'ResultDesc'        => 'Success',
-            'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
           );
         }
     }
@@ -162,21 +159,18 @@ public static $credentials;
     if(is_null($callback) || empty($callback)){
       return array(
         'ResultCode'          => 0, 
-        'ResultDesc'          => 'Success',
-        'ThirdPartyTransID'     =>  isset($data['transID']) ? $data['transID'] : 0
+        'ResultDesc'          => 'Success'
       );
     } else {
       if (!call_user_func_array($callback, array($data))) {
         return array(
           'ResultCode'        => 1, 
-          'ResultDesc'        => 'Failed',
-          'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+          'ResultDesc'        => 'Failed'
         );
       } else {
         return array(
           'ResultCode'        => 0, 
-          'ResultDesc'        => 'Success',
-          'ThirdPartyTransID'   => isset($data['transID']) ? $data['transID'] : 0
+          'ResultDesc'        => 'Success'
         );
       }
     }

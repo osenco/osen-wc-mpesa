@@ -27,7 +27,7 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id) {
 	if(wc_get_order($order_id)){
 		$order = new WC_Order($order_id);
 		$total = $order->get_total();
-		$reference = 'ORDER#'.$order_id;
+		$reference = $order_id;
 	}
 
 	if($order->get_payment_method() !== 'mpesa'){
@@ -92,7 +92,7 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id) {
         <thead>
             <tr>
                 <th class="woocommerce-table__product-name product-name">
-                    <?php _e('Missed the STK Prompt? Pay Manually Via M-PESA') ?></th>
+                    <?php _e("STK Push didn't work? Pay Manually Via M-PESA") ?></th>
             </tr>
         </thead>
 
@@ -218,16 +218,14 @@ function wc_mpesa_process_ipn()
 					$order = new WC_Order($order_id);
 					
 					if ($ipn_balance == 0) {
-						$order->payment_complete();
-						$order->add_order_note(__("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
+						$order->update_status('completed', __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
 						update_post_meta($post, '_order_status', 'complete');
 
 						$headers = 'From: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>' . "\r\n";
 						wp_mail($order["billing_address"], 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. '.$amount.' on '.$transactionDate.'with receipt Number '.$mpesaReceiptNumber.'.', $headers);
 					} elseif ($ipn_balance < 0) {
 						$currency = get_woocommerce_currency();
-						$order->payment_complete();
-						$order->add_order_note(__("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
+						$order->update_status('completed', __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
 						update_post_meta($post, '_order_status', 'complete');
 					} else {
 						$order->update_status('on-hold');
@@ -318,16 +316,13 @@ function wc_mpesa_process_ipn()
 						if ($ipn_balance == 0) {
 							update_post_meta($post, '_order_status', 'complete');
 							update_post_meta($post, '_receipt', $mpesaReceiptNumber);
-
-							$order->payment_complete();
-							$order->add_order_note(__("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
+							$order->update_status('completed', __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
 							
 							$headers[] = 'From: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>' . "\r\n";
 							wp_mail($order["billing_address"], 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. '.$amount.' on '.$transactionDate.'. Receipt number '.$mpesaReceiptNumber, $headers);
 						} elseif ($ipn_balance < 0) {
 							$currency = get_woocommerce_currency();
-							$order->payment_complete();
-							$order->add_order_note(__("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
+							$order->update_status('completed', __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
 							update_post_meta($post, '_order_status', 'complete');
 							update_post_meta($post, '_receipt', $mpesaReceiptNumber);
 						} else {
@@ -441,10 +436,12 @@ function wc_mpesa_process_ipn()
 	}
 }
 
-add_action('wp_footer', 'ajax_polling');
+//if(is_wc_endpoint_url( 'order-received' )){
+	add_action('wp_footer', 'ajax_polling');
+//}
 function ajax_polling()
 {
-	$url = home_url('?pesaip&order='); ?>
+	$url = home_url('?pesaipn&order='); ?>
 <script>
 var checker = setInterval(() => {
     if (
