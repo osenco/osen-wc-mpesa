@@ -1,7 +1,7 @@
 {
 	"name": "Mpesa for Woocommerce",
 	"version": "1.20.5",
-	"download_url": "http://example.com/updates/example-plugin.zip",
+	"download_url": "https://github.com/osenco/osen-wc-mpesa/archive/v1.20.5.zip",
 
 	"homepage": "https://wc-mpesa.osen.co.ke/",
 	"requires": "4.5",
