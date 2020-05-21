@@ -25,12 +25,12 @@
     },
 
 	"banners": {
-		"low": "http://w-shadow.com/files/external-update-example/assets/banner-772x250.png",
-		"high": "http://w-shadow.com/files/external-update-example/assets/banner-1544x500.png"
+		"low": "https://user-images.githubusercontent.com/14233942/61905978-04c93980-af33-11e9-93c4-1b1ec6719e66.png",
+		"high": "https://user-images.githubusercontent.com/14233942/61905978-04c93980-af33-11e9-93c4-1b1ec6719e66.png"
 	},
 
 	"rating": 90,
-	"num_ratings": 123,
+	"num_ratings": 560,
 
 	"downloaded": 1234,
 	"active_installs": 12345
