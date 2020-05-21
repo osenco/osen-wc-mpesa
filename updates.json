@@ -13,10 +13,10 @@
 	"author_homepage": "http://osen.co.ke/",
 
 	"sections": {
-		"description": "(Required) Plugin description. Basic HTML can be used in all sections.",
-		"installation": "(Recommended) Installation instructions.",
-		"changelog": "(Recommended) Changelog. <p>This section will be displayed by default when the user clicks 'View version x.y.z details'.</p>",
-		"custom_section": "This is a custom section labeled 'Custom Section'."
+		"description": "<p>This plugin seeks to provide a simple plug-n-play implementation for integrating M-Pesa Payments into online stores built with WooCommerce and WordPress.</p>",
+		"installation": "Download the latest release from Github, and extract the zip file in your plugins directory of your WordPress instalation",
+		"changelog": "<ul><li>Auto updates enabled</li></ul>",
+		"going_live": "<p>While we have made all efforts to ensure this plugin works out of the box - with minimum configuration required - the service provider requires that the user go through a certain ardous process to migrate from sandbox(test) environment to production.</p><p>We have made a <a href='https://wc-mpesa.osen.co.ke/going-live'>tutorial here</a> to walk you through the process. We however have a team ready on call to assist you in this are, at a fiat fee of KSh 4000 one-off, should you find it difficult.</p>"
 	},
 	
 	"icons" : {
@@ -28,21 +28,6 @@
 		"low": "http://w-shadow.com/files/external-update-example/assets/banner-772x250.png",
 		"high": "http://w-shadow.com/files/external-update-example/assets/banner-1544x500.png"
 	},
-
-	"translations": [
-		{
-			"language": "fr_FR",
-			"version": "4.0",
-			"updated": "2016-04-22 23:22:42",
-			"package": "http://example.com/updates/translations/french-language-pack.zip"
-		},
-		{
-			"language": "de_DE",
-			"version": "5.0",
-			"updated": "2016-04-22 23:22:42",
-			"package": "http://example.com/updates/translations/german-language-pack.zip"
-		}
-	],
 
 	"rating": 90,
 	"num_ratings": 123,
