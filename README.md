@@ -15,7 +15,6 @@
 WordPress Plugin that extends WordPress and WooCommerce functionality to integrate MPESA for making payments, remittances, checking account balance transaction status and reversals. It also adds Kenyan Counties to the WooCommerce states list.
 ![Wc MPesa Configuration](https://user-images.githubusercontent.com/14233942/61905978-04c93980-af33-11e9-93c4-1b1ec6719e66.png)
 
-
 ## Installation
 Getting started with MPESA for WooCommerce is very easy. All configuration is done in the WooCommerce settings in the WordPress admin dashboard.
 
@@ -27,7 +26,7 @@ Your site/app MUST be running over https for the MPESA Instant Payment Notificat
 * Click the install button and the plugin will be installed. Once installed, activate the plugin and configure it at http://yoursite.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=mpesa
 
 ### Manual Installation 
-* First, you need to download the latest release of the plugin from [here](https://github.com/osenco/osen-wc-mpesa/archive/v1.20.3.zip).
+* First, you need to download the latest release of the plugin from [here](https://github.com/osenco/osen-wc-mpesa/releases).
 * Using an FTP program, or your hosting control panel, upload the plugin folder (wc-mpesa) to your WordPress installation’s wp-content/plugins/ directory.
 * Activate the plugin from the Plugins menu within the WordPress admin
 

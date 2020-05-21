@@ -224,6 +224,6 @@ foreach (glob(plugin_dir_path(__FILE__) . 'inc/*.php') as $filename) {
 require __DIR__ . '/updates/plugin-update-checker.php';
 $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
 	'https://raw.githubusercontent.com/osenco/osen-wc-mpesa/master/updates.json',
-	__FILE__, //Full path to the main plugin file or functions.php.
+	__FILE__,
 	'wc-mpesa'
 );
