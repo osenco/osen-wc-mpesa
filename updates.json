@@ -7,7 +7,7 @@
 	"requires": "4.5",
 	"tested": "5.4",
 	"last_updated": "2020-05-01 16:17:00",
-	"upgrade_notice": "Here's why you should upgrade...",
+	"upgrade_notice": "Autoupdates from here on",
 
 	"author": "Osen Concepts",
 	"author_homepage": "http://osen.co.ke/",
@@ -20,8 +20,8 @@
 	},
 	
 	"icons" : {
-		"1x" : "http://w-shadow.com/files/external-update-example/assets/icon-128x128.png",
-		"2x" : "http://w-shadow.com/files/external-update-example/assets/icon-256x256.png"
+		"1x" : "https://user-images.githubusercontent.com/14233942/82600900-54aa7880-9bb7-11ea-8e2e-26c9beb7b7ba.png",
+		"2x" : "https://user-images.githubusercontent.com/14233942/82600900-54aa7880-9bb7-11ea-8e2e-26c9beb7b7ba.png"
     },
 
 	"banners": {
