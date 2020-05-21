@@ -200,16 +200,16 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'default'     => __('1', 'woocommerce'),
 					'desc_tip'    => true,
 				),
-				// 'completion' => array(
-				// 	'title'       => __('Order Status on Payment', 'woocommerce'),
-				// 	'type'        => 'select',
-				// 	'options' => array(
-				//       	'completed' => __('Mark order as completed', 'woocommerce'),
-				//      	'processing' => __('Mark order as processing', 'woocommerce')
-				//    ),
-				// 	'description' => __('What status to set the order after Mpesa payment has been received', 'woocommerce'),
-				// 	'desc_tip'    => true,
-				// ),
+				'completion' => array(
+					'title'       => __('Order Status on Payment', 'woocommerce'),
+					'type'        => 'select',
+					'options' => array(
+				      	'completed' => __('Mark order as completed', 'woocommerce'),
+				     	'processing' => __('Mark order as processing', 'woocommerce')
+				   ),
+					'description' => __('What status to set the order after Mpesa payment has been received', 'woocommerce'),
+					'desc_tip'    => true,
+				),
 				'enable_for_methods' => array(
 					'title'             => __('Enable for shipping methods', 'woocommerce'),
 					'type'              => 'multiselect',
@@ -315,7 +315,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 			$first_name	= $order->get_billing_first_name();
 			$last_name 	= $order->get_billing_last_name();
 
-			$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, bloginfo('name').' Purchase', 'WCMPesa');
+			$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name').' Purchase', 'WCMPesa');
 
 			if($result){
 				$request_id = $result['MerchantRequestID'];

@@ -122,25 +122,3 @@ function woocommerce_emails_attach_downloadables($attachments, $status, $order)
     }
     return $attachments;
 }
-
-//add_action('woocommerce_email_order_details', 'wcmpesa_email_order_mpesa_receipt', 1, 4);
-function wcmpesa_email_order_mpesa_receipt($order, $admin, $plain, $email) 
-{
-	$post = get_post_id_by_meta_key_and_value('_order_id', $order);
-    $receipt = get_post_meta($post, '_receipt', true);
-  	if(!empty($receipt)){ 
-  		__('<strong>MPESA RECEIPT NUMBER: </strong> '.$receipt, 'woocommerce');
-  	}
-}
-
-add_action('woocommerce_before_email_order', 'add_order_instruction_email', 10, 2); 
-function add_order_instruction_email($order, $sent_to_admin)
-{  
-	if (! $sent_to_admin) {
-
-		if ('mpesa' == $order->payment_method) {
-			echo wpautop(wptexturize($instructions)) . PHP_EOL;
-		}
-
-	}
-}

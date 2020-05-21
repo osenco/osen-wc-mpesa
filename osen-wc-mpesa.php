@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package Mpesa For WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
@@ -8,7 +9,7 @@
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.20.04
+ * Version: 1.20.05
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
@@ -37,73 +38,75 @@
  */
 
 // Exit if accessed directly.
-if (!defined('ABSPATH')){
+if (!defined('ABSPATH')) {
 	exit;
 }
 
-define('WCM_VER', '1.19.08');
-if (! defined('WCM_PLUGIN_FILE')) {
+define('WCM_VER', '1.20.5');
+if (!defined('WCM_PLUGIN_FILE')) {
 	define('WCM_PLUGIN_FILE', __FILE__);
 }
 
-add_action('wp', function (){
-	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
+add_action('wp', function () {
+	if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 		deactivate_plugins(plugin_basename(__FILE__));
 	}
 });
 
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
-function wc_mpesa_activation_check() 
+function wc_mpesa_activation_check()
 {
-	if (! get_option('wc_mpesa_flush_rewrite_rules_flag')) {
+	if (!get_option('wc_mpesa_flush_rewrite_rules_flag')) {
 		add_option('wc_mpesa_flush_rewrite_rules_flag', true);
 	}
 
-	if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))){
+	if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
 		deactivate_plugins(plugin_basename(__FILE__));
 		exit('Please Install/Activate WooCommerce for the MPesa extension to work');
 	}
 
-    if (! is_plugin_active('woocommerce/woocommerce.php')){
-        deactivate_plugins(plugin_basename(__FILE__));
-    }
+	if (!is_plugin_active('woocommerce/woocommerce.php')) {
+		deactivate_plugins(plugin_basename(__FILE__));
+	}
 }
 
 add_action('init', 'wc_mpesa_flush_rewrite_rules_maybe', 20);
-function wc_mpesa_flush_rewrite_rules_maybe() {
-    if (get_option('wc_mpesa_flush_rewrite_rules_flag')) {
-        flush_rewrite_rules();
-        delete_option('wc_mpesa_flush_rewrite_rules_flag');
-    }
+function wc_mpesa_flush_rewrite_rules_maybe()
+{
+	if (get_option('wc_mpesa_flush_rewrite_rules_flag')) {
+		flush_rewrite_rules();
+		delete_option('wc_mpesa_flush_rewrite_rules_flag');
+	}
 }
 
 add_action('activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2);
-function wc_mpesa_detect_plugin_activation($plugin, $network_activation) {
+function wc_mpesa_detect_plugin_activation($plugin, $network_activation)
+{
 	flush_rewrite_rules();
-    if($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php'){
-        exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
-    }
+	if ($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php') {
+		exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
+	}
 }
 
 add_action('deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2);
 function wc_mpesa_detect_woocommerce_deactivation($plugin, $network_activation)
 {
-    if ($plugin == 'woocommerce/woocommerce.php'){
-        deactivate_plugins(plugin_basename(__FILE__));
-    }
+	if ($plugin == 'woocommerce/woocommerce.php') {
+		deactivate_plugins(plugin_basename(__FILE__));
+	}
 }
 
-add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'mpesa_action_links');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'mpesa_action_links');
 function mpesa_action_links($links)
 {
 	return array_merge(
-		$links, 
+		$links,
 		array(
-			'<a href="'.admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa').'">&nbsp;STK & C2B Setup</a>', 
+			'<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa') . '">&nbsp;STK & C2B Setup</a>',
 			// '<a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">&nbsp;B2C</a>' 
 		)
 	);
-} 
+}
 
 add_filter('plugin_row_meta', 'mpesa_row_meta', 10, 2);
 function mpesa_row_meta($links, $file)
@@ -122,15 +125,16 @@ function mpesa_row_meta($links, $file)
 	return (array) $links;
 }
 
-spl_autoload_register(function ($class)
-{
-	if (strpos($class, 'Osen') === false) { return; }
-	
+spl_autoload_register(function ($class) {
+	if (strpos($class, 'Osen') === false) {
+		return;
+	}
+
 	$class 	= ltrim($class, '\\');
 	$class	= str_replace('Osen\\', '', $class);
 	$file 	= str_replace('\\', '/', $class);
 
-	require_once plugin_dir_path(__FILE__)."src/{$file}.php";
+	require_once plugin_dir_path(__FILE__) . "src/{$file}.php";
 });
 
 /**
@@ -216,3 +220,10 @@ Osen\Mpesa\C2B::set(
 foreach (glob(plugin_dir_path(__FILE__) . 'inc/*.php') as $filename) {
 	require_once $filename;
 }
+
+require __DIR__ . '/update/plugin-update-checker.php';
+$myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
+	'https://osen.services/path/to/details.json',
+	__FILE__, //Full path to the main plugin file or functions.php.
+	'wc-mpesa'
+);
