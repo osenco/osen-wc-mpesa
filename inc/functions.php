@@ -22,11 +22,11 @@ function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 	}
 }
 
-add_action('woocommerce_thankyou_mpesa', 'wc_mpesa_add_content_thankyou_mpesa');
-function wc_mpesa_add_content_thankyou_mpesa($order_id)
+add_action('woocommerce_thankyou_mpesa', function ($order_id)
 {
 	$mpesa = get_option('woocommerce_mpesa_settings');
 	$idtype = Osen\Mpesa\C2B::$type;
+	$url = home_url('?pesaipn&order=');
 
 	if (wc_get_order($order_id)) {
 		$order = new WC_Order($order_id);
@@ -41,6 +41,7 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id)
 	$type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services'; ?>
 	<style>
 		@keyframes wave {
+
 			0%,
 			60%,
 			100% {
@@ -119,7 +120,67 @@ function wc_mpesa_add_content_thankyou_mpesa($order_id)
 			</table>
 		</section>
 	<?php endif;
-}
+
+	echo <<<JS
+	<script id="pesaipn-checker">
+		jQuery(document).ready(function($) {
+			var checker = setInterval(() => {
+				if ($("#payment_method").length && $("#payment_method").val() !== 'mpesa') {
+					clearInterval(checker);
+				}
+
+				if ($("#current_order").length) {
+					var order = $("#current_order").val();
+					if (order.length) {
+						$.get("{$url}" + order, [], function(data) {
+							if (data.receipt == '' || data.receipt == 'N/A') {
+								$("#mpesa_receipt").html(
+									'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
+								);
+							} else {
+								if ($("#mpesa-receipt-overview").length) {} else {
+									$(".woocommerce-order-overview").append(
+										'<li id="mpesa-receipt-overview" class="woocommerce-order-overview__payment-method method">Receipt number: <strong>' +
+										data.receipt +
+										'</strong></li>'
+									);
+								}
+
+								if ($("#mpesa-receipt-table-row").length) {} else {
+									$(".woocommerce-table--order-details > tfoot")
+										.find('tr:last-child')
+										.prev()
+										.after(
+											'<tr id="mpesa-receipt-table-row"><th scope="row">Receipt number:</th><td>' +
+											data.receipt +
+											'</td></tr>'
+										);
+								}
+
+								$("#mpesa_receipt").html(
+									'Payment confirmed. Receipt number: <b>' +
+									data.receipt +
+									'</b>'
+								);
+
+								$("#missed_stk").hide();
+
+								location.reload();
+
+								clearInterval(checker);
+
+								return false;
+							}
+						});
+					}
+				}
+
+			},
+			3000);
+		});
+	</script>
+JS;
+});
 
 add_action('init', 'wc_mpesa_rewrite_add_rewrites');
 function wc_mpesa_rewrite_add_rewrites()
@@ -425,66 +486,3 @@ function wc_mpesa_process_ipn()
 		exit(wp_send_json($response));
 	}
 }
-
-add_action('woocommerce_thankyou_mpesa', function () {
-	$url = home_url('?pesaipn&order=');
-	echo <<<JS
-	<script id="pesaipn-checker">
-		jQuery(document).ready(function($) {
-			var checker = setInterval(() => {
-				if ($("#payment_method").length && $("#payment_method").val() !== 'mpesa') {
-					clearInterval(checker);
-				}
-
-				if ($("#current_order").length) {
-					var order = $("#current_order").val();
-					if (order.length) {
-						$.get("{$url}" + order, [], function(data) {
-							if (data.receipt == '' || data.receipt == 'N/A') {
-								$("#mpesa_receipt").html(
-									'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
-								);
-							} else {
-								if ($("#mpesa-receipt-overview").length) {} else {
-									$(".woocommerce-order-overview").append(
-										'<li id="mpesa-receipt-overview" class="woocommerce-order-overview__payment-method method">Receipt number: <strong>' +
-										data.receipt +
-										'</strong></li>'
-									);
-								}
-
-								if ($("#mpesa-receipt-table-row").length) {} else {
-									$(".woocommerce-table--order-details > tfoot")
-										.find('tr:last-child')
-										.prev()
-										.after(
-											'<tr id="mpesa-receipt-table-row"><th scope="row">Receipt number:</th><td>' +
-											data.receipt +
-											'</td></tr>'
-										);
-								}
-
-								$("#mpesa_receipt").html(
-									'Payment confirmed. Receipt number: <b>' +
-									data.receipt +
-									'</b>'
-								);
-
-								$("#missed_stk").hide();
-
-								location.reload();
-
-								clearInterval(checker);
-
-								return false;
-							}
-						});
-					}
-				}
-
-			},
-			3000);
-		});
-	</script>
-JS;
-});
