@@ -110,12 +110,12 @@ class STK
 			: 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
 		$credentials = base64_encode(self::$appkey . ':' . self::$appsecret);
-		$response = wp_remote_get(
+		$response    = wp_remote_get(
 			$endpoint,
 			array(
 				'headers' => array(
-					'Authorization' => 'Basic ' . $credentials
-				)
+					'Authorization' => 'Basic ' . $credentials,
+				),
 			)
 		);
 
@@ -133,19 +133,19 @@ class STK
 	{
 		if (is_null($callback) || empty($callback)) {
 			return array(
-				'ResultCode'            => 0,
-				'ResultDesc'            => 'Success'
+				'ResultCode' => 0,
+				'ResultDesc' => 'Success',
 			);
 		} else {
 			if (!call_user_func_array($callback, array($data))) {
 				return array(
-					'ResultCode'        => 1,
-					'ResultDesc'        => 'Failed'
+					'ResultCode' => 1,
+					'ResultDesc' => 'Failed',
 				);
 			} else {
 				return array(
-					'ResultCode'        => 0,
-					'ResultDesc'        => 'Success',
+					'ResultCode' => 0,
+					'ResultDesc' => 'Success',
 				);
 			}
 		}
@@ -160,19 +160,19 @@ class STK
 	{
 		if (is_null($callback) || empty($callback)) {
 			return array(
-				'ResultCode'          => 0,
-				'ResultDesc'          => 'Success'
+				'ResultCode' => 0,
+				'ResultDesc' => 'Success',
 			);
 		} else {
 			if (!call_user_func_array($callback, array($data))) {
 				return array(
-					'ResultCode'        => 1,
-					'ResultDesc'        => 'Failed'
+					'ResultCode' => 1,
+					'ResultDesc' => 'Failed',
 				);
 			} else {
 				return array(
-					'ResultCode'        => 0,
-					'ResultDesc'        => 'Success'
+					'ResultCode' => 0,
+					'ResultDesc' => 'Success',
 				);
 			}
 		}
@@ -189,39 +189,39 @@ class STK
 	 */
 	public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
 	{
-		$phone      = preg_replace('/^0/', '254', str_replace("+", "", $phone));
+		$phone = preg_replace('/^0/', '254', str_replace("+", "", $phone));
 
-		$endpoint   = (self::$env == 'live')
+		$endpoint = (self::$env == 'live')
 			? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
 			: 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
-		$timestamp  = date('YmdHis');
-		$password   = base64_encode(self::$headoffice . self::$passkey . $timestamp);
+		$timestamp = date('YmdHis');
+		$password  = base64_encode(self::$headoffice . self::$passkey . $timestamp);
 
-		$post_data  = array(
-			'BusinessShortCode'   => self::$headoffice,
-			'Password'            => $password,
-			'Timestamp'           => $timestamp,
-			'TransactionType'     => (self::$type == 4) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
-			'Amount'              => round($amount),
-			'PartyA'              => $phone,
-			'PartyB'              => self::$shortcode,
-			'PhoneNumber'         => $phone,
-			'CallBackURL'         => self::$reconcile,
-			'AccountReference'    => $reference,
-			'TransactionDesc'     => $trxdesc,
-			'Remark'              => $remark
+		$post_data = array(
+			'BusinessShortCode' => self::$headoffice,
+			'Password'          => $password,
+			'Timestamp'         => $timestamp,
+			'TransactionType'   => (self::$type == 4) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
+			'Amount'            => round($amount),
+			'PartyA'            => $phone,
+			'PartyB'            => self::$shortcode,
+			'PhoneNumber'       => $phone,
+			'CallBackURL'       => self::$reconcile,
+			'AccountReference'  => $reference,
+			'TransactionDesc'   => $trxdesc,
+			'Remark'            => $remark,
 		);
 
-		$data_string  = json_encode($post_data);
-		$response     = wp_remote_post(
+		$data_string = json_encode($post_data);
+		$response    = wp_remote_post(
 			$endpoint,
 			array(
 				'headers' => array(
-					'Content-Type' => 'application/json',
-					'Authorization' => 'Bearer ' . self::token()
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . self::token(),
 				),
-				'body'    => $data_string
+				'body'    => $data_string,
 			)
 		);
 		return is_wp_error($response)
@@ -270,33 +270,33 @@ class STK
 
 	public static function status($transaction, $command = 'TransactionStatusQuery', $remarks = 'Transaction Status Query', $occasion = '')
 	{
-		$token = self::token();
+		$token    = self::token();
 		$endpoint = (self::$env == 'live')
 			? 'https://api.safaricom.co.ke/mpesa/transactionstatus/v1/query'
 			: 'https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query';
 
 		$post_data = array(
-			'Initiator'           => self::$username,
-			'SecurityCredential'  => self::$credentials,
-			'CommandID'           => $command,
-			'TransactionID'       => $transaction,
-			'PartyA'              => self::$shortcode,
-			'IdentifierType'      => self::$type,
-			'ResultURL'           => self::$results,
-			'QueueTimeOutURL'     => self::$timeout,
-			'Remarks'             => $remarks,
-			'Occasion'            => $occasion
+			'Initiator'          => self::$username,
+			'SecurityCredential' => self::$credentials,
+			'CommandID'          => $command,
+			'TransactionID'      => $transaction,
+			'PartyA'             => self::$shortcode,
+			'IdentifierType'     => self::$type,
+			'ResultURL'          => self::$results,
+			'QueueTimeOutURL'    => self::$timeout,
+			'Remarks'            => $remarks,
+			'Occasion'           => $occasion,
 		);
 
-		$data_string  = json_encode($post_data);
-		$response     = wp_remote_post(
+		$data_string = json_encode($post_data);
+		$response    = wp_remote_post(
 			$endpoint,
 			array(
 				'headers' => array(
-					'Content-Type' => 'application/json',
-					'Authorization' => 'Bearer ' . self::token()
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . self::token(),
 				),
-				'body'    => $data_string
+				'body'    => $data_string,
 			)
 		);
 

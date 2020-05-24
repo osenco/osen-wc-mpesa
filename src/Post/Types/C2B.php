@@ -1,5 +1,7 @@
 <?php
+
 namespace Osen\Post\Types;
+
 /**
  * @package MPesa For WooCommerce
  * @subpackage Menus
@@ -9,21 +11,17 @@ namespace Osen\Post\Types;
 
 class C2B
 {
-    function __construct()
-    {
-
-    }
-
     public static function init()
     {
         add_action('init', [new self, 'mpesaipn_post_type'], 0);
         add_filter('manage_mpesaipn_posts_columns', [new self, 'filter_mpesaipn_table_columns']);
-        add_action('manage_mpesaipn_posts_custom_column',[new self, 'mpesaipn_table_column_content'], 10, 2);
+        add_action('manage_mpesaipn_posts_custom_column', [new self, 'mpesaipn_table_column_content'], 10, 2);
         add_filter('manage_edit-mpesaipn_sortable_columns', [new self, 'mpesaipn_columns_sortable']);
     }
 
     // Register Custom Post - Payments
-    public static function mpesaipn_post_type() {
+    public static function mpesaipn_post_type()
+    {
 
         $labels = array(
             'name'                  => _x('Payments', 'Payment General Name', 'woocommerce'),
@@ -140,9 +138,9 @@ class C2B
                     "failed"        => "This Order Failed"
                 );
 
-                echo ($value = get_post_meta($post_id, '_order_status', true)) 
-                    ? '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit">'.esc_attr($statuses[$value]).'</a>') 
-                    : '<a href="'.admin_url('post.php?post='.esc_attr(trim($order_id)).'&action=edit"').'>Set Status</a>';
+                echo ($value = get_post_meta($post_id, '_order_status', true))
+                    ? '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>')
+                    : '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit"') . '>Set Status</a>';
                 break;
         }
     }
@@ -154,13 +152,14 @@ class C2B
      * @param array $columns The original columns
      * @return array $columns The filtered columns
      */
-    public static function mpesaipn_columns_sortable($columns) 
+    public static function mpesaipn_columns_sortable($columns)
     {
         $columns['title']       = "Type";
         $columns['customer']    = "Customer";
         $columns['reference']   = "Reference";
         $columns['receipt']     = "Receipt";
         $columns['status']      = "Status";
+
         return $columns;
-    }   
+    }
 }

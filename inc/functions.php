@@ -22,8 +22,7 @@ function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 	}
 }
 
-add_action('woocommerce_thankyou_mpesa', function ($order_id)
-{
+add_action('woocommerce_thankyou_mpesa', function ($order_id) {
 	$mpesa = get_option('woocommerce_mpesa_settings');
 	$idtype = Osen\Mpesa\C2B::$type;
 	$url = home_url('?pesaipn&order=');
@@ -104,8 +103,8 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id)
 								<li>Select <b>Lipa na M-PESA</b>.</li>
 								<li>Select <b><?php echo $type; ?></b>.</li>
 								<?php if ($idtype == 4) : ?>
-									<li>Enter <b><?php echo $reference; ?></b> as Account no.</li>
 									<li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as business no.</li>
+									<li>Enter <b><?php echo $reference; ?></b> as Account no.</li>
 								<?php else : ?>
 									<li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as till no.</li>
 								<?php endif; ?>
@@ -119,7 +118,7 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id)
 				</tbody>
 			</table>
 		</section>
-	<?php endif;
+<?php endif;
 
 	echo <<<JS
 	<script id="pesaipn-checker">
@@ -164,17 +163,12 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id)
 								);
 
 								$("#missed_stk").hide();
-
-								location.reload();
-
 								clearInterval(checker);
-
 								return false;
 							}
 						});
 					}
 				}
-
 			},
 			3000);
 		});

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package MPesa For WooCommerce
  * @subpackage WooCommerce Functions
@@ -17,13 +18,13 @@ function wc_mpesa_add_to_gateways($gateways)
 }
 
 add_action('plugins_loaded', 'wc_mpesa_gateway_init', 11);
-function wc_mpesa_gateway_init() 
+function wc_mpesa_gateway_init()
 {
 	/**
 	 * @class WC_Gateway_MPesa
 	 * @extends WC_Payment_Gateway
 	 */
-	class WC_MPESA_Gateway extends WC_Payment_Gateway 
+	class WC_MPESA_Gateway extends WC_Payment_Gateway
 	{
 		public $mpesa_name;
 		public $mpesa_shortcode;
@@ -43,26 +44,26 @@ function wc_mpesa_gateway_init()
 		/**
 		 * Constructor for the gateway.
 		 */
-		public function __construct() 
+		public function __construct()
 		{
-			
+
 			$env 			= get_option('woocommerce_mpesa_settings')["env"];
-			$b2c_settings	= (isset(get_option('woocommerce_mpesa_settings')['enable_b2c']) && get_option('woocommerce_mpesa_settings')['enable_b2c'] == 'yes') 
-				? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">Setup Business-2-Customer</a>.</strong>' 
+			$b2c_settings	= (isset(get_option('woocommerce_mpesa_settings')['enable_b2c']) && get_option('woocommerce_mpesa_settings')['enable_b2c'] == 'yes')
+				? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="' . admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences') . '">Setup Business-2-Customer</a>.</strong>'
 				: '';
 
-			$test_cred 		= ($env == 'sandbox') 
-				? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>' 
-				:  
+			$test_cred 		= ($env == 'sandbox')
+				? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
+				:
 				'';
-				$color = isset($_GET['reg-state']) ? $_GET['reg-state'] : 'black';
-				$register = isset($_GET['mpesa-urls-registered']) ? "<div style='color: {$color}'>{$_GET['mpesa-urls-registered']}</div>" : '';
-				//unset($_SESSION['mpesa_url_registration']);
+			$color = isset($_GET['reg-state']) ? $_GET['reg-state'] : 'black';
+			$register = isset($_GET['mpesa-urls-registered']) ? "<div style='color: {$color}'>{$_GET['mpesa-urls-registered']}</div>" : '';
+			//unset($_SESSION['mpesa_url_registration']);
 
 			$this->id                 		= 'mpesa';
 			$this->icon               		= apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__));
 			$this->method_title       		= __('Lipa Na MPesa', 'woocommerce');
-			$this->method_description 		= $register.(($env == 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>'.$b2c_settings.'<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>'.$test_cred).'<li>We have a <a target="_blank" href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
+			$this->method_description 		= $register . (($env == 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . $b2c_settings . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
 			$this->has_fields         		= false;
 
 			// Load settings
@@ -77,7 +78,7 @@ function wc_mpesa_gateway_init()
 			$this->enable_for_virtual 		= $this->get_option('enable_for_virtual', 'yes') === 'yes' ? true : false;
 
 			add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
-			
+
 			add_filter('woocommerce_payment_complete_order_status', array($this, 'change_payment_complete_order_status'), 10, 3);
 
 			// Customer Emails
@@ -93,14 +94,14 @@ function wc_mpesa_gateway_init()
 		{
 			$shipping_methods = array();
 
-			foreach (WC()->shipping()->load_shipping_methods() as $method){
-				$shipping_methods[ $method->id ] = $method->get_method_title();
+			foreach (WC()->shipping()->load_shipping_methods() as $method) {
+				$shipping_methods[$method->id] = $method->get_method_title();
 			}
 
 			$this->form_fields = array(
 				'enabled' => array(
 					'title'       	=> __('Enable/Disable', 'woocommerce'),
-					'label'       	=> __('Enable '.$this->method_title, 'woocommerce'),
+					'label'       	=> __('Enable ' . $this->method_title, 'woocommerce'),
 					'type'        	=> 'checkbox',
 					'description' 	=> '',
 					'default'     	=> 'yes',
@@ -116,9 +117,9 @@ function wc_mpesa_gateway_init()
 					'title'       	=> __('Environment', 'woocommerce'),
 					'type'        	=> 'select',
 					'options'		=> array(
-				     	'sandbox' 	=> __('Sandbox', 'woocommerce'),
-				      	'live' 		=> __('Live', 'woocommerce'),
-				   ),
+						'sandbox' 	=> __('Sandbox', 'woocommerce'),
+						'live' 		=> __('Live', 'woocommerce'),
+					),
 					'description' 	=> __('MPesa Environment', 'woocommerce'),
 					'desc_tip'    	=> true,
 				),
@@ -126,15 +127,15 @@ function wc_mpesa_gateway_init()
 					'title'       	=> __('Identifier Type', 'woocommerce'),
 					'type'        	=> 'select',
 					'options' => array(
-				      	/**1 => __('MSISDN', 'woocommerce'),*/
-				      	4 			=> __('Paybill Number', 'woocommerce'),
-				     	2 			=> __('Till Number', 'woocommerce')
-				   ),
+						/**1 => __('MSISDN', 'woocommerce'),*/
+						4 			=> __('Paybill Number', 'woocommerce'),
+						2 			=> __('Till Number', 'woocommerce')
+					),
 					'description' 	=> __('MPesa Identifier Type', 'woocommerce'),
 					'desc_tip'    	=> true,
 				),
 				'headoffice' => array(
-					'title'       	=> __('Head Office Number', 'woocommerce'),
+					'title'       	=> __('Store Number/Paybill', 'woocommerce'),
 					'type'        	=> 'text',
 					'description' 	=> __('Store Number (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
 					'default'     	=> __('174379', 'woocommerce'),
@@ -204,9 +205,9 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'title'       => __('Order Status on Payment', 'woocommerce'),
 					'type'        => 'select',
 					'options' => array(
-				      	'completed' => __('Mark order as completed', 'woocommerce'),
-				     	'processing' => __('Mark order as processing', 'woocommerce')
-				   ),
+						'completed' => __('Mark order as completed', 'woocommerce'),
+						'processing' => __('Mark order as processing', 'woocommerce')
+					),
 					'description' => __('What status to set the order after Mpesa payment has been received', 'woocommerce'),
 					'desc_tip'    => true,
 				),
@@ -233,7 +234,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'title'       	=> __('Manual Payments', 'woocommerce'),
 					'label'       	=> __('Enable C2B API', 'woocommerce'),
 					'type'        	=> 'checkbox',
-					'description' 	=> '<small>'.(($this->get_option('idtype') == 4) ? 'This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>Once enabled, ' : '').'<a class="button button-secondary" href="'.home_url('wcpesa/register/').'">Click here to register confirmation & validation URLs</a></small>',
+					'description' 	=> '<small>' . (($this->get_option('idtype') == 4) ? 'This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>Once enabled, ' : '') . '<a class="button button-secondary" href="' . home_url('wcpesa/register/') . '">Click here to register confirmation & validation URLs</a></small>',
 					'default'     	=> 'no',
 				),
 				// 'enable_b2c' => array(
@@ -266,7 +267,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 				// Test if order needs shipping.
 				if (0 < sizeof($order->get_items())) {
 					foreach ($order->get_items() as $item) {
-						$_product = $item->get_product();
+						$_product = wc_get_product($item['product_id']);;
 						if ($_product && $_product->needs_shipping()) {
 							$needs_shipping = true;
 							break;
@@ -278,12 +279,12 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 			$needs_shipping = apply_filters('woocommerce_cart_needs_shipping', $needs_shipping);
 
 			// Virtual order, with virtual disabled
-			if (! $this->enable_for_virtual && ! $needs_shipping) {
+			if (!$this->enable_for_virtual && !$needs_shipping) {
 				return false;
 			}
 
 			// Only apply if all packages are being shipped via chosen method, or order is virtual.
-			if (! empty($this->enable_for_methods) && $needs_shipping) {
+			if (!empty($this->enable_for_methods) && $needs_shipping) {
 				$chosen_shipping_methods = array();
 
 				if (is_object($order)) {
@@ -309,19 +310,19 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 		public function process_payment($order_id)
 		{
 			$order 		= new WC_Order($order_id);
-			
+
 			$total 		= $order->get_total();
 			$phone 		= $order->get_billing_phone();
 			$first_name	= $order->get_billing_first_name();
 			$last_name 	= $order->get_billing_last_name();
 
-			$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name').' Purchase', 'WCMPesa');
+			$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
-			if($result){
+			if ($result) {
 				$request_id = $result['MerchantRequestID'];
 
 				if (isset($result['errorCode'])) {
-					$error_message = 'MPesa Error '.$result['errorCode'].': '.$result['errorMessage'];
+					$error_message = 'MPesa Error ' . $result['errorCode'] . ': ' . $result['errorMessage'];
 					$order->update_status('failed', __($error_message, 'woocommerce'));
 					wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
 					return array(
@@ -332,7 +333,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					/**
 					 * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
 					 */
-					$order->update_status('on-hold', __('Awaiting MPesa confirmation of payment from '.$phone.'.', 'woocommerce'));
+					$order->update_status('on-hold', __('Awaiting MPesa confirmation of payment from ' . $phone . '.', 'woocommerce'));
 
 					/** 
 					 * Reduce stock levels
@@ -342,17 +343,17 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					/** 
 					 * Remove contents from cart
 					 */
-					WC()->cart->empty_cart(); 
+					WC()->cart->empty_cart();
 
 					// Insert the payment into the database
 					$post_id = wp_insert_post(
 						array(
 							'post_title' 	=> 'Checkout',
-							'post_content'	=> "Response: ".json_encode($result),
+							'post_content'	=> "Response: " . json_encode($result),
 							'post_status'	=> 'publish',
 							'post_type'		=> 'mpesaipn',
 							'post_author'	=> is_user_logged_in() ? get_current_user_id() : $this->get_option('accountant'),
-						) 
+						)
 					);
 
 					update_post_meta($post_id, '_customer', "{$first_name} {$last_name}");
@@ -365,13 +366,13 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					update_post_meta($post_id, '_receipt', 'N/A');
 					update_post_meta($post_id, '_order_status', 'on-hold');
 
-					$this->instructions .= '<p>Awaiting MPesa confirmation of payment from '.$phone.' for request '.$request_id.'. Check your phone for the STK Prompt.</p>';
+					$this->instructions .= '<p>Awaiting MPesa confirmation of payment from ' . $phone . ' for request ' . $request_id . '. Check your phone for the STK Prompt.</p>';
 
 					// Return thankyou redirect
-					return array(																																																																																																																																																														
+					return array(
 						'result' 	=> 'success',
 						'redirect'	=> $this->get_return_url($order),
-					);																																 
+					);
 				}
 			} else {
 				$error_message = __('Could not connect to Daraja', 'woocommerce');
@@ -395,7 +396,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 			// 	echo wpautop(wptexturize($this->instructions));
 			// }
 		}
-		
+
 		/**
 		 * Add content to the WC emails.
 		 *
@@ -406,7 +407,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 		 */
 		public function email_instructions($order, $sent_to_admin, $plain_text = false)
 		{
-			if ($this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method()) {
+			if ($this->instructions && !$sent_to_admin && $this->id === $order->get_payment_method()) {
 				echo wpautop(wptexturize($this->instructions)) . PHP_EOL;
 			}
 		}
