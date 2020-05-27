@@ -179,24 +179,24 @@ JS;
 add_action('init', 'wc_mpesa_rewrite_add_rewrites');
 function wc_mpesa_rewrite_add_rewrites()
 {
-	add_rewrite_rule('wcpesa/([^/]*)/?', 'index.php?wcpesa=$matches[1]', 'top');
+	add_rewrite_rule('lipwa/([^/]*)/?', 'index.php?lipwa=$matches[1]', 'top');
 }
 
 add_filter('query_vars', 'wc_mpesa_rewrite_add_var');
 function wc_mpesa_rewrite_add_var($vars)
 {
-	$vars[] = 'wcpesa';
+	$vars[] = 'lipwa';
 	return $vars;
 }
 
 add_action('template_redirect', 'wc_mpesa_process_ipn');
 function wc_mpesa_process_ipn()
 {
-	if (get_query_var('wcpesa')) {
+	if (get_query_var('lipwa')) {
 		header("Access-Control-Allow-Origin: *");
 		header("Content-Type: Application/json");
 
-		$action = get_query_var('wcpesa', 'something_ominous');
+		$action = get_query_var('lipwa', 'something_ominous');
 
 		switch ($action) {
 			case "validate":
@@ -327,7 +327,6 @@ function wc_mpesa_process_ipn()
 				$resultCode 						= $response['Body']['stkCallback']['ResultCode'];
 				$resultDesc 						= $response['Body']['stkCallback']['ResultDesc'];
 				$merchantRequestID 					= $response['Body']['stkCallback']['MerchantRequestID'];
-				$checkoutRequestID 					= $response['Body']['stkCallback']['CheckoutRequestID'];
 
 				$post = wc_mpesa_post_id_by_meta_key_and_value('_request_id', $merchantRequestID);
 				wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
@@ -341,22 +340,16 @@ function wc_mpesa_process_ipn()
 					$first_name 					= $order->get_billing_first_name();
 					$last_name 						= $order->get_billing_last_name();
 					$customer 						= "{$first_name} {$last_name}";
-				} else {
-					$customer 						= "MPesa Customer";
-				}
 
-				if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
-					$amount 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
-					$mpesaReceiptNumber 			= $response['Body']['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
-					$balance 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
-					$transactionDate 				= $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
-					$phone 							= $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
+					if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
+						$amount 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][0]['Value'];
+						$mpesaReceiptNumber 			= $response['Body']['stkCallback']['CallbackMetadata']['Item'][1]['Value'];
+						$balance 						= $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
+						$transactionDate 				= $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
+						$phone 							= $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
 
-					$after_ipn_paid = round($before_ipn_paid) + round($amount);
-					$ipn_balance = $after_ipn_paid - $amount_due;
-
-					if (wc_get_order($order_id)) {
-						$order = new WC_Order($order_id);
+						$after_ipn_paid = round($before_ipn_paid) + round($amount);
+						$ipn_balance = $after_ipn_paid - $amount_due;
 
 						if ($ipn_balance == 0) {
 							update_post_meta($post, '_order_status', 'complete');
@@ -375,24 +368,25 @@ function wc_mpesa_process_ipn()
 							$order->add_order_note(__("MPesa Payment from {$phone} Incomplete"));
 							update_post_meta($post, '_order_status', 'on-hold');
 						}
-					}
 
-					update_post_meta($post, '_paid', $after_ipn_paid);
-					update_post_meta($post, '_amount', $amount_due);
-					update_post_meta($post, '_balance', $ipn_balance);
-					update_post_meta($post, '_phone', $phone);
-					update_post_meta($post, '_customer', $customer);
-					update_post_meta($post, '_order_id', $order_id);
-					update_post_meta($post, '_receipt', $mpesaReceiptNumber);
-				} else {
-					if (wc_get_order($order_id)) {
-						$order = new WC_Order($order_id);
-						$order->update_status('on-hold');
+						update_post_meta($post, '_paid', $after_ipn_paid);
+						update_post_meta($post, '_amount', $amount_due);
+						update_post_meta($post, '_balance', $ipn_balance);
+						update_post_meta($post, '_phone', $phone);
+						update_post_meta($post, '_customer', $customer);
+						update_post_meta($post, '_order_id', $order_id);
+						update_post_meta($post, '_receipt', $mpesaReceiptNumber);
+					} else {
+						$order->update_status('cancelled');
 						$order->add_order_note(__("MPesa Error {$resultCode}: {$resultDesc}"));
 					}
-				}
 
-				exit(wp_send_json(Osen\Mpesa\STK::reconcile()));
+					exit(wp_send_json(Osen\Mpesa\STK::reconcile()));
+				} else {
+					exit(wp_send_json(Osen\Mpesa\STK::reconcile(function () {
+						return false;
+					})));
+				}
 				break;
 
 			case "status":

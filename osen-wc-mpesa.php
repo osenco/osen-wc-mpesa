@@ -3,20 +3,20 @@
 /**
  * @package Mpesa For WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.20.56
+ * @version 1.20.57
  *
  * Plugin Name: MPesa For WooCommerce
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.20.56
+ * Version: 1.20.57
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
  * Tested up to: 5.4
  * 
  * WC requires at least: 3.5.0
- * WC tested up to: 4.0
+ * WC tested up to: 4.1
  * 
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -140,8 +140,8 @@ spl_autoload_register(function ($class) {
 /**
  * Initialize all our custom post types
  */
-Osen\Post\Types\C2B::init();
 //Osen\Post\Types\B2C::init();
+Osen\Post\Types\C2B::init();
 
 /**
  * Initialize our admin menus
@@ -221,6 +221,9 @@ foreach (glob(plugin_dir_path(__FILE__) . 'inc/*.php') as $filename) {
 	require_once $filename;
 }
 
+/**
+ * Auto-updates
+ */
 require __DIR__ . '/updates/plugin-update-checker.php';
 $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
 	'https://raw.githubusercontent.com/osenco/osen-wc-mpesa/master/updates.json',
