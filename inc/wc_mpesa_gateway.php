@@ -234,7 +234,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'title'       	=> __('Manual Payments', 'woocommerce'),
 					'label'       	=> __('Enable C2B API(Offline Payments)', 'woocommerce'),
 					'type'        	=> 'checkbox',
-					'description' 	=> '<small>' . (($this->get_option('idtype') == 4) ? 'This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>' : '') . '<a class="button button-secondary" href="' . home_url('wcpesa/register/') . '">Once enabled, click here to register confirmation & validation URLs</a><p>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</p></small>',
+					'description' 	=> '<small>' . (($this->get_option('idtype') == 4) ? 'This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>' : '') . '<a class="button button-secondary" href="' . home_url('lipwa/register/') . '">Once enabled, click here to register confirmation & validation URLs</a><p>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</p></small>',
 					'default'     	=> 'no',
 				),
 				// 'enable_b2c' => array(

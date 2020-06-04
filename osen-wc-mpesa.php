@@ -170,10 +170,10 @@ Osen\Mpesa\STK::set(
 		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
 		'type'	 		=> isset($c2b['idtype']) ? $c2b['idtype'] : 4,
 		'passkey'	 	=> isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-		'validate' 		=> home_url('wcpesa/validate/'),
-		'confirm' 		=> home_url('wcpesa/confirm/'),
-		'reconcile' 	=> home_url('wcpesa/reconcile/'),
-		'timeout' 		=> home_url('wcpesa/timeout/')
+		'validate' 		=> home_url('lipwa/validate/'),
+		'confirm' 		=> home_url('lipwa/confirm/'),
+		'reconcile' 	=> home_url('lipwa/reconcile/'),
+		'timeout' 		=> home_url('lipwa/timeout/')
 	)
 );
 
@@ -187,10 +187,10 @@ Osen\Mpesa\C2B::set(
 		'shortcode' 	=> isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
 		'type'	 		=> isset($c2b['idtype']) ? $c2b['idtype'] : 4,
 		'passkey'	 	=> isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-		'validate' 		=> home_url('wcpesa/validate/'),
-		'confirm' 		=> home_url('wcpesa/confirm/'),
-		'reconcile' 	=> home_url('wcpesa/reconcile/'),
-		'timeout' 		=> home_url('wcpesa/timeout/')
+		'validate' 		=> home_url('lipwa/validate/'),
+		'confirm' 		=> home_url('lipwa/confirm/'),
+		'reconcile' 	=> home_url('lipwa/reconcile/'),
+		'timeout' 		=> home_url('lipwa/timeout/')
 	)
 );
 
@@ -207,10 +207,10 @@ Osen\Mpesa\C2B::set(
 // 		'passkey'	 	=> isset($b2c['passkey']) ? $b2c['passkey'] : '',
 // 		'username'	 	=> isset($b2c['username']) ? $b2c['username'] : '',
 // 		'password'	 	=> isset($b2c['password']) ? $b2c['password'] : '',
-// 		'validate' 		=> home_url('wcpesa/validate/'),
-// 		'confirm' 		=> home_url('wcpesa/confirm/'),
-// 		'reconcile' 	=> home_url('wcpesa/reconcile/'),
-// 		'timeout' 		=> home_url('wcpesa/timeout/')
+// 		'validate' 		=> home_url('lipwa/validate/'),
+// 		'confirm' 		=> home_url('lipwa/confirm/'),
+// 		'reconcile' 	=> home_url('lipwa/reconcile/'),
+// 		'timeout' 		=> home_url('lipwa/timeout/')
 // 	)
 // );
 
