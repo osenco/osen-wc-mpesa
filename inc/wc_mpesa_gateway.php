@@ -47,8 +47,8 @@ function wc_mpesa_gateway_init()
 		public function __construct()
 		{
 
-			$env 			= get_option('woocommerce_mpesa_settings')["env"];
-			$b2c_settings	= (isset(get_option('woocommerce_mpesa_settings')['enable_b2c']) && get_option('woocommerce_mpesa_settings')['enable_b2c'] == 'yes')
+			$env 			= $this->get_option('env', 'sandbox');
+			$b2c_settings	= ($this->get_option('enable_b2c', 'no') == 'yes')
 				? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="' . admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences') . '">Setup Business-2-Customer</a>.</strong>'
 				: '';
 
@@ -180,13 +180,13 @@ Enter your service (MPesa) PIN to proceed. In case you don\'t see the pop up on 
 You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 					'desc_tip'    => true,
 				),
-				// 'instructions' => array(
-				// 	'title'       => __('Instructions', 'woocommerce'),
-				// 	'type'        => 'textarea',
-				// 	'description' => __('Instructions that will be added to the thank you page.', 'woocommerce'),
-				// 	'default'     => __('Thank you for buying from us. You will receive a confirmation message from MPesa shortly.', 'woocommerce'),
-				// 	'desc_tip'    => true,
-				// ),
+				'instructions' => array(
+					'title'       => __('Instructions', 'woocommerce'),
+					'type'        => 'textarea',
+					'description' => __('Instructions that will be added to the thank you page.', 'woocommerce'),
+					'default'     => __('Thank you for buying from us. Your order will be processed once we confirm your payment.', 'woocommerce'),
+					'desc_tip'    => true,
+				),
 				// 'account' => array(
 				// 	'title'       => __('Account Name', 'woocommerce'),
 				// 	'type'        => 'text',
@@ -392,9 +392,9 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 		 */
 		public function thankyou_page()
 		{
-			// if ($this->instructions) {
-			// 	echo wpautop(wptexturize($this->instructions));
-			// }
+			if ($this->instructions) {
+				echo wpautop(wptexturize($this->instructions));
+			}
 		}
 
 		/**

@@ -33,10 +33,6 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
 		$reference = $order_id;
 	}
 
-	if ($order->get_payment_method() !== 'mpesa') {
-		return;
-	}
-
 	$type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services'; ?>
 	<style>
 		@keyframes wave {
@@ -91,7 +87,7 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
 				<thead>
 					<tr>
 						<th class="woocommerce-table__product-name product-name">
-							<?php _e("STK Push didn't work? Pay Manually Via M-PESA") ?>
+							<?php _e("STK Push didn't work? Pay Manually Via M-PESA"); ?>
 						</th>
 					</tr>
 				</thead>
@@ -113,6 +109,15 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
 								<li>Confirm your details and press OK.</li>
 								<li>Wait for a confirmation message from M-PESA.</li>
 							</ol>
+							
+						</td>
+					</tr>
+					<tr class="woocommerce-table__line-item order_item">
+						<td class="woocommerce-table__product-name product-name">
+							<form action="<?php echo home_url("lipwa/request"); ?>" mhod="POST" id="renitiate-form">
+								<input type="hidden" name="order" value="<?php echo $order_id; ?>">
+								<button id="renitiate-button" class="button alt" type="submit">Resend STK Push</button>
+							</form>
 						</td>
 					</tr>
 				</tbody>
@@ -123,6 +128,18 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
 	echo <<<JS
 	<script id="pesaipn-checker">
 		jQuery(document).ready(function($) {
+			$('#renitiate-form').submit(function(e){
+				e.preventDefault();
+
+				var form = $(this);
+
+				$.post(form.attr('action'), form.serialize(), function(response){
+					$("#mpesa_receipt").html(
+									'STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
+								);
+				});
+			});
+
 			var checker = setInterval(() => {
 				if ($("#payment_method").length && $("#payment_method").val() !== 'mpesa') {
 					clearInterval(checker);
@@ -199,6 +216,18 @@ function wc_mpesa_process_ipn()
 		$action = get_query_var('lipwa', 'something_ominous');
 
 		switch ($action) {
+			case "request":
+				$order_id = $_POST['order'];
+				$order 		= new WC_Order($order_id);
+				$total 		= $order->get_total();
+				$phone 		= $order->get_billing_phone();
+				$first_name	= $order->get_billing_first_name();
+				$last_name 	= $order->get_billing_last_name();
+
+				$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+
+				wp_send_json($result);
+			break;
 			case "validate":
 				exit(wp_send_json(
 					Osen\Mpesa\STK::validate()

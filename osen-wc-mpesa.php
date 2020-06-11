@@ -3,13 +3,13 @@
 /**
  * @package Mpesa For WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.20.64
+ * @version 1.20.65
  *
  * Plugin Name: MPesa For WooCommerce
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.20.64
+ * Version: 1.20.65
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
@@ -47,12 +47,6 @@ if (!defined('WCM_PLUGIN_FILE')) {
 	define('WCM_PLUGIN_FILE', __FILE__);
 }
 
-add_action('wp', function () {
-	if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
-		deactivate_plugins(plugin_basename(__FILE__));
-	}
-});
-
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check()
 {
@@ -60,13 +54,15 @@ function wc_mpesa_activation_check()
 		add_option('wc_mpesa_flush_rewrite_rules_flag', true);
 	}
 
-	if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
-		deactivate_plugins(plugin_basename(__FILE__));
-		exit('Please Install/Activate WooCommerce for the MPesa extension to work');
-	}
-
 	if (!is_plugin_active('woocommerce/woocommerce.php')) {
 		deactivate_plugins(plugin_basename(__FILE__));
+
+		add_action('admin_notices', function () {
+			$class = 'notice notice-error is-dismissible';
+			$message = __('Please Install/Activate WooCommerce for this extension to work..', 'woocommerce');
+
+			printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
+		});
 	}
 }
 
