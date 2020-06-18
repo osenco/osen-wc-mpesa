@@ -1,5 +1,5 @@
 <?php
-namespace Osen\Settings;
+namespace Osen\Woocommerce\Settings;
 /**
  * @package WPay C2B
  * @subpackage Admin Settings Page

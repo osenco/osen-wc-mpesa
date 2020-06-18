@@ -1,6 +1,6 @@
 <?php
 
-namespace Osen\Mpesa;
+namespace Osen\Woocommerce\Mpesa;
 
 /**
  * @package MPesa For WooCommerce

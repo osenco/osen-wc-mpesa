@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package MPesa For WooCommerce
+						 * @package MPesa For WooCommerce
  * @subpackage WooCommerce Functions
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
@@ -316,7 +316,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
 			$first_name	= $order->get_billing_first_name();
 			$last_name 	= $order->get_billing_last_name();
 
-			$result 	= Osen\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+			$result 	= Osen\Woocommerce\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
 			if ($result) {
 				$request_id = $result['MerchantRequestID'];

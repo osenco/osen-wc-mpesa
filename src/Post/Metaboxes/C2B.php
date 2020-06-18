@@ -1,6 +1,6 @@
 <?php
 
-namespace Osen\Post\Metaboxes;
+namespace Osen\Woocommerce\Post\Metaboxes;
 
 /**
  * @package MPesa For WooCommerce

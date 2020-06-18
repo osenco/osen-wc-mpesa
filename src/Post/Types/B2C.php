@@ -1,6 +1,6 @@
 <?php
 
-namespace Osen\Post\Types;
+namespace Osen\Woocommerce\Post\Types;
 
 /**
  * @package MPesa For WooCommerce

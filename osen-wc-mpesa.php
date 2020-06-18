@@ -3,13 +3,13 @@
 /**
  * @package Mpesa For WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.20.65
+ * @version 1.20.66
  *
  * Plugin Name: MPesa For WooCommerce
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.20.65
+ * Version: 1.20.66
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
@@ -46,6 +46,8 @@ define('WCM_VER', '1.20.5');
 if (!defined('WCM_PLUGIN_FILE')) {
 	define('WCM_PLUGIN_FILE', __FILE__);
 }
+
+require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
 function wc_mpesa_activation_check()
@@ -121,43 +123,31 @@ function mpesa_row_meta($links, $file)
 	return (array) $links;
 }
 
-spl_autoload_register(function ($class) {
-	if (strpos($class, 'Osen') === false) {
-		return;
-	}
-
-	$class 	= ltrim($class, '\\');
-	$class	= str_replace('Osen\\', '', $class);
-	$file 	= str_replace('\\', '/', $class);
-
-	require_once plugin_dir_path(__FILE__) . "src/{$file}.php";
-});
-
 /**
  * Initialize all our custom post types
  */
-//Osen\Post\Types\B2C::init();
-Osen\Post\Types\C2B::init();
+//Osen\Woocommerce\Post\Types\B2C::init();
+Osen\Woocommerce\Post\Types\C2B::init();
 
 /**
  * Initialize our admin menus
  */
-Osen\Menus\Menu::init();
+Osen\Woocommerce\Menus\Menu::init();
 
 /**
  * Initialize settings pages for B2C API
  */
-//Osen\Settings\B2C::init();
-Osen\Settings\Withdraw::init();
+//Osen\Woocommerce\Settings\B2C::init();
+Osen\Woocommerce\Settings\Withdraw::init();
 
 /**
  * Initialize metaboxes for C2B API
  */
-Osen\Post\Metaboxes\C2B::init();
+Osen\Woocommerce\Post\Metaboxes\C2B::init();
 
 // Stk
 $c2b = get_option('woocommerce_mpesa_settings');
-Osen\Mpesa\STK::set(
+Osen\Woocommerce\Mpesa\STK::set(
 	array(
 		'env' 			=> isset($c2b['env']) ? $c2b['env'] : 'sandbox',
 		'appkey' 		=> isset($c2b['key']) ? $c2b['key'] : 'bclwIPkcRqw61yUt',
@@ -174,7 +164,7 @@ Osen\Mpesa\STK::set(
 );
 
 // c2b
-Osen\Mpesa\C2B::set(
+Osen\Woocommerce\Mpesa\C2B::set(
 	array(
 		'env' 			=> isset($c2b['env']) ? $c2b['env'] : 'sandbox',
 		'appkey' 		=> isset($c2b['key']) ? $c2b['key'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
@@ -192,7 +182,7 @@ Osen\Mpesa\C2B::set(
 
 //b2c
 // $b2c = get_option('b2c_wcmpesa_options');
-// Osen\Mpesa\B2C::set(
+// Osen\Woocommerce\Mpesa\B2C::set(
 // 	array(
 // 		'env' 			=> isset($b2c['env']) ? $b2c['env'] : 'sandbox',
 // 		'appkey' 		=> isset($b2c['key']) ? $b2c['key'] : '',

@@ -1,5 +1,5 @@
 <?php
-namespace Osen\Settings;
+namespace Osen\Woocommerce\Settings;
 
 /**
  * @package WPay C2B
@@ -160,6 +160,6 @@ class Withdraw{
         $PhoneNumber = str_replace("+", "", $phone);
         $PhoneNumber = preg_replace('/^0/', '254', $phone);
 
-        exit(wp_send_json(Osen\Mpesa\B2C::request($PhoneNumber, $Amount, $Ref)));
+        exit(wp_send_json(Osen\Woocommerce\Mpesa\B2C::request($PhoneNumber, $Amount, $Ref)));
     }
 }

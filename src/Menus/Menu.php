@@ -1,6 +1,6 @@
 <?php
 
-namespace Osen\Menus;
+namespace Osen\Woocommerce\Menus;
 
 class Menu
 {
