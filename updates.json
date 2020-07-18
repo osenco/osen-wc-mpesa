@@ -1,12 +1,12 @@
 {
 	"name": "Mpesa for Woocommerce",
-	"version": "1.20.77",
-	"download_url": "https://github.com/osenco/osen-wc-mpesa/archive/v1.20.77.zip",
+	"version": "1.20.78",
+	"download_url": "https://github.com/osenco/osen-wc-mpesa/archive/v1.20.78.zip",
 
 	"homepage": "https://wc-mpesa.osen.co.ke/",
 	"requires": "4.5",
 	"tested": "5.4",
-	"last_updated": "2020-07-17 12:00:00",
+	"last_updated": "2020-07-18 12:00:00",
 	"upgrade_notice": "Autoupdates from here on",
 
 	"author": "Osen Concepts",
@@ -15,7 +15,7 @@
 	"sections": {
 		"description": "<p>This plugin seeks to provide a simple plug-n-play implementation for integrating M-Pesa Payments into online stores built with WooCommerce and WordPress.</p>",
 		"installation": "Download the latest release from Github, and extract the zip file in your plugins directory of your WordPress instalation",
-		"changelog": "<ul><li>Removed .ke counties - now natively supported by WooCommerce</li><li>Added resend STK Push button on thank you page.</li><li>Changed paths from /wcpesa to /lipwa to avoid blacklisted names</li><li>Auto updates enabled</li><li>Reorder account number and paybill in C2B instructions</li><li>Mark order as cancelled if STK push times out or is cancelled</li></ul>",
+		"changelog": "<ul><li>Customizable resend button text</li><li>Fixed cancelled orders incase STK times out to allow for offline/delayed payments</li><li>Removed .ke counties - now natively supported by WooCommerce</li><li>Added resend STK Push button on thank you page.</li><li>Changed paths from /wcpesa to /lipwa to avoid blacklisted names</li><li>Auto updates enabled</li><li>Reorder account number and paybill in C2B instructions</li><li>Mark order as cancelled if STK push times out or is cancelled</li></ul>",
 		"going_live": "<p>While we have made all efforts to ensure this plugin works out of the box - with minimum configuration required - the service provider requires that the user go through a certain ardous process to migrate from sandbox(test) environment to production.</p><p>We have made a <a href='https://wc-mpesa.osen.co.ke/going-live'>tutorial here</a> to walk you through the process. We however have a team ready on call to assist you in this are, at a fiat fee of KSh 4000 one-off, should you find it difficult.</p>"
 	},
 	
@@ -32,6 +32,6 @@
 	"rating": 90,
 	"num_ratings": 1070,
 
-	"downloaded": 929,
-	"active_installs": 845
+	"downloaded": 1009,
+	"active_installs": 1005
 }

@@ -42,96 +42,96 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
         $reference = $order_id;
     }
 
-    $type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services';?>
-	<style>
-		@keyframes wave {
+    $type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services'; ?>
+    <style>
+        @keyframes wave {
 
-			0%,
-			60%,
-			100% {
-				transform: initial;
-			}
+            0%,
+            60%,
+            100% {
+                transform: initial;
+            }
 
-			30% {
-				transform: translateY(-15px);
-			}
-		}
+            30% {
+                transform: translateY(-15px);
+            }
+        }
 
-		@keyframes blink {
-			0% {
-				opacity: .2;
-			}
+        @keyframes blink {
+            0% {
+                opacity: .2;
+            }
 
-			20% {
-				opacity: 1;
-			}
+            20% {
+                opacity: 1;
+            }
 
-			100% {
-				opacity: .2;
-			}
-		}
+            100% {
+                opacity: .2;
+            }
+        }
 
-		.saving span {
-			animation: blink 1.4s linear infinite;
-			animation-fill-mode: both;
-		}
+        .saving span {
+            animation: blink 1.4s linear infinite;
+            animation-fill-mode: both;
+        }
 
-		.saving span:nth-child(2) {
-			animation-delay: .2s;
-		}
+        .saving span:nth-child(2) {
+            animation-delay: .2s;
+        }
 
-		.saving span:nth-child(3) {
-			animation-delay: .4s;
-		}
-	</style>
-	<section class="woocommerce-order-details">
-		<input type="hidden" id="current_order" value="<?php echo $order_id; ?>">
-		<input type="hidden" id="payment_method" value="<?php echo $order->get_payment_method(); ?>">
-		<p class="saving" id="mpesa_receipt">Confirming receipt, please wait</p>
-	</section>
+        .saving span:nth-child(3) {
+            animation-delay: .4s;
+        }
+    </style>
+    <section class="woocommerce-order-details">
+        <input type="hidden" id="current_order" value="<?php echo $order_id; ?>">
+        <input type="hidden" id="payment_method" value="<?php echo $order->get_payment_method(); ?>">
+        <p class="saving" id="mpesa_receipt">Confirming receipt, please wait</p>
+    </section>
 
-	<?php if (isset($mpesa['enable_c2b']) && $mpesa['enable_c2b'] == 'yes'): ?>
-		<section class="woocommerce-order-details" id="missed_stk">
-			<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
-				<thead>
-					<tr>
-						<th class="woocommerce-table__product-name product-name">
-							<?php _e("STK Push didn't work? Pay Manually Via M-PESA");?>
-						</th>
-					</tr>
-				</thead>
+    <?php if (isset($mpesa['enable_c2b']) && $mpesa['enable_c2b'] == 'yes') : ?>
+        <section class="woocommerce-order-details" id="missed_stk">
+            <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                <thead>
+                    <tr>
+                        <th class="woocommerce-table__product-name product-name">
+                            <?php _e("STK Push didn't work? Pay Manually Via M-PESA"); ?>
+                        </th>
+                    </tr>
+                </thead>
 
-				<tbody>
-					<tr class="woocommerce-table__line-item order_item">
-						<td class="woocommerce-table__product-name product-name">
-							<ol>
-								<li>Select <b>Lipa na M-PESA</b>.</li>
-								<li>Select <b><?php echo $type; ?></b>.</li>
-								<?php if ($idtype == 4): ?>
-									<li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as business no.</li>
-									<li>Enter <b><?php echo $reference; ?></b> as Account no.</li>
-								<?php else: ?>
-									<li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as till no.</li>
-								<?php endif;?>
-								<li>Enter Amount <b><?php echo round($total); ?></b>.</li>
-								<li>Enter your M-PESA PIN</li>
-								<li>Confirm your details and press OK.</li>
-								<li>Wait for a confirmation message from M-PESA.</li>
-							</ol>
+                <tbody>
+                    <tr class="woocommerce-table__line-item order_item">
+                        <td class="woocommerce-table__product-name product-name">
+                            <ol>
+                                <li>Select <b>Lipa na M-PESA</b>.</li>
+                                <li>Select <b><?php echo $type; ?></b>.</li>
+                                <?php if ($idtype == 4) : ?>
+                                    <li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as business no.</li>
+                                    <li>Enter <b><?php echo $reference; ?></b> as Account no.</li>
+                                <?php else : ?>
+                                    <li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as till no.</li>
+                                <?php endif; ?>
+                                <li>Enter Amount <b><?php echo round($total); ?></b>.</li>
+                                <li>Enter your M-PESA PIN</li>
+                                <li>Confirm your details and press OK.</li>
+                                <li>Wait for a confirmation message from M-PESA.</li>
+                            </ol>
 
-						</td>
-					</tr>
-					<tr class="woocommerce-table__line-item order_item">
-						<td class="woocommerce-table__product-name product-name">
-							<form action="<?php echo home_url("lipwa/request"); ?>" mhod="POST" id="renitiate-form">
-								<input type="hidden" name="order" value="<?php echo $order_id; ?>">
-								<button id="renitiate-button" class="button alt" type="submit">Resend STK Push</button>
-							</form>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</section>
+                        </td>
+                    </tr>
+                    <tr class="woocommerce-table__line-item order_item">
+                        <td class="woocommerce-table__product-name product-name">
+                            <form action="<?php echo home_url("lipwa/request"); ?>" mhod="POST" id="renitiate-form">
+                                <input type="hidden" name="order" value="<?php echo $order_id; ?>">
+                                <button id="renitiate-button" class="button alt" type="submit"><?php echo $mpesa['resend'] ?? 'Resend STK Push'; ?></button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 <?php endif;
 
     echo <<<JS
@@ -386,7 +386,6 @@ function wc_mpesa_process_ipn()
                         $balance            = $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
                         $transactionDate    = $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
                         $phone              = $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
-
                         $after_ipn_paid = round($before_ipn_paid) + round($amount);
                         $ipn_balance    = $after_ipn_paid - $amount_due;
 
@@ -417,7 +416,7 @@ function wc_mpesa_process_ipn()
                         update_post_meta($post, '_order_id', $order_id);
                         update_post_meta($post, '_receipt', $mpesaReceiptNumber);
                     } else {
-                        $order->update_status('cancelled');
+                        $order->update_status('on-hold');
                         $order->add_order_note(__("MPesa Error {$resultCode}: {$resultDesc}"));
                     }
 

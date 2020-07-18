@@ -1,7 +1,7 @@
 <?php
 
 /**
-						 * @package MPesa For WooCommerce
+ * @package MPesa For WooCommerce
  * @subpackage WooCommerce Functions
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
@@ -167,6 +167,13 @@ function wc_mpesa_gateway_init()
 					'type'        => 'textarea',
 					'description' => __('Used to create a password for use when making a Lipa Na M-Pesa Online Payment API call.', 'woocommerce'),
 					'default'     => __('bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', 'woocommerce'),
+					'desc_tip'    => true,
+				),
+				'resend' => array(
+					'title'       => __('Resend STK Button Text', 'woocommerce'),
+					'type'        => 'text',
+					'description' => __('Text description for resend STK prompt button', 'woocommerce'),
+					'default'     => __('Resend STK Push', 'woocommerce'),
 					'desc_tip'    => true,
 				),
 				'description' => array(
