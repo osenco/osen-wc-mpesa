@@ -3,20 +3,20 @@
 /**
  * @package Mpesa For WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.20.78
+ * @version 1.20.79
  *
  * Plugin Name: MPesa For WooCommerce
  * Plugin URI: https://wc-mpesa.osen.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 1.20.78
+ * Version: 1.20.79
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
  * Tested up to: 5.4
  * 
  * WC requires at least: 3.5.0
- * WC tested up to: 4.1
+ * WC tested up to: 4.3
  * 
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html

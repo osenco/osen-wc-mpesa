@@ -187,7 +187,7 @@ class STK
 	 * @param string $remark    - Remarks about transaction(optional)
 	 * @return array
 	 */
-	public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
+	public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
 	{
 		$phone = preg_replace('/^0/', '254', str_replace("+", "", $phone));
 
@@ -224,9 +224,15 @@ class STK
 				'body'    => $data_string,
 			)
 		);
-		return is_wp_error($response)
-			? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
-			: json_decode($response['body'], true);
+
+		if(is_wp_error($response)){
+			return array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja');
+		} else {
+			$body = json_decode($response['body'], true);
+			return is_null($request) 
+				? $body 
+				: array_merge($body, ['requested' => $post_data]);
+		}
 	}
 
 	/**

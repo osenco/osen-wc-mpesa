@@ -67,3 +67,18 @@ function woocommerce_emails_attach_downloadables($attachments, $status, $order)
 
 	return $attachments;
 }
+
+/**
+ * @since 1.20.79
+ */
+add_action('woocommerce_thankyou_mpesa', function ($order_id) {
+	$c2b = get_option('woocommerce_mpesa_settings');
+
+	if (($c2b['debug'] ?? 'no') == 'yes') {
+		echo '
+		<section class="woocommerce-order-details">
+		<p>Mpesa request body</p>
+			<code>'.WC()->session->get('mpesa_request').'</code>
+		</section>';
+	}
+});
