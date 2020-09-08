@@ -16,7 +16,7 @@ function wcmpesa_new_order_column($columns)
 
 /**
  * Render custom column content within edit.php table on event post types.
- * 
+ *
  * @access public
  * @param string $column The name of the column being acted upon
  * @return void
@@ -30,11 +30,11 @@ function shop_order_payments_table_column_content($column_id, $post_id)
 		case 'mpesa':
 			$statuses = array(
 				"processing" => "This Order Is Processing",
-				"on-hold" => "This Order Is On Hold",
-				"complete" => "This Order Is Complete",
-				"cancelled" => "This Order Is Cancelled",
-				"refunded" => "This Order Is Refunded",
-				"failed" => "This Order Failed"
+				"on-hold"    => "This Order Is On Hold",
+				"complete"   => "This Order Is Complete",
+				"cancelled"  => "This Order Is Cancelled",
+				"refunded"   => "This Order Is Refunded",
+				"failed"     => "This Order Failed",
 			);
 
 			echo ($value = get_post_meta($post_id, '_order_status', true)) ? '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>') : '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit"') . '>Set Status</a>';
@@ -78,7 +78,7 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
 		echo '
 		<section class="woocommerce-order-details">
 		<p>Mpesa request body</p>
-			<code>'.WC()->session->get('mpesa_request').'</code>
+			<code>' . WC()->session->get('mpesa_request') . '</code>
 		</section>';
 	}
 });

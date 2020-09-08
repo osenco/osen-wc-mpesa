@@ -7,6 +7,9 @@
  * @since 0.18.01
  */
 
+use Osen\Woocommerce\Mpesa\STK;
+use Osen\Woocommerce\Mpesa\C2B;
+
 function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 {
     global $wpdb;
@@ -33,7 +36,7 @@ function wc_mpesa_process_order($order)
 
 add_action('woocommerce_thankyou_mpesa', function ($order_id) {
     $mpesa  = get_option('woocommerce_mpesa_settings');
-    $idtype = Osen\Woocommerce\Mpesa\C2B::$type;
+    $idtype = C2B::$type;
     $url    = home_url('?pesaipn&order=');
 
     if (wc_get_order($order_id)) {
@@ -88,6 +91,18 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
         <input type="hidden" id="current_order" value="<?php echo $order_id; ?>">
         <input type="hidden" id="payment_method" value="<?php echo $order->get_payment_method(); ?>">
         <p class="saving" id="mpesa_receipt">Confirming receipt, please wait</p>
+        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+            <tbody>
+                <tr class="woocommerce-table__line-item order_item">
+                    <td class="woocommerce-table__product-name product-name">
+                        <form action="<?php echo home_url("lipwa/request"); ?>" method="POST" id="renitiate-form">
+                            <input type="hidden" name="order" value="<?php echo $order_id; ?>">
+                            <button id="renitiate-button" class="button alt" type="submit"><?php echo $mpesa['resend'] ?? 'Resend STK Push'; ?></button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </section>
 
     <?php if (isset($mpesa['enable_c2b']) && $mpesa['enable_c2b'] == 'yes') : ?>
@@ -119,14 +134,6 @@ add_action('woocommerce_thankyou_mpesa', function ($order_id) {
                                 <li>Wait for a confirmation message from M-PESA.</li>
                             </ol>
 
-                        </td>
-                    </tr>
-                    <tr class="woocommerce-table__line-item order_item">
-                        <td class="woocommerce-table__product-name product-name">
-                            <form action="<?php echo home_url("lipwa/request"); ?>" mhod="POST" id="renitiate-form">
-                                <input type="hidden" name="order" value="<?php echo $order_id; ?>">
-                                <button id="renitiate-button" class="button alt" type="submit"><?php echo $mpesa['resend'] ?? 'Resend STK Push'; ?></button>
-                            </form>
                         </td>
                     </tr>
                 </tbody>
@@ -234,13 +241,13 @@ function wc_mpesa_process_ipn()
                 $first_name = $order->get_billing_first_name();
                 $last_name  = $order->get_billing_last_name();
 
-                $result = Osen\Woocommerce\Mpesa\STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+                $result = STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
                 wp_send_json($result);
                 break;
             case "validate":
                 exit(wp_send_json(
-                    Osen\Woocommerce\Mpesa\STK::validate()
+                    STK::validate()
                 ));
                 break;
 
@@ -309,7 +316,7 @@ function wc_mpesa_process_ipn()
                         update_post_meta($post, '_order_status', 'complete');
 
                         $headers = 'From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n";
-                        wp_mail($order["billing_address"], 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . 'with receipt Number ' . $mpesaReceiptNumber . '.', $headers);
+                        wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . 'with receipt Number ' . $mpesaReceiptNumber . '.', $headers);
                     } elseif ($ipn_balance < 0) {
                         $currency = get_woocommerce_currency();
                         $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
@@ -329,11 +336,11 @@ function wc_mpesa_process_ipn()
                 update_post_meta($post, '_order_id', $order_id);
                 update_post_meta($post, '_receipt', $mpesaReceiptNumber);
 
-                exit(wp_send_json(Osen\Woocommerce\Mpesa\STK::confirm()));
+                exit(wp_send_json(STK::confirm()));
                 break;
 
             case "register":
-                Osen\Woocommerce\Mpesa\C2B::register(function ($response) {
+                C2B::register(function ($response) {
                     $status = isset($response['ResponseDescription']) ? 'success' : 'fail';
                     if ($status == 'fail') {
                         $message = isset($response['errorMessage']) ? $response['errorMessage'] : 'Could not register M-PESA URLs, try again later.';
@@ -396,7 +403,7 @@ function wc_mpesa_process_ipn()
                             $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
 
                             $headers[] = 'From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n";
-                            wp_mail($order["billing_address"], 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
+                            wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
                         } elseif ($ipn_balance < 0) {
                             $currency = get_woocommerce_currency();
                             $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
@@ -420,9 +427,9 @@ function wc_mpesa_process_ipn()
                         $order->add_order_note(__("MPesa Error {$resultCode}: {$resultDesc}"));
                     }
 
-                    exit(wp_send_json(Osen\Woocommerce\Mpesa\STK::reconcile()));
+                    exit(wp_send_json(STK::reconcile()));
                 } else {
-                    exit(wp_send_json(Osen\Woocommerce\Mpesa\STK::reconcile(function () {
+                    exit(wp_send_json(STK::reconcile(function () {
                         return false;
                     })));
                 }
@@ -430,7 +437,7 @@ function wc_mpesa_process_ipn()
 
             case "status":
                 $transaction = $_POST['transaction'];
-                exit(wp_send_json(Osen\Woocommerce\Mpesa\STK::status($transaction)));
+                exit(wp_send_json(STK::status($transaction)));
                 break;
 
             case "result":
@@ -466,7 +473,7 @@ function wc_mpesa_process_ipn()
                 $ReferenceData = $result['ReferenceData'];
                 $ReferenceItem = $ReferenceData['ReferenceItem'];
                 $Occasion      = $ReferenceItem[0]['Value'];
-                exit(wp_send_json(Osen\Woocommerce\Mpesa\STK::validate()));
+                exit(wp_send_json(STK::validate()));
                 break;
 
             case "timeout":
@@ -493,10 +500,10 @@ function wc_mpesa_process_ipn()
                     $order->add_order_note(__("MPesa Payment Timed Out", 'woocommerce'));
                 }
 
-                exit(wp_send_json(Osen\Woocommerce\Mpesa\STK::timeout()));
+                exit(wp_send_json(STK::timeout()));
                 break;
             default:
-                exit(wp_send_json(Osen\Woocommerce\Mpesa\C2B::register()));
+                exit(wp_send_json(C2B::register()));
         }
     }
 

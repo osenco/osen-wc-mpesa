@@ -1,12 +1,12 @@
 {
 	"name": "Mpesa for Woocommerce",
-	"version": "1.20.79",
-	"download_url": "https://github.com/osenco/osen-wc-mpesa/archive/v1.20.79.zip",
+	"version": "1.20.99",
+	"download_url": "https://github.com/osenco/osen-wc-mpesa/archive/v1.20.99.zip",
 
 	"homepage": "https://wc-mpesa.osen.co.ke/",
 	"requires": "4.5",
-	"tested": "5.4",
-	"last_updated": "2020-07-24 02:20:00",
+	"tested": "5.5",
+	"last_updated": "2020-09-09 06:20:00",
 	"upgrade_notice": "Debug Mode",
 
 	"author": "Osen Concepts",

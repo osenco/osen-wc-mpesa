@@ -2,7 +2,7 @@
 
 /**
  * @package MPesa For WooCommerce
- * @subpackage WooCommerce Functions
+ * @subpackage WooCommerce Mpesa Gateway
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
  */
@@ -47,26 +47,26 @@ function wc_mpesa_gateway_init()
          * Constructor for the gateway.
          */
         public function __construct()
-        {	
+        {
             $this->id                 = 'mpesa';
             $this->icon               = apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__));
-			$this->method_title       = __('Lipa Na MPesa', 'woocommerce');
-			
+            $this->method_title       = __('Lipa Na MPesa', 'woocommerce');
+
             // Load settings
             $this->init_form_fields();
-			$this->init_settings();
-			
+            $this->init_settings();
+
             $env          = $this->get_option('env', 'sandbox');
             $b2c_settings = ($this->get_option('enable_b2c', 'no') == 'yes')
-            	? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="' . admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences') . '">Setup Business-2-Customer</a>.</strong>'
-            	: '';
+                ? '<strong>These settings are for Customer-2-Business payments. Click here to <a href="' . admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences') . '">Setup Business-2-Customer</a>.</strong>'
+                : '';
             $test_cred = ($env == 'sandbox')
-            	? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
-            	: '';
+                ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
+                : '';
             $color    = isset($_GET['reg-state']) ? $_GET['reg-state'] : 'black';
             $register = isset($_GET['mpesa-urls-registered']) ? "<div style='color: {$color}'>{$_GET['mpesa-urls-registered']}</div>" : '';
-			
-			$this->method_description = $register . (($env == 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . $b2c_settings . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
+
+            $this->method_description = $register . (($env == 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . $b2c_settings . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this for when you go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work, ensure your site is running over https(SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wc-mpesa.osen.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
             $this->has_fields         = false;
 
             // Get settings
@@ -75,7 +75,7 @@ function wc_mpesa_gateway_init()
             $this->instructions       = $this->get_option('instructions');
             $this->enable_for_methods = $this->get_option('enable_for_methods', array());
             $this->enable_for_virtual = $this->get_option('enable_for_virtual', 'yes') === 'yes' ? true : false;
-            $this->debug 			  = $this->get_option('debug', 'no') === 'yes' ? true : false;
+            $this->debug               = $this->get_option('debug', 'no') === 'yes' ? true : false;
 
             add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
 
@@ -248,7 +248,7 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
                     'title'       => __('Manual Payments', 'woocommerce'),
                     'label'       => __('Enable C2B API(Offline Payments)', 'woocommerce'),
                     'type'        => 'checkbox',
-                    'description' => '<small>' . (($this->get_option('idtype', 4) == 4) ? 'This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br>' : '') . '<a class="button button-secondary" href="' . home_url('lipwa/register/') . '">Once enabled, click here to register confirmation & validation URLs</a><p>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</p></small>',
+                    'description' => '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('lipwa/register/') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>',
                     'default'     => 'no',
                 ),
                 // 'enable_b2c' => array(
@@ -260,10 +260,10 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
                 // ),
                 'debug'              => array(
                     'title'       => __('Debug Mode', 'woocommerce'),
-                    'label'       => __('Check to enable debug mode and show request body', 'woocommerce').$this->get_option('debug'),
+                    'label'       => __('Check to enable debug mode and show request body', 'woocommerce'),
                     'type'        => 'checkbox',
                     'default'     => 'no',
-                    'description' => '<small>' .__('Show Request Body(to send to Daraja on request)', 'woocommerce').'<small>'
+                    'description' => '<small>' . __('Show Request Body(to send to Daraja team on request)', 'woocommerce') . '<small>'
                 )
             );
         }
@@ -335,17 +335,18 @@ You will receive a confirmation message shortly thereafter.', 'woocommerce'),
             $total      = $order->get_total();
             $phone      = $order->get_billing_phone();
             $first_name = $order->get_billing_first_name();
-			$last_name  = $order->get_billing_last_name();
-			
-			$c2b = get_option('woocommerce_mpesa_settings');
+            $last_name  = $order->get_billing_last_name();
+
+            $c2b = get_option('woocommerce_mpesa_settings');
 
             if (($c2b['debug'] ?? 'no') == 'yes') {
                 $result = STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa', true);
-                WC()->session->set('mpesa_request', json_encode($result['requested']));
+                $message = json_encode($result['requested']);
+                WC()->session->set('mpesa_request', $message);
             } else {
                 $result = STK::request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
-			}
-			
+            }
+
             if ($result) {
                 $request_id = $result['MerchantRequestID'];
 

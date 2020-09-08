@@ -21,7 +21,7 @@ class C2B
         add_meta_box('c2b-payment-customer_details', 'Customer Details', [new self, 'customer_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
         add_meta_box('c2b-payment-order_details', 'Order Details', [new self, 'order_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
         add_meta_box('c2b-payment-payment_details', 'Payment Details', [new self, 'payment_details'], ['mpesaipn', 'b2c_payment'], 'side', 'high');
-        //add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [new self, 'mpesa_status'], [ 'mpesaipn', 'shop_order' ], 'side', 'low');
+        add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [new self, 'mpesa_status'], ['mpesaipn', 'shop_order'], 'side', 'low');
         add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [new self, 'order_notes'], 'mpesaipn', 'normal', 'default');
         add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [new self, 'mpesa_payment'], 'shop_order', 'side', 'low');
     }
@@ -44,16 +44,18 @@ class C2B
 
     public static function mpesa_status($post)
     {
-        $status = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
+        $id      = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $post->ID);
+        $post    = get_post($id);
+        $status  = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
         $request = ($value = get_post_meta($post->ID, '_request', true)) ? $value : 0;
 
         $statuses = array(
-            "processing"    => "This Order Is Processing",
-            "on-hold"       => "This Order Is On Hold",
-            "complete"      => "This Order Is Complete",
-            "cancelled"     => "This Order Is Cancelled",
-            "refunded"      => "This Order Is Refunded",
-            "failed"        => "This Order Failed"
+            "processing" => "This Order Is Processing",
+            "on-hold"    => "This Order Is On Hold",
+            "complete"   => "This Order Is Complete",
+            "cancelled"  => "This Order Is Cancelled",
+            "refunded"   => "This Order Is Refunded",
+            "failed"     => "This Order Failed",
         );
 
         echo '<table class="form-table" >
@@ -64,7 +66,8 @@ class C2B
             </tr>
             <tr valign="top" >
                 <td>
-                    <button type="submit" id="mpesaipn_status" name="mpesaipn_status" class="button button-large">Check Payment Status</button>
+                    ' . (($status == 'complete')
+                    ? '<button id="mpesaipn_status" name="mpesaipn_status" class="button button-large">Check Payment Status</button>
                     <script>
                         jQuery(document).ready(function($){
                             $("#mpesaipn_status").click(function(e){
@@ -74,7 +77,18 @@ class C2B
                                 });
                             });
                         });
-                    </script>
+                    </script>' 
+                    : '<button id="mpesaipn_reinitiate" name="mpesaipn_reinitiate" class="button button-large">Reinitiate Prompt</button>
+                    <script>
+                        jQuery(document).ready(function($){
+                            $("#mpesaipn_reinitiate").click(function(e){
+                                e.preventDefault();
+                                $.post("' . home_url("lipwa/request") . '", [order: ' . $post->ID . '], function(data){
+                                    $("#mpesaipn_status_result").html("STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>");
+                                });
+                            });
+                        });
+                    </script>'). '
                 </td>
             </tr>
         </table>';
@@ -82,15 +96,15 @@ class C2B
 
     public static function customer_details($post)
     {
-        $customer   = get_post_meta($post->ID, '_customer', true);
-        $phone      = get_post_meta($post->ID, '_phone', true);
+        $customer = get_post_meta($post->ID, '_customer', true);
+        $phone    = get_post_meta($post->ID, '_phone', true);
         if (isset($_GET['order'])) {
-            $order         = new \WC_Order($_GET['order']);
-            $total         = wc_format_decimal($order->get_total(), 2);
-            $phone         = $order->get_billing_phone();
+            $order      = new \WC_Order($_GET['order']);
+            $total      = wc_format_decimal($order->get_total(), 2);
+            $phone      = $order->get_billing_phone();
             $first_name = $order->get_billing_first_name();
-            $last_name     = $order->get_billing_last_name();
-            $customer     = "{$first_name} {$last_name}";
+            $last_name  = $order->get_billing_last_name();
+            $customer   = "{$first_name} {$last_name}";
         }
 
         // Remove the plus sign before the customer's phone number
@@ -117,19 +131,19 @@ class C2B
 
     public static function order_details($post)
     {
-        $order      = ($value = get_post_meta($post->ID, '_order_id', true)) ? $value : $post->ID;
-        $order      = isset($_GET['order']) ? $_GET['order'] : $order;
-        $amount     = get_post_meta($post->ID, '_amount', true);
-        $paid       = get_post_meta($post->ID, '_paid', true);
-        $balance    = get_post_meta($post->ID, '_balance', true);
+        $order   = ($value = get_post_meta($post->ID, '_order_id', true)) ? $value : $post->ID;
+        $order   = isset($_GET['order']) ? $_GET['order'] : $order;
+        $amount  = get_post_meta($post->ID, '_amount', true);
+        $paid    = get_post_meta($post->ID, '_paid', true);
+        $balance = get_post_meta($post->ID, '_balance', true);
 
         if (isset($_GET['order'])) {
-            $order_details  = new \WC_Order($_GET['order']);
-            $amount         = wc_format_decimal($order_details->get_total(), 2);
-            $phone          = $order_details->get_billing_phone();
-            $first_name     = $order_details->get_billing_first_name();
-            $last_name      = $order_details->get_billing_last_name();
-            $customer       = "{$first_name} {$last_name}";
+            $order_details = new \WC_Order($_GET['order']);
+            $amount        = wc_format_decimal($order_details->get_total(), 2);
+            $phone         = $order_details->get_billing_phone();
+            $first_name    = $order_details->get_billing_first_name();
+            $last_name     = $order_details->get_billing_last_name();
+            $customer      = "{$first_name} {$last_name}";
         }
 
         $new = wc_get_order($order) ? '' : ' <a href="' . admin_url('post-new.php?post_type=shop_order') . '" class="button">Add New Manual Order</a>';
@@ -162,17 +176,17 @@ class C2B
 
     public static function payment_details($post)
     {
-        $status     = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
-        $request    = get_post_meta($post->ID, '_request_id', true);
-        $receipt    = get_post_meta($post->ID, '_receipt', true);
+        $status  = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
+        $request = get_post_meta($post->ID, '_request_id', true);
+        $receipt = get_post_meta($post->ID, '_receipt', true);
 
-        $statuses   = array(
-            "processing"    => "This Order Is Processing",
-            "on-hold"       => "This Order Is On Hold",
-            "complete"      => "This Order Is Complete",
-            "cancelled"     => "This Order Is Cancelled",
-            "refunded"      => "This Order Is Refunded",
-            "failed"        => "This Order Failed"
+        $statuses = array(
+            "processing" => "This Order Is Processing",
+            "on-hold"    => "This Order Is On Hold",
+            "complete"   => "This Order Is Complete",
+            "cancelled"  => "This Order Is Cancelled",
+            "refunded"   => "This Order Is Refunded",
+            "failed"     => "This Order Failed",
         ); ?>
         <p>Add here the MPesa confirmation code received and set the appropriate order status for <b>Request ID: <?php echo $request; ?></b>.</p>
         <?php echo '<p>MPesa Receipt Number <input type="text" name="receipt" value="' . esc_attr($receipt) . ' " /></p>'; ?>
@@ -191,16 +205,14 @@ class C2B
         public static function mpesaipn_save_meta($post_id)
         {
             if (isset($_POST['save_meta'])) {
-                $customer       = trim($_POST['customer']);
-                $phone          = trim($_POST['phone']);
-                $order_id       = trim($_POST['order_id']);
-                $order_status   = trim($_POST['status']);
-                $order_note     = trim($_POST['order_note']);
-
-                $amount         = trim($_POST['amount']);
-                $paid           = trim($_POST['paid']);
-
-                $receipt = trim($_POST['receipt']);
+                $customer     = trim($_POST['customer']);
+                $phone        = trim($_POST['phone']);
+                $order_id     = trim($_POST['order_id']);
+                $order_status = trim($_POST['status']);
+                $order_note   = trim($_POST['order_note']);
+                $amount       = trim($_POST['amount']);
+                $paid         = trim($_POST['paid']);
+                $receipt      = trim($_POST['receipt']);
 
                 update_post_meta($post_id, '_customer', strip_tags($customer));
                 update_post_meta($post_id, '_phone', strip_tags($phone));

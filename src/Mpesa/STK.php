@@ -85,10 +85,6 @@ class STK
 	 */
 	public static $credentials;
 
-	public function __construct()
-	{
-	}
-
 	/**
 	 * @param array $config - Key-value pairs of settings
 	 */
@@ -242,11 +238,7 @@ class STK
 	 */
 	public static function reconcile($callback = null, $data = null)
 	{
-		if (is_null($data)) {
-			$response = json_decode(file_get_contents('php://input'), true);
-		} else {
-			$response = $data;
-		}
+		$response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
 
 		return is_null($callback)
 			? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
