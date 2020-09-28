@@ -1,11 +1,11 @@
 <?php
-namespace Osen\Woocommerce\Settings;
+namespace Osen\Woocommerce\Admin\Settings;
 
 /**
  * @package WPay C2B
  * @subpackage Admin Settings Page
  * @author Osen Concepts <hi@osen.co.ke>
- * @version 1.8
+ * @version 2.0.0
  * @since 1.8
  * @license See LICENSE
  */

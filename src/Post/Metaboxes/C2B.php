@@ -6,6 +6,7 @@ namespace Osen\Woocommerce\Post\Metaboxes;
  * @package MPesa For WooCommerce
  * @subpackage Metaboxes
  * @author Mauko Maunde < hi@mauko.co.ke >
+ * @version 2.0.0
  * @since 0.18.01
  */
 class C2B
@@ -205,14 +206,14 @@ class C2B
         public function mpesaipn_save_meta($post_id)
         {
             if (isset($_POST['save_meta'])) {
-                $customer     = trim($_POST['customer']);
-                $phone        = trim($_POST['phone']);
-                $order_id     = trim($_POST['order_id']);
-                $order_status = trim($_POST['status']);
-                $order_note   = trim($_POST['order_note']);
-                $amount       = trim($_POST['amount']);
-                $paid         = trim($_POST['paid']);
-                $receipt      = trim($_POST['receipt']);
+                $customer     = sanitize_text_field($_POST['customer']);
+                $phone        = sanitize_text_field($_POST['phone']);
+                $order_id     = sanitize_text_field($_POST['order_id']);
+                $order_status = sanitize_text_field($_POST['status']);
+                $order_note   = sanitize_text_field($_POST['order_note']);
+                $amount       = sanitize_text_field($_POST['amount']);
+                $paid         = sanitize_text_field($_POST['paid']);
+                $receipt      = sanitize_text_field($_POST['receipt']);
 
                 update_post_meta($post_id, '_customer', strip_tags($customer));
                 update_post_meta($post_id, '_phone', strip_tags($phone));

@@ -1,13 +1,14 @@
 <?php
 
-namespace Osen\Woocommerce\Settings;
+namespace Osen\Woocommerce\Admin;
 
 use Osen\Woocommerce\Mpesa\B2C;
+
 /**
  * @package WPay C2B
  * @subpackage Admin Settings Page
  * @author Osen Concepts <hi@osen.co.ke>
- * @version 1.8
+ * @version 2.0.0
  * @since 1.8
  * @license See LICENSE
  */
@@ -42,7 +43,7 @@ class Withdraw
 
         add_settings_field(
             'amount',
-            __('Amount', 'woocommerce'),
+            __('amount', 'woocommerce'),
             [$this, 'wcmpesab2cw_fields_wcmpesab2cw_mpesa_username_cb'],
             'wcmpesab2cw',
             'wcmpesab2cw_section_mpesa',
@@ -100,14 +101,12 @@ class Withdraw
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             <form id="wcmpesab2cw_ajax_form" action="<?php echo esc_url(admin_url('admin-ajax.php')); ?>" method="POST">
                 <?php
-                // output setting sections and their fields
-                // (sections are registered for "wcmpesab2cw", each field is registered to a specific section)
                 do_settings_sections('wcmpesab2cw');
 
                 wp_nonce_field('process_wcmpesab2cw_form', 'wcmpesab2cw_form_nonce');
                 ?>
                 <input type="hidden" name="action" value="process_wcmpesab2cw_form">
-                <input type="hidden" name="ref" value="Withdrawal on <?php echo date('Y-m-d \a\t H:i'); ?>">
+                <input type="hidden" name="reference" value="Withdrawal on <?php echo date('Y-m-d \a\t H:i'); ?>">
                 <button class="button button-primary">Withdraw</button>
             </form>
             <?php
@@ -153,13 +152,12 @@ class Withdraw
             exit(wp_send_json(['errorCode' => 'The form is not valid']));
         }
 
-        $Amount = trim($_POST['amount']);
-        $phone  = trim($_POST['phone']);
-        $Ref    = trim($_POST['ref']);
+        $amount    = sanitize_text_field($_POST['amount']);
+        $phone     = sanitize_text_field($_POST['phone']);
+        $reference = sanitize_text_field($_POST['reference']);
+        $phone     = str_replace("+", "", $phone);
+        $phone     = preg_replace('/^0/', '254', $phone);
 
-        $PhoneNumber = str_replace("+", "", $phone);
-        $PhoneNumber = preg_replace('/^0/', '254', $phone);
-
-        exit(wp_send_json((new B2C)->request($PhoneNumber, $Amount, $Ref)));
+        exit(wp_send_json((new B2C)->request($phone, $amount, $reference)));
     }
 }

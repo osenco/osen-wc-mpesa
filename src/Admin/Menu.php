@@ -1,6 +1,6 @@
 <?php
 
-namespace Osen\Woocommerce\Menus;
+namespace Osen\Woocommerce\Admin;
 
 class Menu
 {
@@ -82,24 +82,31 @@ class Menu
             <h1>About M-Pesa for WooCommerce</h1>
 
             <h3>The Plugin</h3>
-            <article>
-                <p>This plugin seeks to provide a simple plug-n-play implementation for integrating M-Pesa Payments into online
-                    stores built with WooCommerce and WordPress.</p>
-            </article>
+            <div style="display: grid; grid-template-columns: 1fr 5fr; grid-gap: 20px 20px">
+                <div>
+                    <img src="<?php echo plugins_url("osen-wc-mpesa/assets/wcmpesa.png"); ?>" width="100%">
+                </div>
+                <div>
+                    <article>
+                        <p>This plugin seeks to provide a simple plug-n-play implementation for integrating M-Pesa Payments into online
+                            stores built with WooCommerce and WordPress.</p>
+                    </article>
 
-            <h3>Pre-requisites</h3>
-            <article>
-                <ol>
-                    <li>Please <a href="https://developer.safaricom.co.ke/" target="_blank">create an app on Daraja</a> if you
-                        haven"t. Fill in the app"s consumer key and secret below.</li>
-                    <li>Ensure you have access to the <a href="https://ke.mpesa.org">M-Pesa Web Portal</a>. You"ll need this for
-                        when you go LIVE.</li>
-                    <li>For security purposes, and for the M-Pesa Instant Payment Notification to work, ensure your site is
-                        running over https(SSL).</li>
-                    <li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank">get sandbox test
-                            credentials here</a>.</li>
-                </ol>
-            </article>
+                    <h3>Pre-requisites</h3>
+                    <article>
+                        <ol>
+                            <li>Please <a href="https://developer.safaricom.co.ke/" target="_blank">create an app on Daraja</a> if you
+                                haven"t. Fill in the app"s consumer key and secret below.</li>
+                            <li>Ensure you have access to the <a href="https://ke.mpesa.org">M-Pesa Web Portal</a>. You"ll need this for
+                                when you go LIVE.</li>
+                            <li>For security purposes, and for the M-Pesa Instant Payment Notification to work, ensure your site is
+                                running over https(SSL).</li>
+                            <li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank">get sandbox test
+                                    credentials here</a>.</li>
+                        </ol>
+                    </article>
+                </div>
+            </div>
 
             <h3>Integration(Going Live)</h3>
             <article>
@@ -131,7 +138,7 @@ class Menu
                 <p>To help improve and support our effort to make such solutions as this one, you can start by contributing
                     here:</p>
                 <div style="padding-left: 20px;">
-                    <li><a href="https://github.com/osenco/osen-wc-mpesa">This Plugin"s Github Repo</a></li>
+                    <li><a href="https://github.com/osenco/osen-wc-mpesa">This Plugin's Github Repo</a></li>
                     <li><a href="https://github.com/osenco/mpesa">M-Pesa PHP SDK</a></li>
                     <li><a href="https://github.com/osenco/osen-oc-mpesa">M-Pesa For Open Cart</a></li>
                     <li><a href="https://github.com/osenco/osen-presta-mpesa">M-Pesa For PrestaShop</a></li>
@@ -139,9 +146,7 @@ class Menu
             </article>
 
             <h3>Contact</h3>
-            <h4>Get in touch with us either via email (<a href="mail-to:hi@osen.co.ke">hi@osen.co.ke</a>) or via phone(<a href="tel:+254204404993">+254204404993</a>)</h4>
-
-            <img src="<?php echo plugins_url("osen-wc-mpesa/inc/mpesa.png"); ?>">
+            <h4>Get in touch with us either via email (<a href="mail-to:hi@osen.co.ke">hi@osen.co.ke</a>) or via phone(<a href="tel:+254705459494">+254705459494</a>)</h4>
         </div><?php
             }
 
@@ -152,7 +157,7 @@ class Menu
                 $monthly = array();
 
                 foreach (get_posts(["post_type" => "mpesaipn"]) as $post) {
-                    \setup_postdata($post);
+                    setup_postdata($post);
                     for ($i = 1; $i <= 12; $i++) {
                         if (date("Y", strtotime($post->post_date)) == date("Y")) {
                             if (date("m", strtotime($post->post_date)) == $i) {
@@ -173,16 +178,17 @@ class Menu
                 $ms = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 $ps = array_values($payments);
 
-                wp_enqueue_style("c3", plugins_url("assets/c3/c3.min.css", __FILE__));
-                wp_enqueue_script("c3", plugins_url("assets/c3/c3.bundle.js", __FILE__));
+                wp_enqueue_style("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.min.css"));
+                wp_enqueue_script("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.bundle.js"));
 
                 $date = date("Y");
                 $cols = json_encode(array_merge(["data1"], $ps));
                 $categories = json_encode(array_unique($ms));
 
-                echo '<div class="wrap">
+                echo <<<CHART
+                <div class="wrap">
         <h1 class="wp-heading">Payments Analytics</h1>
-        <h4>Total monthly payments received via MPESA for the year ' . $date . '</h4>
+        <h4>Total monthly payments received via MPESA for the year {$date} </h4>
     <br>
     <div id="chart-bar" style="height: 500px"></div>
     <script type="text/javascript">
@@ -194,7 +200,7 @@ class Menu
                 type: "bar",
                 columns: [
                     // each columns data
-                    ' . $cols . ' ,
+                    {$cols},
                 ],
                 colors: {
                     "data1": "#0073aa", // blue
@@ -208,7 +214,7 @@ class Menu
                 x: {
                     type: "category",
                     // name of each category
-                    categories: ' . $categories . '
+                    categories: {$categories}
                 },
             },
             legend: {
@@ -221,7 +227,8 @@ class Menu
         });
     });
     </script>
-    </div>';
+    </div>
+CHART;
             }
 
             public function wc_mpesa_menu_settings()

@@ -51,7 +51,7 @@ function wc_mpesa_gateway_init()
             public function __construct()
             {
                 $this->id           = 'mpesa';
-                $this->icon         = apply_filters('woocommerce_mpesa_icon', plugins_url('mpesa.png', __FILE__));
+                $this->icon         = apply_filters('woocommerce_mpesa_icon', plugins_url('assets/mpesa.png', __FILE__));
                 $this->method_title = __('Lipa Na MPesa', 'woocommerce');
 
                 // Load settings

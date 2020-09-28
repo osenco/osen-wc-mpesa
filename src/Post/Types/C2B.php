@@ -4,7 +4,7 @@ namespace Osen\Woocommerce\Post\Types;
 
 /**
  * @package MPesa For WooCommerce
- * @subpackage Menus
+ * @subpackage Admin
  * @author Mauko Maunde < hi@mauko.co.ke >
  * @since 0.18.01
  */
@@ -61,7 +61,7 @@ class C2B
             'show_ui'               => true,
             'show_in_menu'          => true,
             'show_in_admin_bar'     => false,
-            'show_in_nav_menus'     => false,
+            'show_in_nav_Admin'     => false,
             'can_export'            => true,
             'has_archive'           => false,
             'exclude_from_search'   => true,
@@ -139,8 +139,8 @@ class C2B
                 );
 
                 echo ($value = get_post_meta($post_id, '_order_status', true))
-                    ? '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>')
-                    : '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit"') . '>Set Status</a>';
+                    ? '<a href="' . admin_url('post.php?post=' . esc_attr(sanitize_text_field($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>')
+                    : '<a href="' . admin_url('post.php?post=' . esc_attr(sanitize_text_field($order_id)) . '&action=edit"') . '>Set Status</a>';
                 break;
         }
     }

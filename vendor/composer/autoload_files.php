@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    '98401b498387e1a8116c883fc05a8a41' => $baseDir . '/mpesa-gateway.php',
+    'dfceb480b9ce78a93ab4222e950a3686' => $baseDir . '/gateway.php',
 );

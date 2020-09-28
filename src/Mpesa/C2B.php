@@ -6,7 +6,7 @@ namespace Osen\Woocommerce\Mpesa;
  * @package MPesa For WooCommerce
  * @subpackage C2B Library
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.10
+ * @version 2.0.0
  * @since 0.18.01
  */
 
@@ -76,19 +76,19 @@ class C2B
     {
         $c2b = get_option('woocommerce_mpesa_settings');
         $config = array(
-            'env'        => isset($c2b['env']) ? $c2b['env'] : 'sandbox',
-            'appkey'     => isset($c2b['key']) ? $c2b['key'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-            'appsecret'  => isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-            'headoffice' => isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
-            'shortcode'  => isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
-            'type'       => isset($c2b['idtype']) ? $c2b['idtype'] : 4,
-            'passkey'    => isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+            'env'        => $c2b['env'] ?? 'sandbox',
+            'appkey'     => $c2b['key'] ?? 'bclwIPkcRqw61yUt',
+            'appsecret'  => $c2b['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+            'headoffice' => $c2b['headoffice'] ?? '174379',
+            'shortcode'  => $c2b['shortcode'] ?? '174379',
+            'type'       => $c2b['idtype'] ?? 4,
+            'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
             'validate'   => home_url('lipwa/validate/'),
             'confirm'    => home_url('lipwa/confirm/'),
             'reconcile'  => home_url('lipwa/reconcile/'),
             'timeout'    => home_url('lipwa/timeout/'),
         );
-        
+
         foreach ($config as $key => $value) {
             $this->$key = $value;
         }
@@ -100,7 +100,9 @@ class C2B
      */
     public function token()
     {
-        $endpoint = ($this->env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+        $endpoint = ($this->env == 'live')
+            ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+            : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
         $credentials = base64_encode($this->appkey . ':' . $this->appsecret);
         $response    = wp_remote_get(
@@ -112,9 +114,13 @@ class C2B
             )
         );
 
-        $return = is_wp_error($response) ? 'null' : json_decode($response['body']);
+        $return = is_wp_error($response)
+            ? 'null'
+            : json_decode($response['body']);
 
-        return is_null($return) ? '' : (isset($return->access_token) ? $return->access_token : '');
+        return is_null($return)
+            ? '' : (isset($return->access_token)
+                ? $return->access_token : '');
     }
 
     /**
@@ -181,6 +187,7 @@ class C2B
         $endpoint = ($this->env == 'live')
             ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl'
             : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+
         $post_data = array(
             'ShortCode'       => $this->shortcode,
             'ResponseType'    => 'Cancelled',
@@ -220,9 +227,11 @@ class C2B
     public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
     {
         $phone     = preg_replace('/^0/', '254', str_replace("+", "", $phone));
-        $endpoint  = ($this->env == 'live') ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
         $timestamp = date('YmdHis');
         $password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
+        $endpoint  = ($this->env == 'live')
+            ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+            : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
         $post_data = array(
             'BusinessShortCode' => $this->headoffice,

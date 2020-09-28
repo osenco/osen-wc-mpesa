@@ -6,7 +6,7 @@ namespace Osen\Woocommerce\Mpesa;
  * @package MPesa For WooCommerce
  * @subpackage C2B Library
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.10
+ * @version 2.0.0
  * @since 0.18.01
  */
 
@@ -90,20 +90,20 @@ class STK
 	 */
 	public function __construct()
 	{
-		$c2b = get_option('woocommerce_mpesa_settings');
+		$c2b = get_option('woocommerce_mpesa_settings', []);
 		$config = array(
-        'env'        => isset($c2b['env']) ? $c2b['env'] : 'sandbox',
-        'appkey'     => isset($c2b['key']) ? $c2b['key'] : 'bclwIPkcRqw61yUt',
-        'appsecret'  => isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-        'headoffice' => isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
-        'shortcode'  => isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
-        'type'       => isset($c2b['idtype']) ? $c2b['idtype'] : 4,
-        'passkey'    => isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-        'validate'   => home_url('lipwa/validate/'),
-        'confirm'    => home_url('lipwa/confirm/'),
-        'reconcile'  => home_url('lipwa/reconcile/'),
-        'timeout'    => home_url('lipwa/timeout/')
-);
+			'env'        => $c2b['env'] ?? 'sandbox',
+			'appkey'     => $c2b['key'] ?? 'bclwIPkcRqw61yUt',
+			'appsecret'  => $c2b['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+			'headoffice' => $c2b['headoffice'] ?? '174379',
+			'shortcode'  => $c2b['shortcode'] ?? '174379',
+			'type'       => $c2b['idtype'] ?? 4,
+			'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+			'validate'   => home_url('lipwa/validate/'),
+			'confirm'    => home_url('lipwa/confirm/'),
+			'reconcile'  => home_url('lipwa/reconcile/'),
+			'timeout'    => home_url('lipwa/timeout/')
+		);
 		foreach ($config as $key => $value) {
 			$this->$key = $value;
 		}
@@ -235,12 +235,12 @@ class STK
 			)
 		);
 
-		if(is_wp_error($response)){
+		if (is_wp_error($response)) {
 			return array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja');
 		} else {
 			$body = json_decode($response['body'], true);
-			return is_null($request) 
-				? $body 
+			return is_null($request)
+				? $body
 				: array_merge($body, ['requested' => $post_data]);
 		}
 	}

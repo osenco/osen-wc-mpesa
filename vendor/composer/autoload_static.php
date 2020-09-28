@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7
 {
     public static $files = array (
-        '98401b498387e1a8116c883fc05a8a41' => __DIR__ . '/../..' . '/mpesa-gateway.php',
+        'dfceb480b9ce78a93ab4222e950a3686' => __DIR__ . '/../..' . '/gateway.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -25,16 +25,16 @@ class ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7
     );
 
     public static $classMap = array (
+        'Osen\\Woocommerce\\Admin\\Menu' => __DIR__ . '/../..' . '/src/Admin/Menu.php',
+        'Osen\\Woocommerce\\Admin\\Settings\\B2C' => __DIR__ . '/../..' . '/src/Admin/Settings/B2C.php',
+        'Osen\\Woocommerce\\Admin\\Withdraw' => __DIR__ . '/../..' . '/src/Admin/Withdraw.php',
         'Osen\\Woocommerce\\Initialize' => __DIR__ . '/../..' . '/src/Initialize.php',
-        'Osen\\Woocommerce\\Menus\\Menu' => __DIR__ . '/../..' . '/src/Menus/Menu.php',
         'Osen\\Woocommerce\\Mpesa\\B2C' => __DIR__ . '/../..' . '/src/Mpesa/B2C.php',
         'Osen\\Woocommerce\\Mpesa\\C2B' => __DIR__ . '/../..' . '/src/Mpesa/C2B.php',
         'Osen\\Woocommerce\\Mpesa\\STK' => __DIR__ . '/../..' . '/src/Mpesa/STK.php',
         'Osen\\Woocommerce\\Post\\Metaboxes\\C2B' => __DIR__ . '/../..' . '/src/Post/Metaboxes/C2B.php',
         'Osen\\Woocommerce\\Post\\Types\\B2C' => __DIR__ . '/../..' . '/src/Post/Types/B2C.php',
         'Osen\\Woocommerce\\Post\\Types\\C2B' => __DIR__ . '/../..' . '/src/Post/Types/C2B.php',
-        'Osen\\Woocommerce\\Settings\\B2C' => __DIR__ . '/../..' . '/src/Settings/B2C.php',
-        'Osen\\Woocommerce\\Settings\\Withdraw' => __DIR__ . '/../..' . '/src/Settings/Withdraw.php',
         'Osen\\Woocommerce\\Utilities' => __DIR__ . '/../..' . '/src/Utilities.php',
     );
 

@@ -13,12 +13,12 @@ class Initialize
 {
     function __construct()
     {
-        register_activation_hook('osen-wc-mpesa', array($this, 'wc_mpesa_activation_check'));
+        register_activation_hook('osen-wc-mpesa/osen-wc-mpesa.php', array($this, 'wc_mpesa_activation_check'));
         add_filter('plugin_row_meta', array($this, 'mpesa_row_meta'), 10, 2);
         add_action('init', array($this, 'wc_mpesa_flush_rewrite_rules_maybe'), 20);
         add_action('activated_plugin', array($this, 'wc_mpesa_detect_plugin_activation'), 10, 2);
         add_action('deactivated_plugin', array($this, 'wc_mpesa_detect_woocommerce_deactivation'), 10, 2);
-        add_filter('plugin_action_links_' . 'osen-wc-mpesa', array($this, 'mpesa_action_links'));
+        add_filter('plugin_action_links_' . 'osen-wc-mpesa/osen-wc-mpesa.php', array($this, 'mpesa_action_links'));
     }
 
     function wc_mpesa_activation_check()
@@ -28,7 +28,7 @@ class Initialize
         }
 
         if (!is_plugin_active('woocommerce/woocommerce.php')) {
-            deactivate_plugins('osen-wc-mpesa');
+            deactivate_plugins('osen-wc-mpesa/osen-wc-mpesa.php');
 
             add_action('admin_notices', function () {
                 $class   = 'notice notice-error is-dismissible';
@@ -50,7 +50,7 @@ class Initialize
     function wc_mpesa_detect_plugin_activation($plugin, $network_activation)
     {
         flush_rewrite_rules();
-        if ($plugin == 'osen-wc-mpesa') {
+        if ($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php') {
             exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
         }
     }
@@ -58,7 +58,7 @@ class Initialize
     function wc_mpesa_detect_woocommerce_deactivation($plugin, $network_activation)
     {
         if ($plugin == 'woocommerce/woocommerce.php') {
-            deactivate_plugins('osen-wc-mpesa');
+            deactivate_plugins('osen-wc-mpesa/osen-wc-mpesa.php');
         }
     }
 
@@ -75,7 +75,7 @@ class Initialize
 
     function mpesa_row_meta($links, $file)
     {
-        $plugin = 'osen-wc-mpesa';
+        $plugin = 'osen-wc-mpesa/osen-wc-mpesa.php';
 
         if ($plugin == $file) {
             $row_meta = array(
