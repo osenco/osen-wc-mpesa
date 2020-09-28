@@ -16,6 +16,7 @@
     "autoload": {
         "psr-4": {
             "Osen\\Woocommerce\\": "src/"
-        }
+        },
+        "files": ["mpesa-gateway.php"]
     }
 }

@@ -10,23 +10,23 @@ namespace Osen\Woocommerce\Post\Metaboxes;
  */
 class C2B
 {
-    public static function init()
+    public function __construct()
     {
-        add_action('add_meta_boxes', [new self, 'mpesa_mb_sm']);
-        add_action('save_post', [new self, 'mpesaipn_save_meta']);
+        add_action('add_meta_boxes', [$this, 'mpesa_mb_sm']);
+        add_action('save_post', [$this, 'mpesaipn_save_meta']);
     }
 
-    public static function mpesa_mb_sm()
+    public function mpesa_mb_sm()
     {
-        add_meta_box('c2b-payment-customer_details', 'Customer Details', [new self, 'customer_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
-        add_meta_box('c2b-payment-order_details', 'Order Details', [new self, 'order_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
-        add_meta_box('c2b-payment-payment_details', 'Payment Details', [new self, 'payment_details'], ['mpesaipn', 'b2c_payment'], 'side', 'high');
-        add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [new self, 'mpesa_status'], ['mpesaipn', 'shop_order'], 'side', 'low');
-        add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [new self, 'order_notes'], 'mpesaipn', 'normal', 'default');
-        add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [new self, 'mpesa_payment'], 'shop_order', 'side', 'low');
+        add_meta_box('c2b-payment-customer_details', 'Customer Details', [$this, 'customer_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
+        add_meta_box('c2b-payment-order_details', 'Order Details', [$this, 'order_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
+        add_meta_box('c2b-payment-payment_details', 'Payment Details', [$this, 'payment_details'], ['mpesaipn', 'b2c_payment'], 'side', 'high');
+        add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [$this, 'mpesa_status'], ['mpesaipn', 'shop_order'], 'side', 'low');
+        add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [$this, 'order_notes'], 'mpesaipn', 'normal', 'default');
+        add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [$this, 'mpesa_payment'], 'shop_order', 'side', 'low');
     }
 
-    public static function mpesa_payment($post)
+    public function mpesa_payment($post)
     {
         echo '<table class="form-table" >
             <tr valign="top" >
@@ -42,7 +42,7 @@ class C2B
         </table>';
     }
 
-    public static function mpesa_status($post)
+    public function mpesa_status($post)
     {
         $id      = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $post->ID);
         $post    = get_post($id);
@@ -94,7 +94,7 @@ class C2B
         </table>';
     }
 
-    public static function customer_details($post)
+    public function customer_details($post)
     {
         $customer = get_post_meta($post->ID, '_customer', true);
         $phone    = get_post_meta($post->ID, '_phone', true);
@@ -129,7 +129,7 @@ class C2B
         </table>';
     }
 
-    public static function order_details($post)
+    public function order_details($post)
     {
         $order   = ($value = get_post_meta($post->ID, '_order_id', true)) ? $value : $post->ID;
         $order   = isset($_GET['order']) ? $_GET['order'] : $order;
@@ -162,7 +162,7 @@ class C2B
         </table>';
     }
 
-    public static function order_notes($post)
+    public function order_notes($post)
     {
         echo '<table class="form-table" >
             <tr valign="top" >
@@ -174,7 +174,7 @@ class C2B
         </table>';
     }
 
-    public static function payment_details($post)
+    public function payment_details($post)
     {
         $status  = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
         $request = get_post_meta($post->ID, '_request_id', true);
@@ -202,7 +202,7 @@ class C2B
         </p><?php
         }
 
-        public static function mpesaipn_save_meta($post_id)
+        public function mpesaipn_save_meta($post_id)
         {
             if (isset($_POST['save_meta'])) {
                 $customer     = trim($_POST['customer']);

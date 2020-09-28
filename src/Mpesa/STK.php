@@ -18,80 +18,94 @@ class STK
 	/**
 	 * @param string  | Environment in use    | live/sandbox
 	 */
-	public static $env = 'sandbox';
+	public $env = 'sandbox';
 
 	/**
 	 * @param string | Daraja App Consumer Key   | lipia/validate
 	 */
-	public static $appkey;
+	public $appkey;
 
 	/**
 	 * @param string | Daraja App Consumer Secret   | lipia/validate
 	 */
-	public static $appsecret;
+	public $appsecret;
 
 	/**
 	 * @param string | Online Passkey | lipia/validate
 	 */
-	public static $passkey;
+	public $passkey;
 
 	/**
 	 * @param string  | Head Office Shortcode | 123456
 	 */
-	public static $headoffice;
+	public $headoffice;
 
 	/**
 	 * @param string  | Business Paybill/Till | 123456
 	 */
-	public static $shortcode;
+	public $shortcode;
 
 	/**
 	 * @param integer | Identifier Type   | 1(MSISDN)/2(Till)/4(Paybill)
 	 */
-	public static $type = 4;
+	public $type = 4;
 
 	/**
 	 * @param string | Validation URI   | lipia/validate
 	 */
-	public static $validate;
+	public $validate;
 
 	/**
 	 * @param string  | Confirmation URI  | lipia/confirm
 	 */
-	public static $confirm;
+	public $confirm;
 
 	/**
 	 * @param string  | Reconciliation URI  | lipia/reconcile
 	 */
-	public static $reconcile;
+	public $reconcile;
 
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public static $results;
+	public $results;
 
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public static $timeout;
+	public $timeout;
 
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public static $username;
+	public $username;
 
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public static $credentials;
+	public $credentials;
 
 	/**
 	 * @param array $config - Key-value pairs of settings
 	 */
-	public static function set($config)
+	public function __construct()
 	{
+		$c2b = get_option('woocommerce_mpesa_settings');
+		$config = array(
+        'env'        => isset($c2b['env']) ? $c2b['env'] : 'sandbox',
+        'appkey'     => isset($c2b['key']) ? $c2b['key'] : 'bclwIPkcRqw61yUt',
+        'appsecret'  => isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+        'headoffice' => isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
+        'shortcode'  => isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
+        'type'       => isset($c2b['idtype']) ? $c2b['idtype'] : 4,
+        'passkey'    => isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+        'validate'   => home_url('lipwa/validate/'),
+        'confirm'    => home_url('lipwa/confirm/'),
+        'reconcile'  => home_url('lipwa/reconcile/'),
+        'timeout'    => home_url('lipwa/timeout/')
+);
 		foreach ($config as $key => $value) {
-			self::$$key = $value;
+			$this->$key = $value;
 		}
 	}
 
@@ -99,13 +113,13 @@ class STK
 	 * Function to generate access token
 	 * @return string/mixed
 	 */
-	public static function token()
+	public function token()
 	{
-		$endpoint = (self::$env == 'live')
+		$endpoint = ($this->env == 'live')
 			? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
 			: 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-		$credentials = base64_encode(self::$appkey . ':' . self::$appsecret);
+		$credentials = base64_encode($this->appkey . ':' . $this->appsecret);
 		$response    = wp_remote_get(
 			$endpoint,
 			array(
@@ -125,7 +139,7 @@ class STK
 	 * @param callable $callback - Optional callable function to process the response - must return boolean
 	 * @return array
 	 */
-	public static function validate($callback = null, $data = [])
+	public function validate($callback = null, $data = [])
 	{
 		if (is_null($callback) || empty($callback)) {
 			return array(
@@ -152,7 +166,7 @@ class STK
 	 * @param callable $callback - Optional callable function to process the response - must return boolean
 	 * @return array
 	 */
-	public static function confirm($callback = null, $data = [])
+	public function confirm($callback = null, $data = [])
 	{
 		if (is_null($callback) || empty($callback)) {
 			return array(
@@ -183,27 +197,27 @@ class STK
 	 * @param string $remark    - Remarks about transaction(optional)
 	 * @return array
 	 */
-	public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
+	public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
 	{
 		$phone = preg_replace('/^0/', '254', str_replace("+", "", $phone));
 
-		$endpoint = (self::$env == 'live')
+		$endpoint = ($this->env == 'live')
 			? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
 			: 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
 		$timestamp = date('YmdHis');
-		$password  = base64_encode(self::$headoffice . self::$passkey . $timestamp);
+		$password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
 
 		$post_data = array(
-			'BusinessShortCode' => self::$headoffice,
+			'BusinessShortCode' => $this->headoffice,
 			'Password'          => $password,
 			'Timestamp'         => $timestamp,
-			'TransactionType'   => (self::$type == 4) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
+			'TransactionType'   => ($this->type == 4) ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
 			'Amount'            => round($amount),
 			'PartyA'            => $phone,
-			'PartyB'            => self::$shortcode,
+			'PartyB'            => $this->shortcode,
 			'PhoneNumber'       => $phone,
-			'CallBackURL'       => self::$reconcile,
+			'CallBackURL'       => $this->reconcile,
 			'AccountReference'  => $reference,
 			'TransactionDesc'   => $trxdesc,
 			'Remark'            => $remark,
@@ -215,7 +229,7 @@ class STK
 			array(
 				'headers' => array(
 					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . self::token(),
+					'Authorization' => 'Bearer ' . $this->token(),
 				),
 				'body'    => $data_string,
 			)
@@ -236,7 +250,7 @@ class STK
 	 * @param callable $callback - Optional callable function to process the response - must return boolean
 	 * @return bool/array
 	 */
-	public static function reconcile($callback = null, $data = null)
+	public function reconcile($callback = null, $data = null)
 	{
 		$response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
 
@@ -250,7 +264,7 @@ class STK
 	 * @param callable $callback - Optional callable function to process the response - must return boolean
 	 * @return bool/array
 	 */
-	public static function timeout($callback = null, $data = null)
+	public function timeout($callback = null, $data = null)
 	{
 		if (is_null($data)) {
 			$response = json_decode(file_get_contents('php://input'), true);
@@ -266,22 +280,22 @@ class STK
 		}
 	}
 
-	public static function status($transaction, $command = 'TransactionStatusQuery', $remarks = 'Transaction Status Query', $occasion = '')
+	public function status($transaction, $command = 'TransactionStatusQuery', $remarks = 'Transaction Status Query', $occasion = '')
 	{
-		$token    = self::token();
-		$endpoint = (self::$env == 'live')
+		$token    = $this->token();
+		$endpoint = ($this->env == 'live')
 			? 'https://api.safaricom.co.ke/mpesa/transactionstatus/v1/query'
 			: 'https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query';
 
 		$post_data = array(
-			'Initiator'          => self::$username,
-			'SecurityCredential' => self::$credentials,
+			'Initiator'          => $this->username,
+			'SecurityCredential' => $this->credentials,
 			'CommandID'          => $command,
 			'TransactionID'      => $transaction,
-			'PartyA'             => self::$shortcode,
-			'IdentifierType'     => self::$type,
-			'ResultURL'          => self::$results,
-			'QueueTimeOutURL'    => self::$timeout,
+			'PartyA'             => $this->shortcode,
+			'IdentifierType'     => $this->type,
+			'ResultURL'          => $this->results,
+			'QueueTimeOutURL'    => $this->timeout,
 			'Remarks'            => $remarks,
 			'Occasion'           => $occasion,
 		);
@@ -292,7 +306,7 @@ class STK
 			array(
 				'headers' => array(
 					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . self::token(),
+					'Authorization' => 'Bearer ' . $this->token(),
 				),
 				'body'    => $data_string,
 			)

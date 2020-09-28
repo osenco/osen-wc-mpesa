@@ -49,170 +49,33 @@ if (!defined('WCM_PLUGIN_FILE')) {
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
-register_activation_hook(__FILE__, 'wc_mpesa_activation_check');
-function wc_mpesa_activation_check()
+function setup_plugin()
 {
-    if (!get_option('wc_mpesa_flush_rewrite_rules_flag')) {
-        add_option('wc_mpesa_flush_rewrite_rules_flag', true);
-    }
 
-    if (!is_plugin_active('woocommerce/woocommerce.php')) {
-        deactivate_plugins(plugin_basename(__FILE__));
+    new Osen\Woocommerce\Initialize;
+    new Osen\Woocommerce\Utilities;
 
-        add_action('admin_notices', function () {
-            $class   = 'notice notice-error is-dismissible';
-            $message = __('Please Install/Activate WooCommerce for this extension to work..', 'woocommerce');
+    /**
+     * Initialize all our custom post types
+     */
+    // Osen\Woocommerce\Post\Types\(new B2C;
+    new Osen\Woocommerce\Post\Types\C2B;
 
-            printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
-        });
-    }
+    /**
+     * Initialize our admin menus
+     */
+    new Osen\Woocommerce\Menus\Menu;
+
+    /**
+     * Initialize settings pages for B2C API
+     */
+    // Osen\Woocommerce\Settings\(new B2C;
+    new Osen\Woocommerce\Settings\Withdraw;
+
+    /**
+     * Initialize metaboxes for C2B API
+     */
+    new Osen\Woocommerce\Post\Metaboxes\C2B;
 }
 
-add_action('init', 'wc_mpesa_flush_rewrite_rules_maybe', 20);
-function wc_mpesa_flush_rewrite_rules_maybe()
-{
-    if (get_option('wc_mpesa_flush_rewrite_rules_flag')) {
-        flush_rewrite_rules();
-        delete_option('wc_mpesa_flush_rewrite_rules_flag');
-    }
-}
-
-add_action('activated_plugin', 'wc_mpesa_detect_plugin_activation', 10, 2);
-function wc_mpesa_detect_plugin_activation($plugin, $network_activation)
-{
-    flush_rewrite_rules();
-    if ($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php') {
-        exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
-    }
-}
-
-add_action('deactivated_plugin', 'wc_mpesa_detect_woocommerce_deactivation', 10, 2);
-function wc_mpesa_detect_woocommerce_deactivation($plugin, $network_activation)
-{
-    if ($plugin == 'woocommerce/woocommerce.php') {
-        deactivate_plugins(plugin_basename(__FILE__));
-    }
-}
-
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'mpesa_action_links');
-function mpesa_action_links($links)
-{
-    return array_merge(
-        $links,
-        array(
-            '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa') . '">&nbsp;STK & C2B Setup</a>',
-            // '<a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">&nbsp;B2C</a>'
-        )
-    );
-}
-
-add_filter('plugin_row_meta', 'mpesa_row_meta', 10, 2);
-function mpesa_row_meta($links, $file)
-{
-    $plugin = plugin_basename(__FILE__);
-
-    if ($plugin == $file) {
-        $row_meta = array(
-            'github'  => '<a href="' . esc_url('https://github.com/osenco/osen-wc-mpesa/') . '" target="_blank" aria-label="' . esc_attr__('Contribute on Github', 'woocommerce') . '">' . esc_html__('Github', 'woocommerce') . '</a>',
-            'apidocs' => '<a href="' . esc_url('https://developer.safaricom.co.ke/docs/') . '" target="_blank" aria-label="' . esc_attr__('MPesa API Docs (Daraja)', 'woocommerce') . '">' . esc_html__('API docs', 'woocommerce') . '</a>',
-        );
-
-        return array_merge($links, $row_meta);
-    }
-
-    return (array) $links;
-}
-
-/**
- * Initialize all our custom post types
- */
-//Osen\Woocommerce\Post\Types\B2C::init();
-Osen\Woocommerce\Post\Types\C2B::init();
-
-/**
- * Initialize our admin menus
- */
-Osen\Woocommerce\Menus\Menu::init();
-
-/**
- * Initialize settings pages for B2C API
- */
-//Osen\Woocommerce\Settings\B2C::init();
-Osen\Woocommerce\Settings\Withdraw::init();
-
-/**
- * Initialize metaboxes for C2B API
- */
-Osen\Woocommerce\Post\Metaboxes\C2B::init();
-
-// Stk
-$c2b = get_option('woocommerce_mpesa_settings');
-Osen\Woocommerce\Mpesa\STK::set(
-    array(
-        'env'        => isset($c2b['env']) ? $c2b['env'] : 'sandbox',
-        'appkey'     => isset($c2b['key']) ? $c2b['key'] : 'bclwIPkcRqw61yUt',
-        'appsecret'  => isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-        'headoffice' => isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
-        'shortcode'  => isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
-        'type'       => isset($c2b['idtype']) ? $c2b['idtype'] : 4,
-        'passkey'    => isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-        'validate'   => home_url('lipwa/validate/'),
-        'confirm'    => home_url('lipwa/confirm/'),
-        'reconcile'  => home_url('lipwa/reconcile/'),
-        'timeout'    => home_url('lipwa/timeout/'),
-    )
-);
-
-// c2b
-Osen\Woocommerce\Mpesa\C2B::set(
-    array(
-        'env'        => isset($c2b['env']) ? $c2b['env'] : 'sandbox',
-        'appkey'     => isset($c2b['key']) ? $c2b['key'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-        'appsecret'  => isset($c2b['secret']) ? $c2b['secret'] : '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-        'headoffice' => isset($c2b['headoffice']) ? $c2b['headoffice'] : '174379',
-        'shortcode'  => isset($c2b['shortcode']) ? $c2b['shortcode'] : '174379',
-        'type'       => isset($c2b['idtype']) ? $c2b['idtype'] : 4,
-        'passkey'    => isset($c2b['passkey']) ? $c2b['passkey'] : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-        'validate'   => home_url('lipwa/validate/'),
-        'confirm'    => home_url('lipwa/confirm/'),
-        'reconcile'  => home_url('lipwa/reconcile/'),
-        'timeout'    => home_url('lipwa/timeout/'),
-    )
-);
-
-//b2c
-// $b2c = get_option('b2c_wcmpesa_options');
-// Osen\Woocommerce\Mpesa\B2C::set(
-//     array(
-//         'env'             => isset($b2c['env']) ? $b2c['env'] : 'sandbox',
-//         'appkey'         => isset($b2c['key']) ? $b2c['key'] : '',
-//         'appsecret'     => isset($b2c['secret']) ? $b2c['secret'] : '',
-//         'headoffice'     => isset($b2c['headoffice']) ? $b2c['headoffice'] : '',
-//         'shortcode'     => isset($b2c['shortcode']) ? $b2c['shortcode'] : '',
-//         'type'             => isset($b2c['idtype']) ? $b2c['idtype'] : 4,
-//         'passkey'         => isset($b2c['passkey']) ? $b2c['passkey'] : '',
-//         'username'         => isset($b2c['username']) ? $b2c['username'] : '',
-//         'password'         => isset($b2c['password']) ? $b2c['password'] : '',
-//         'validate'         => home_url('lipwa/validate/'),
-//         'confirm'         => home_url('lipwa/confirm/'),
-//         'reconcile'     => home_url('lipwa/reconcile/'),
-//         'timeout'         => home_url('lipwa/timeout/')
-//     )
-// );
-
-/**
- * Load Custom Plugin Functions
- */
-foreach (glob(plugin_dir_path(__FILE__) . 'inc/*.php') as $filename) {
-    require_once $filename;
-}
-
-/**
- * Auto-updates
- */
-require __DIR__ . '/updates/plugin-update-checker.php';
-$myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
-    'https://raw.githubusercontent.com/osenco/osen-wc-mpesa/master/updates.json',
-    __FILE__,
-    'wc-mpesa'
-);
+setup_plugin();

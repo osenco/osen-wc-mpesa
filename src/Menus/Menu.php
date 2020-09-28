@@ -5,9 +5,9 @@ namespace Osen\Woocommerce\Menus;
 class Menu
 {
 
-    public static function init()
+    public function __construct()
     {
-        add_action("admin_menu", [new self, "wc_mpesa_menu"]);
+        add_action("admin_menu", [$this, "wc_mpesa_menu"]);
     }
     /**
      * @package M-Pesa For WooCommerce
@@ -15,7 +15,7 @@ class Menu
      * @author Mauko Maunde < hi@mauko.co.ke >
      * @since 0.18.01
      */
-    public static function wc_mpesa_menu()
+    public function wc_mpesa_menu()
     {
         // if((get_option("woocommerce_mpesa_settings")["enable_b2c"] == "yes")){
         //     add_submenu_page(
@@ -34,7 +34,7 @@ class Menu
             __("About Plugin", "woocommerce"),
             "manage_options",
             "wc_mpesa_about",
-            [new self, "wc_mpesa_menu_about"]
+            [$this, "wc_mpesa_menu_about"]
         );
 
         add_submenu_page(
@@ -43,7 +43,7 @@ class Menu
             __("Configuration", "woocommerce"),
             "manage_options",
             "wc_mpesa_preferences",
-            [new self, "wc_mpesa_menu_settings"]
+            [$this, "wc_mpesa_menu_settings"]
         );
 
         // if((get_option("woocommerce_mpesa_settings")["enable_b2c"] == "yes")){
@@ -53,7 +53,7 @@ class Menu
         //         __("Configure B2C", "woocommerce"), 
         //         "manage_options",
         //         "wc_mpesa_b2c_preferences", 
-        //         [new self, "wc_mpesa_b2c_settings" ]
+        //         [$this, "wc_mpesa_b2c_settings" ]
         //     );
 
         //     add_submenu_page(
@@ -62,7 +62,7 @@ class Menu
         //         __("Withdraw", "woocommerce"), 
         //         "manage_options", 
         //         "wcmpesab2cw", 
-        //         [new self, "wcmpesab2cw_options_page_html"]
+        //         [$this, "wcmpesab2cw_options_page_html"]
         //     );
         // }
 
@@ -72,11 +72,11 @@ class Menu
             __("M-Pesa Analytics", "woocommerce"),
             "manage_options",
             "wc_mpesa_analytics",
-            [new self, "wc_mpesa_menu_analytics"]
+            [$this, "wc_mpesa_menu_analytics"]
         );
     }
 
-    public static function wc_mpesa_menu_about()
+    public function wc_mpesa_menu_about()
     { ?>
         <div class="wrap">
             <h1>About M-Pesa for WooCommerce</h1>
@@ -145,7 +145,7 @@ class Menu
         </div><?php
             }
 
-            public static function wc_mpesa_menu_analytics()
+            public function wc_mpesa_menu_analytics()
             {
                 $payments = array();
                 $months = array();
@@ -224,17 +224,17 @@ class Menu
     </div>';
             }
 
-            public static function wc_mpesa_menu_settings()
+            public function wc_mpesa_menu_settings()
             {
                 wp_redirect(admin_url("admin.php?page=wc-settings&tab=checkout&section=mpesa"));
             }
 
-            public static function wc_mpesa_b2c_settings()
+            public function wc_mpesa_b2c_settings()
             {
                 wp_redirect(admin_url("admin.php?post_type=b2c_payment&page=wcmpesab2c"));
             }
 
-            public static function wc_mpesa_menu_b2c()
+            public function wc_mpesa_menu_b2c()
             {
                 wp_redirect(admin_url("edit.php?post_type=b2c_payment"));
             }

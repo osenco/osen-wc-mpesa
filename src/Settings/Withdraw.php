@@ -2,6 +2,7 @@
 
 namespace Osen\Woocommerce\Settings;
 
+use Osen\Woocommerce\Mpesa\B2C;
 /**
  * @package WPay C2B
  * @subpackage Admin Settings Page
@@ -13,23 +14,23 @@ namespace Osen\Woocommerce\Settings;
 class Withdraw
 {
 
-    public static function init()
+    public function __construct()
     {
-        add_action('admin_init', [new self, 'wcmpesab2cw_settings_init']);
-        add_action('wp_ajax_process_wcmpesab2cw_form', [new self, 'process_wcmpesab2cw_form']);
-        add_action('wp_ajax_nopriv_process_wcmpesab2cw_form', [new self, 'process_wcmpesab2cw_form']);
+        add_action('admin_init', [$this, 'wcmpesab2cw_settings_init']);
+        add_action('wp_ajax_process_wcmpesab2cw_form', [$this, 'process_wcmpesab2cw_form']);
+        add_action('wp_ajax_nopriv_process_wcmpesab2cw_form', [$this, 'process_wcmpesab2cw_form']);
     }
 
-    public static function wcmpesab2cw_settings_init()
+    public function wcmpesab2cw_settings_init()
     {
         register_setting('wcmpesab2cw', 'wcmpesab2cw_options');
 
-        add_settings_section('wcmpesab2cw_section_mpesa', __('Withdraw Money To MPesa.', 'woocommerce'), [new self, 'wcmpesab2cw_section_wcmpesab2cw_mpesa_cb'], 'wcmpesab2cw');
+        add_settings_section('wcmpesab2cw_section_mpesa', __('Withdraw Money To MPesa.', 'woocommerce'), [$this, 'wcmpesab2cw_section_wcmpesab2cw_mpesa_cb'], 'wcmpesab2cw');
 
         add_settings_field(
             'phone',
             __('Phone Number', 'woocommerce'),
-            [new self, 'wcmpesab2cw_fields_wcmpesab2cw_mpesa_shortcode_cb'],
+            [$this, 'wcmpesab2cw_fields_wcmpesab2cw_mpesa_shortcode_cb'],
             'wcmpesab2cw',
             'wcmpesab2cw_section_mpesa',
             [
@@ -42,7 +43,7 @@ class Withdraw
         add_settings_field(
             'amount',
             __('Amount', 'woocommerce'),
-            [new self, 'wcmpesab2cw_fields_wcmpesab2cw_mpesa_username_cb'],
+            [$this, 'wcmpesab2cw_fields_wcmpesab2cw_mpesa_username_cb'],
             'wcmpesab2cw',
             'wcmpesab2cw_section_mpesa',
             [
@@ -53,7 +54,7 @@ class Withdraw
         );
     }
 
-    public static function wcmpesab2cw_section_wcmpesab2cw_mpesa_cb($args)
+    public function wcmpesab2cw_section_wcmpesab2cw_mpesa_cb($args)
     {
         $options      = get_option('b2c_wcmpesa_options');
         $instructions = isset($options['instructions']) ? $options['instructions'] : 'Crosscheck values before submission'; ?>
@@ -63,7 +64,7 @@ class Withdraw
     <?php
     }
 
-    public static function wcmpesab2cw_fields_wcmpesab2cw_mpesa_shortcode_cb($args)
+    public function wcmpesab2cw_fields_wcmpesab2cw_mpesa_shortcode_cb($args)
     {
         $options = get_option('wcmpesab2cw_options');
     ?>
@@ -74,7 +75,7 @@ class Withdraw
     <?php
     }
 
-    public static function wcmpesab2cw_fields_wcmpesab2cw_mpesa_username_cb($args)
+    public function wcmpesab2cw_fields_wcmpesab2cw_mpesa_username_cb($args)
     {
         $options = get_option('wcmpesab2cw_options');
     ?>
@@ -89,7 +90,7 @@ class Withdraw
      * top level menu:
      * callback functions
      */
-    public static function wcmpesab2cw_options_page_html()
+    public function wcmpesab2cw_options_page_html()
     {
         // check user capabilities
         if (!current_user_can('manage_options')) {
@@ -146,7 +147,7 @@ class Withdraw
 <?php
     }
 
-    public static function process_wcmpesab2cw_form()
+    public function process_wcmpesab2cw_form()
     {
         if (!isset($_POST['wcmpesab2cw_form_nonce']) || !wp_verify_nonce($_POST['wcmpesab2cw_form_nonce'], 'process_wcmpesab2cw_form')) {
             exit(wp_send_json(['errorCode' => 'The form is not valid']));
@@ -159,6 +160,6 @@ class Withdraw
         $PhoneNumber = str_replace("+", "", $phone);
         $PhoneNumber = preg_replace('/^0/', '254', $phone);
 
-        exit(wp_send_json(Osen\Woocommerce\Mpesa\B2C::request($PhoneNumber, $Amount, $Ref)));
+        exit(wp_send_json((new B2C)->request($PhoneNumber, $Amount, $Ref)));
     }
 }

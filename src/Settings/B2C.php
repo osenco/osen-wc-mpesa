@@ -12,9 +12,9 @@ namespace Osen\Woocommerce\Settings;
 
 class B2C
 {
-    public static function init()
+    public function __construct()
     {
-        add_action('admin_init', [new self, 'b2c_settings_init']);
+        add_action('admin_init', [$this, 'b2c_settings_init']);
     }
 
     public function b2c_settings_init()
@@ -26,7 +26,7 @@ class B2C
         add_settings_field(
             'env',
             __('Environment', 'woocommerce'),
-            [new self, 'b2c_fields_env_cb'],
+            [$this, 'b2c_fields_env_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -40,7 +40,7 @@ class B2C
             'shortcode',
             __('Mpesa Shortcode', 'woocommerce'),
             [
-                new self, 'b2c_fields_b2c_mpesa_shortcode_cb'],
+                $this, 'b2c_fields_b2c_mpesa_shortcode_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -53,7 +53,7 @@ class B2C
         add_settings_field(
             'username',
             __('Mpesa Username', 'woocommerce'),
-            [new self, 'b2c_fields_b2c_mpesa_username_cb'],
+            [$this, 'b2c_fields_b2c_mpesa_username_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -66,7 +66,7 @@ class B2C
         add_settings_field(
             'password',
             __('Mpesa Password', 'woocommerce'),
-            [new self, 'b2c_fields_b2c_mpesa_password_cb'],
+            [$this, 'b2c_fields_b2c_mpesa_password_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -79,7 +79,7 @@ class B2C
         add_settings_field(
             'appkey',
             __('App Consumer Key', 'woocommerce'),
-            [new self, 'b2c_fields_b2c_mpesa_ck_cb'],
+            [$this, 'b2c_fields_b2c_mpesa_ck_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -92,7 +92,7 @@ class B2C
         add_settings_field(
             'appsecret',
             __('App Consumer Secret', 'woocommerce'),
-            [new self, 'b2c_fields_b2c_mpesa_cs_cb'],
+            [$this, 'b2c_fields_b2c_mpesa_cs_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -105,7 +105,7 @@ class B2C
         add_settings_field(
             'passkey',
             __('Online Passkey', 'woocommerce'),
-            [new self, 'b2c_fields_b2c_mpesa_pk_cb'],
+            [$this, 'b2c_fields_b2c_mpesa_pk_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [
@@ -118,7 +118,7 @@ class B2C
         add_settings_field(
             'instructions',
             __('Withdrawal Instructions', 'woocommerce'),
-            [new self, 'b2c_fields_b2c_mpesa_w_cb'],
+            [$this, 'b2c_fields_b2c_mpesa_w_cb'],
             'wcmpesab2c',
             'b2c_section_mpesa',
             [

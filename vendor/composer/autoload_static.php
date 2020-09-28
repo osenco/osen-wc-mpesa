@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
 {
+    public static $files = array (
+        '98401b498387e1a8116c883fc05a8a41' => __DIR__ . '/../..' . '/mpesa-gateway.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'O' => 
         array (
@@ -21,6 +25,7 @@ class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
     );
 
     public static $classMap = array (
+        'Osen\\Woocommerce\\Initialize' => __DIR__ . '/../..' . '/src/Initialize.php',
         'Osen\\Woocommerce\\Menus\\Menu' => __DIR__ . '/../..' . '/src/Menus/Menu.php',
         'Osen\\Woocommerce\\Mpesa\\B2C' => __DIR__ . '/../..' . '/src/Mpesa/B2C.php',
         'Osen\\Woocommerce\\Mpesa\\C2B' => __DIR__ . '/../..' . '/src/Mpesa/C2B.php',
@@ -30,6 +35,7 @@ class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
         'Osen\\Woocommerce\\Post\\Types\\C2B' => __DIR__ . '/../..' . '/src/Post/Types/C2B.php',
         'Osen\\Woocommerce\\Settings\\B2C' => __DIR__ . '/../..' . '/src/Settings/B2C.php',
         'Osen\\Woocommerce\\Settings\\Withdraw' => __DIR__ . '/../..' . '/src/Settings/Withdraw.php',
+        'Osen\\Woocommerce\\Utilities' => __DIR__ . '/../..' . '/src/Utilities.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
