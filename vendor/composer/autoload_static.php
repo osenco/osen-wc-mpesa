@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
+class ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7
 {
     public static $files = array (
         '98401b498387e1a8116c883fc05a8a41' => __DIR__ . '/../..' . '/mpesa-gateway.php',
@@ -41,9 +41,9 @@ class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7::$classMap;
 
         }, null, ClassLoader::class);
     }
