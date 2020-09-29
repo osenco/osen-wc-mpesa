@@ -49,7 +49,7 @@ if (!defined('WCM_PLUGIN_FILE')) {
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
-function setup_plugin()
+function osen_setup_wc_mpesa()
 {
     /**
      * Initialize all plugin features and utilities
@@ -83,4 +83,4 @@ function setup_plugin()
 /**
  * Initialize everything
  */
-setup_plugin();
+osen_setup_wc_mpesa();
