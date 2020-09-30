@@ -132,8 +132,7 @@ class Utilities
                         </tr>
                     </tbody>
                 </table>
-            </section>
-<?php endif;
+            </section><?php endif;
 
         echo <<<JS
         <script id="pesaipn-checker">
@@ -201,8 +200,9 @@ class Utilities
                 3000);
             });
         </script>
-    JS;
+JS;
     }
+    
     function wc_mpesa_rewrite_add_rewrites()
     {
         add_rewrite_rule('lipwa/([^/]*)/?', 'index.php?lipwa=$matches[1]', 'top');
@@ -210,7 +210,7 @@ class Utilities
 
     function wc_mpesa_rewrite_add_var($vars)
     {
-        $vars[] = 'lipwa';
+        array_push($vars, 'lipwa');
         return $vars;
     }
 
