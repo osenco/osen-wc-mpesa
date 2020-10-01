@@ -4,8 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
+class ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7
 {
+    public static $files = array (
+        'dfceb480b9ce78a93ab4222e950a3686' => __DIR__ . '/../..' . '/gateway.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'O' => 
         array (
@@ -21,23 +25,25 @@ class ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0
     );
 
     public static $classMap = array (
-        'Osen\\Woocommerce\\Menus\\Menu' => __DIR__ . '/../..' . '/src/Menus/Menu.php',
+        'Osen\\Woocommerce\\Admin\\Menu' => __DIR__ . '/../..' . '/src/Admin/Menu.php',
+        'Osen\\Woocommerce\\Admin\\Settings\\B2C' => __DIR__ . '/../..' . '/src/Admin/Settings/B2C.php',
+        'Osen\\Woocommerce\\Admin\\Withdraw' => __DIR__ . '/../..' . '/src/Admin/Withdraw.php',
+        'Osen\\Woocommerce\\Initialize' => __DIR__ . '/../..' . '/src/Initialize.php',
         'Osen\\Woocommerce\\Mpesa\\B2C' => __DIR__ . '/../..' . '/src/Mpesa/B2C.php',
         'Osen\\Woocommerce\\Mpesa\\C2B' => __DIR__ . '/../..' . '/src/Mpesa/C2B.php',
         'Osen\\Woocommerce\\Mpesa\\STK' => __DIR__ . '/../..' . '/src/Mpesa/STK.php',
         'Osen\\Woocommerce\\Post\\Metaboxes\\C2B' => __DIR__ . '/../..' . '/src/Post/Metaboxes/C2B.php',
         'Osen\\Woocommerce\\Post\\Types\\B2C' => __DIR__ . '/../..' . '/src/Post/Types/B2C.php',
         'Osen\\Woocommerce\\Post\\Types\\C2B' => __DIR__ . '/../..' . '/src/Post/Types/C2B.php',
-        'Osen\\Woocommerce\\Settings\\B2C' => __DIR__ . '/../..' . '/src/Settings/B2C.php',
-        'Osen\\Woocommerce\\Settings\\Withdraw' => __DIR__ . '/../..' . '/src/Settings/Withdraw.php',
+        'Osen\\Woocommerce\\Utilities' => __DIR__ . '/../..' . '/src/Utilities.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInita0f71f2f6d1f32a73092072ef8e1c0c0::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit40c746120c0999ac5bf3c0bcf39a7ff7::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -6,27 +6,28 @@ namespace Osen\Woocommerce\Post\Metaboxes;
  * @package MPesa For WooCommerce
  * @subpackage Metaboxes
  * @author Mauko Maunde < hi@mauko.co.ke >
+ * @version 2.0.0
  * @since 0.18.01
  */
 class C2B
 {
-    public static function init()
+    public function __construct()
     {
-        add_action('add_meta_boxes', [new self, 'mpesa_mb_sm']);
-        add_action('save_post', [new self, 'mpesaipn_save_meta']);
+        add_action('add_meta_boxes', [$this, 'mpesa_mb_sm']);
+        add_action('save_post', [$this, 'mpesaipn_save_meta']);
     }
 
-    public static function mpesa_mb_sm()
+    public function mpesa_mb_sm()
     {
-        add_meta_box('c2b-payment-customer_details', 'Customer Details', [new self, 'customer_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
-        add_meta_box('c2b-payment-order_details', 'Order Details', [new self, 'order_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
-        add_meta_box('c2b-payment-payment_details', 'Payment Details', [new self, 'payment_details'], ['mpesaipn', 'b2c_payment'], 'side', 'high');
-        add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [new self, 'mpesa_status'], ['mpesaipn', 'shop_order'], 'side', 'low');
-        add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [new self, 'order_notes'], 'mpesaipn', 'normal', 'default');
-        add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [new self, 'mpesa_payment'], 'shop_order', 'side', 'low');
+        add_meta_box('c2b-payment-customer_details', 'Customer Details', [$this, 'customer_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
+        add_meta_box('c2b-payment-order_details', 'Order Details', [$this, 'order_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
+        add_meta_box('c2b-payment-payment_details', 'Payment Details', [$this, 'payment_details'], ['mpesaipn', 'b2c_payment'], 'side', 'high');
+        add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [$this, 'mpesa_status'], ['mpesaipn', 'shop_order'], 'side', 'low');
+        add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [$this, 'order_notes'], 'mpesaipn', 'normal', 'default');
+        add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [$this, 'mpesa_payment'], 'shop_order', 'side', 'low');
     }
 
-    public static function mpesa_payment($post)
+    public function mpesa_payment($post)
     {
         echo '<table class="form-table" >
             <tr valign="top" >
@@ -42,7 +43,7 @@ class C2B
         </table>';
     }
 
-    public static function mpesa_status($post)
+    public function mpesa_status($post)
     {
         $id      = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $post->ID);
         $post    = get_post($id);
@@ -94,7 +95,7 @@ class C2B
         </table>';
     }
 
-    public static function customer_details($post)
+    public function customer_details($post)
     {
         $customer = get_post_meta($post->ID, '_customer', true);
         $phone    = get_post_meta($post->ID, '_phone', true);
@@ -129,7 +130,7 @@ class C2B
         </table>';
     }
 
-    public static function order_details($post)
+    public function order_details($post)
     {
         $order   = ($value = get_post_meta($post->ID, '_order_id', true)) ? $value : $post->ID;
         $order   = isset($_GET['order']) ? $_GET['order'] : $order;
@@ -162,7 +163,7 @@ class C2B
         </table>';
     }
 
-    public static function order_notes($post)
+    public function order_notes($post)
     {
         echo '<table class="form-table" >
             <tr valign="top" >
@@ -174,7 +175,7 @@ class C2B
         </table>';
     }
 
-    public static function payment_details($post)
+    public function payment_details($post)
     {
         $status  = ($value = get_post_meta($post->ID, '_order_status', true)) ? $value : 'complete';
         $request = get_post_meta($post->ID, '_request_id', true);
@@ -202,17 +203,17 @@ class C2B
         </p><?php
         }
 
-        public static function mpesaipn_save_meta($post_id)
+        public function mpesaipn_save_meta($post_id)
         {
             if (isset($_POST['save_meta'])) {
-                $customer     = trim($_POST['customer']);
-                $phone        = trim($_POST['phone']);
-                $order_id     = trim($_POST['order_id']);
-                $order_status = trim($_POST['status']);
-                $order_note   = trim($_POST['order_note']);
-                $amount       = trim($_POST['amount']);
-                $paid         = trim($_POST['paid']);
-                $receipt      = trim($_POST['receipt']);
+                $customer     = sanitize_text_field($_POST['customer']);
+                $phone        = sanitize_text_field($_POST['phone']);
+                $order_id     = sanitize_text_field($_POST['order_id']);
+                $order_status = sanitize_text_field($_POST['status']);
+                $order_note   = sanitize_text_field($_POST['order_note']);
+                $amount       = sanitize_text_field($_POST['amount']);
+                $paid         = sanitize_text_field($_POST['paid']);
+                $receipt      = sanitize_text_field($_POST['receipt']);
 
                 update_post_meta($post_id, '_customer', strip_tags($customer));
                 update_post_meta($post_id, '_phone', strip_tags($phone));

@@ -6,7 +6,7 @@ namespace Osen\Woocommerce\Mpesa;
  * @package MPesa For WooCommerce
  * @subpackage B2C Library
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.10
+ * @version 2.0.0
  * @since 0.18.01
  */
 
@@ -15,24 +15,41 @@ namespace Osen\Woocommerce\Mpesa;
  */
 class B2C
 {
-	public static $env = 'sandbox';
-	public static $username;
-	public static $password;
-	public static $appkey;
-	public static $appsecret;
-	public static $passkey;
-	public static $shortcode;
-	public static $headoffice;
-	public static $type = 4;
-	public static $validate;
-	public static $confirm;
-	public static $reconcile;
-	public static $timeout;
+	public $env = 'sandbox';
+	public $username;
+	public $password;
+	public $appkey;
+	public $appsecret;
+	public $passkey;
+	public $shortcode;
+	public $headoffice;
+	public $type = 4;
+	public $validate;
+	public $confirm;
+	public $reconcile;
+	public $timeout;
 
-	public static function set($config)
+	public function set($config)
 	{
+		$b2c    = get_option('wc_b2c_settings', []);
+		$config =
+			array(
+				'env'        => $b2c['env'] ?? 'sandbox',
+				'appkey'     => $b2c['key'] ?? 'bclwIPkcRqw61yUt',
+				'appsecret'  => $b2c['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+				'headoffice' => $b2c['headoffice'] ?? '174379',
+				'shortcode'  => $b2c['shortcode'] ?? '174379',
+				'type'       => $b2c['idtype'] ?? 4,
+				'username'   => $b2c['username'] ?? '',
+				'password'   => $b2c['password'] ?? '',
+				'validate'   => home_url('lipwa/validate/'),
+				'confirm'    => home_url('lipwa/confirm/'),
+				'reconcile'  => home_url('lipwa/reconcile/'),
+				'timeout'    => home_url('lipwa/timeout/'),
+			);
+
 		foreach ($config as $key => $value) {
-			self::$$key = $value;
+			$this->$key = $value;
 		}
 	}
 
@@ -40,11 +57,13 @@ class B2C
 	 * Function to generate access token
 	 * @return string/mixed
 	 */
-	public static function token()
+	public function token()
 	{
-		$endpoint = (self::$env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+		$endpoint = ($this->env == 'live')
+			? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+			: 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-		$credentials = base64_encode(self::$appkey . ':' . self::$appsecret);
+		$credentials = base64_encode($this->appkey . ':' . $this->appsecret);
 		$response    = wp_remote_get(
 			$endpoint,
 			array(
@@ -64,7 +83,7 @@ class B2C
 	 * @param callable $callback - Optional callable function to process the response - must return boolean
 	 * @return array
 	 */
-	public static function validate($callback = null, $data = [])
+	public function validate($callback = null, $data = [])
 	{
 		if (is_null($callback) || empty($callback)) {
 			return array(
@@ -94,7 +113,7 @@ class B2C
 	 * @param callable $callback - Optional callable function to process the response - must return boolean
 	 * @return array
 	 */
-	public static function confirm($callback = null, $data = [])
+	public function confirm($callback = null, $data = [])
 	{
 		if (is_null($callback) || empty($callback)) {
 			return array(
@@ -122,15 +141,17 @@ class B2C
 	/**
 	 *
 	 */
-	public static function request($phone, $amount, $reference, $trxdesc = '', $remark = '')
+	public function request($phone, $amount, $reference, $trxdesc = '', $remark = '')
 	{
 		$phone     = str_replace("+", "", $phone);
 		$phone     = preg_replace('/^0/', '254', $phone);
-		$token     = self::token();
-		$endpoint  = (self::$env == 'live') ? 'https://api.safaricom.co.ke/mpesa/b2c/v1/paymentrequest' : 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest';
+		$token     = $this->token();
+		$endpoint  = ($this->env == 'live')
+			? 'https://api.safaricom.co.ke/mpesa/b2c/v1/paymentrequest'
+			: 'https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest';
 		$timestamp = date('YmdHis');
-		$env       = self::$env;
-		$plaintext = self::$password;
+		$env       = $this->env;
+		$plaintext = $this->password;
 		$publicKey = file_get_contents('cert/' . $env . '/cert.cer');
 
 		openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
@@ -138,15 +159,15 @@ class B2C
 		$password = base64_encode($encrypted);
 
 		$curl_post_data = array(
-			'InitiatorName'      => self::$username,
+			'InitiatorName'      => $this->username,
 			'SecurityCredential' => $password,
-			'CommandID'          => (self::$type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+			'CommandID'          => ($this->type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
 			'Amount'             => round($amount),
-			'PartyA'             => self::$shortcode,
+			'PartyA'             => $this->shortcode,
 			'PartyB'             => $phone,
 			'Remarks'            => $remark,
-			'QueueTimeOutURL'    => self::$timeout,
-			'ResultURL'          => self::$reconcile,
+			'QueueTimeOutURL'    => $this->timeout,
+			'ResultURL'          => $this->reconcile,
 			'Occasion'           => $reference,
 		);
 
@@ -157,7 +178,7 @@ class B2C
 			array(
 				'headers' => array(
 					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . self::token(),
+					'Authorization' => 'Bearer ' . $this->token(),
 				),
 				'body'    => $data_string,
 			)
@@ -170,10 +191,12 @@ class B2C
 	/**
 	 *
 	 */
-	public static function reconcile($callback, $data)
+	public function reconcile($callback, $data)
 	{
 		$response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
 
-		return is_null($callback) ? array('resultCode' => 0, 'resultDesc' => 'Success') : call_user_func_array($callback, array($response));
+		return is_null($callback)
+			? array('resultCode' => 0, 'resultDesc' => 'Success')
+			: call_user_func_array($callback, array($response));
 	}
 }

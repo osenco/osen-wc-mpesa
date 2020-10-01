@@ -4,24 +4,24 @@ namespace Osen\Woocommerce\Post\Types;
 
 /**
  * @package MPesa For WooCommerce
- * @subpackage Menus
+ * @subpackage Admin
  * @author Mauko Maunde < hi@mauko.co.ke >
  * @since 0.18.01
  */
 
 class B2C
 {
-    public static function init()
+    public function init()
     {
-        add_action('init', [new self, 'b2c_payments_post_type'], 0);
-        add_filter('manage_b2c_payment_posts_columns', [new self, 'filter_b2c_payments_table_columns']);
-        add_filter('manage_edit-b2c_payment_sortable_columns', [new self, 'b2c_payments_columns_sortable']);
+        add_action('init', [$this, 'b2c_payments_post_type'], 0);
+        add_filter('manage_b2c_payment_posts_columns', [$this, 'filter_b2c_payments_table_columns']);
+        add_filter('manage_edit-b2c_payment_sortable_columns', [$this, 'b2c_payments_columns_sortable']);
 
-        //add_action('manage_posts_custom_column',[new self, 'b2c_payments_table_column_content'], 10, 2);
+        //add_action('manage_posts_custom_column',[$this, 'b2c_payments_table_column_content'], 10, 2);
     }
 
     // Register Custom Post - Disbursement/Refunds
-    public static function b2c_payments_post_type()
+    public function b2c_payments_post_type()
     {
 
         $labels = array(
@@ -62,7 +62,7 @@ class B2C
             'show_in_rest'        => true,
             'show_in_menu'        => false,
             'show_in_admin_bar'   => false,
-            'show_in_nav_menus'   => false,
+            'show_in_nav_Admin'   => false,
             'can_export'          => true,
             'has_archive'         => false,
             'exclude_from_search' => true,
@@ -82,7 +82,7 @@ class B2C
      * @param array $columns The existing columns
      * @return array $filtered_columns The filtered columns
      */
-    public static function filter_b2c_payments_table_columns($columns)
+    public function filter_b2c_payments_table_columns($columns)
     {
         $columns['title']    = "Type";
         $columns['customer'] = "Customer";
@@ -142,7 +142,7 @@ class B2C
                     "failed"     => "This Order Failed",
                 );
 
-                echo ($value = get_post_meta($post_id, '_order_status', true)) ? '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>') : '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit"') . '>Set Status</a>';
+                echo ($value = get_post_meta($post_id, '_order_status', true)) ? '<a href="' . admin_url('post.php?post=' . esc_attr(sanitize_text_field($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>') : '<a href="' . admin_url('post.php?post=' . esc_attr(sanitize_text_field($order_id)) . '&action=edit"') . '>Set Status</a>';
                 break;
         }
     }
@@ -154,7 +154,7 @@ class B2C
      * @param array $columns The original columns
      * @return array $columns The filtered columns
      */
-    public static function b2c_payments_columns_sortable($columns)
+    public function b2c_payments_columns_sortable($columns)
     {
         $columns['title']    = "Type";
         $columns['customer'] = "Customer";

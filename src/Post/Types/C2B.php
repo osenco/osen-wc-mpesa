@@ -4,23 +4,23 @@ namespace Osen\Woocommerce\Post\Types;
 
 /**
  * @package MPesa For WooCommerce
- * @subpackage Menus
+ * @subpackage Admin
  * @author Mauko Maunde < hi@mauko.co.ke >
  * @since 0.18.01
  */
 
 class C2B
 {
-    public static function init()
+    public function __construct()
     {
-        add_action('init', [new self, 'mpesaipn_post_type'], 0);
-        add_filter('manage_mpesaipn_posts_columns', [new self, 'filter_mpesaipn_table_columns']);
-        add_action('manage_mpesaipn_posts_custom_column', [new self, 'mpesaipn_table_column_content'], 10, 2);
-        add_filter('manage_edit-mpesaipn_sortable_columns', [new self, 'mpesaipn_columns_sortable']);
+        add_action('init', [$this, 'mpesaipn_post_type'], 0);
+        add_filter('manage_mpesaipn_posts_columns', [$this, 'filter_mpesaipn_table_columns']);
+        add_action('manage_mpesaipn_posts_custom_column', [$this, 'mpesaipn_table_column_content'], 10, 2);
+        add_filter('manage_edit-mpesaipn_sortable_columns', [$this, 'mpesaipn_columns_sortable']);
     }
 
     // Register Custom Post - Payments
-    public static function mpesaipn_post_type()
+    public function mpesaipn_post_type()
     {
 
         $labels = array(
@@ -61,7 +61,7 @@ class C2B
             'show_ui'               => true,
             'show_in_menu'          => true,
             'show_in_admin_bar'     => false,
-            'show_in_nav_menus'     => false,
+            'show_in_nav_Admin'     => false,
             'can_export'            => true,
             'has_archive'           => false,
             'exclude_from_search'   => true,
@@ -84,7 +84,7 @@ class C2B
      * @param array $columns The existing columns
      * @return array $filtered_columns The filtered columns
      */
-    public static function filter_mpesaipn_table_columns($columns)
+    public function filter_mpesaipn_table_columns($columns)
     {
         $columns['title']       = "Type";
         $columns['customer']    = "Customer";
@@ -104,7 +104,7 @@ class C2B
      * @param string $column The name of the column being acted upon
      * @return void
      */
-    public static function mpesaipn_table_column_content($column_id, $post_id)
+    public function mpesaipn_table_column_content($column_id, $post_id)
     {
         $order_id = get_post_meta($post_id, '_order_id', true);
         switch ($column_id) {
@@ -139,8 +139,8 @@ class C2B
                 );
 
                 echo ($value = get_post_meta($post_id, '_order_status', true))
-                    ? '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>')
-                    : '<a href="' . admin_url('post.php?post=' . esc_attr(trim($order_id)) . '&action=edit"') . '>Set Status</a>';
+                    ? '<a href="' . admin_url('post.php?post=' . esc_attr(sanitize_text_field($order_id)) . '&action=edit">' . esc_attr($statuses[$value]) . '</a>')
+                    : '<a href="' . admin_url('post.php?post=' . esc_attr(sanitize_text_field($order_id)) . '&action=edit"') . '>Set Status</a>';
                 break;
         }
     }
@@ -152,7 +152,7 @@ class C2B
      * @param array $columns The original columns
      * @return array $columns The filtered columns
      */
-    public static function mpesaipn_columns_sortable($columns)
+    public function mpesaipn_columns_sortable($columns)
     {
         $columns['title']       = "Type";
         $columns['customer']    = "Customer";

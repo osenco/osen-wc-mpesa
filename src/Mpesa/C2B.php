@@ -6,7 +6,7 @@ namespace Osen\Woocommerce\Mpesa;
  * @package MPesa For WooCommerce
  * @subpackage C2B Library
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 1.10
+ * @version 2.0.0
  * @since 0.18.01
  */
 
@@ -18,69 +18,79 @@ class C2B
     /**
      * @param string  | Environment in use    | live/sandbox
      */
-    public static $env = 'sandbox';
+    public $env = 'sandbox';
 
     /**
      * @param string | Daraja App Consumer Key   | lipia/validate
      */
-    public static $appkey;
+    public $appkey;
 
     /**
      * @param string | Daraja App Consumer Secret   | lipia/validate
      */
-    public static $appsecret;
+    public $appsecret;
 
     /**
      * @param string | Online Passkey | lipia/validate
      */
-    public static $passkey;
+    public $passkey;
 
     /**
      * @param string  | Head Office Shortcode | 123456
      */
-    public static $headoffice;
+    public $headoffice;
 
     /**
      * @param string  | Business Paybill/Till | 123456
      */
-    public static $shortcode;
+    public $shortcode;
 
     /**
      * @param integer | Identifier Type   | 1(MSISDN)/2(Till)/4(Paybill)
      */
-    public static $type = 4;
+    public $type = 4;
 
     /**
      * @param string | Validation URI   | lipia/validate
      */
-    public static $validate;
+    public $validate;
 
     /**
      * @param string  | Confirmation URI  | lipia/confirm
      */
-    public static $confirm;
+    public $confirm;
 
     /**
      * @param string  | Reconciliation URI  | lipia/reconcile
      */
-    public static $reconcile;
+    public $reconcile;
 
     /**
      * @param string  | Timeout URI   | lipia/reconcile
      */
-    public static $timeout;
-
-    public function __construct()
-    {
-    }
-
+    public $timeout;
     /**
      * @param array $config - Key-value pairs of settings
      */
-    public static function set($config)
+    public function __construct()
     {
+        $c2b = get_option('woocommerce_mpesa_settings');
+        $config = array(
+            'env'        => $c2b['env'] ?? 'sandbox',
+            'appkey'     => $c2b['key'] ?? 'bclwIPkcRqw61yUt',
+            'appsecret'  => $c2b['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+            'headoffice' => $c2b['headoffice'] ?? '174379',
+            'shortcode'  => $c2b['shortcode'] ?? '174379',
+            'type'       => $c2b['idtype'] ?? 4,
+            'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+            'validate'   => home_url('lipwa/validate/'),
+            'confirm'    => home_url('lipwa/confirm/'),
+            'reconcile'  => home_url('lipwa/reconcile/'),
+            'timeout'    => home_url('lipwa/timeout/'),
+        );
+
         foreach ($config as $key => $value) {
-            self::$$key = $value;
+            $this->$key = $value;
         }
     }
 
@@ -88,11 +98,13 @@ class C2B
      * Function to generate access token
      * @return string/mixed
      */
-    public static function token()
+    public function token()
     {
-        $endpoint = (self::$env == 'live') ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+        $endpoint = ($this->env == 'live')
+            ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+            : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-        $credentials = base64_encode(self::$appkey . ':' . self::$appsecret);
+        $credentials = base64_encode($this->appkey . ':' . $this->appsecret);
         $response    = wp_remote_get(
             $endpoint,
             array(
@@ -102,9 +114,13 @@ class C2B
             )
         );
 
-        $return = is_wp_error($response) ? 'null' : json_decode($response['body']);
+        $return = is_wp_error($response)
+            ? 'null'
+            : json_decode($response['body']);
 
-        return is_null($return) ? '' : (isset($return->access_token) ? $return->access_token : '');
+        return is_null($return)
+            ? '' : (isset($return->access_token)
+                ? $return->access_token : '');
     }
 
     /**
@@ -112,7 +128,7 @@ class C2B
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return array
      */
-    public static function validate($callback, $data)
+    public function validate($callback, $data)
     {
         if (is_null($callback) || empty($callback)) {
             return array(
@@ -139,7 +155,7 @@ class C2B
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return array
      */
-    public static function confirm($callback, $data)
+    public function confirm($callback, $data)
     {
         if (is_null($callback) || empty($callback)) {
             return array(
@@ -166,16 +182,17 @@ class C2B
      * @param string $env - Environment for which to register URLs
      * @return bool/array
      */
-    public static function register($callback = null)
+    public function register($callback = null)
     {
-        $endpoint = (self::$env == 'live')
-        ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl'
-        : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+        $endpoint = ($this->env == 'live')
+            ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl'
+            : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+
         $post_data = array(
-            'ShortCode'       => self::$shortcode,
+            'ShortCode'       => $this->shortcode,
             'ResponseType'    => 'Cancelled',
-            'ConfirmationURL' => self::$confirm,
-            'ValidationURL'   => self::$validate,
+            'ConfirmationURL' => $this->confirm,
+            'ValidationURL'   => $this->validate,
         );
         $data_string = json_encode($post_data);
 
@@ -184,18 +201,18 @@ class C2B
             array(
                 'headers' => array(
                     'Content-Type'  => 'application/json',
-                    'Authorization' => 'Bearer ' . self::token(),
+                    'Authorization' => 'Bearer ' . $this->token(),
                 ),
                 'body'    => $data_string,
             )
         );
         $result = is_wp_error($response)
-        ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
-        : json_decode($response['body'], true);
+            ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
+            : json_decode($response['body'], true);
 
         return is_null($callback)
-        ? $result
-        : call_user_func($callback, $result);
+            ? $result
+            : call_user_func($callback, $result);
     }
 
     /**
@@ -207,23 +224,25 @@ class C2B
      * @param string $remark    - Remarks about transaction(optional)
      * @return array
      */
-    public static function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
+    public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
     {
         $phone     = preg_replace('/^0/', '254', str_replace("+", "", $phone));
-        $endpoint  = (self::$env == 'live') ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
         $timestamp = date('YmdHis');
-        $password  = base64_encode(self::$headoffice . self::$passkey . $timestamp);
+        $password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
+        $endpoint  = ($this->env == 'live')
+            ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+            : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
         $post_data = array(
-            'BusinessShortCode' => self::$headoffice,
+            'BusinessShortCode' => $this->headoffice,
             'Password'          => $password,
             'Timestamp'         => $timestamp,
-            'TransactionType'   => (self::$type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
+            'TransactionType'   => ($this->type == 4) ? 'CustomerPayBillOnline' : 'BuyGoodsOnline',
             'Amount'            => round($amount),
             'PartyA'            => $phone,
-            'PartyB'            => self::$shortcode,
+            'PartyB'            => $this->shortcode,
             'PhoneNumber'       => $phone,
-            'CallBackURL'       => self::$reconcile,
+            'CallBackURL'       => $this->reconcile,
             'AccountReference'  => $reference,
             'TransactionDesc'   => $trxdesc,
             'Remark'            => $remark,
@@ -235,14 +254,14 @@ class C2B
             array(
                 'headers' => array(
                     'Content-Type'  => 'application/json',
-                    'Authorization' => 'Bearer ' . self::token(),
+                    'Authorization' => 'Bearer ' . $this->token(),
                 ),
                 'body'    => $data_string,
             )
         );
         return is_wp_error($response)
-        ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
-        : json_decode($response['body'], true);
+            ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
+            : json_decode($response['body'], true);
     }
 
     /**
@@ -250,7 +269,7 @@ class C2B
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return bool/array
      */
-    public static function reconcile($args)
+    public function reconcile($args)
     {
         $callback = isset($args[0]) ? $args[0] : 'wc_mpesa_reconcile';
         $data     = isset($args[1]) ? $args[1] : null;
@@ -263,8 +282,8 @@ class C2B
         }
 
         return is_null($callback)
-        ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
-        : call_user_func_array($callback, array($response));
+            ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
+            : call_user_func_array($callback, array($response));
     }
 
     /**
@@ -272,7 +291,7 @@ class C2B
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return bool/array
      */
-    public static function timeout($callback = null, $data = null)
+    public function timeout($callback = null, $data = null)
     {
         if (is_null($data)) {
             $response = json_decode(file_get_contents('php://input'), true);
