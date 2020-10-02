@@ -9,12 +9,12 @@
 
 namespace Osen\Woocommerce;
 
-use Osen\Woocommerce\Mpesa\STK;
 use Osen\Woocommerce\Mpesa\C2B;
+use Osen\Woocommerce\Mpesa\STK;
 
 class Utilities
 {
-    function __construct()
+    public function __construct()
     {
         add_action('init', array($this, 'wc_mpesa_rewrite_add_rewrites'));
         add_filter('query_vars', array($this, 'wc_mpesa_rewrite_add_var'));
@@ -27,7 +27,7 @@ class Utilities
         add_action('woocommerce_thankyou_mpesa', array($this, 'validate_payment'));
     }
 
-    function validate_payment($order_id)
+    public function validate_payment($order_id)
     {
         $mpesa  = get_option('woocommerce_mpesa_settings');
         $idtype = (new C2B)->type;
@@ -42,7 +42,6 @@ class Utilities
         $type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services'; ?>
         <style>
             @keyframes wave {
-
                 0%,
                 60%,
                 100% {
@@ -134,87 +133,87 @@ class Utilities
                 </table>
             </section><?php endif;
 
-        echo <<<JS
-        <script id="pesaipn-checker">
-            jQuery(document).ready(function($) {
-                $('#renitiate-form').submit(function(e){
-                    e.preventDefault();
+            echo <<<JS
+            <script id="pesaipn-checker">
+                jQuery(document).ready(function($) {
+                    $('#renitiate-form').submit(function(e){
+                        e.preventDefault();
 
-                    var form = $(this);
+                        var form = $(this);
 
-                    $.post(form.attr('action'), form.serialize(), function(response){
-                        $("#mpesa_receipt")
-                        .html('STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>');
+                        $.post(form.attr('action'), form.serialize(), function(response){
+                            $("#mpesa_receipt")
+                            .html('STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>');
+                        });
                     });
-                });
 
-                var checker = setInterval(() => {
-                    if ($("#payment_method").length && $("#payment_method").val() !== 'mpesa') {
-                        clearInterval(checker);
-                    }
-
-                    if ($("#current_order").length) {
-                        var order = $("#current_order").val();
-                        if (order.length) {
-                            $.get("{$url}" + order, [], function(data) {
-                                if (data.receipt == '' || data.receipt == 'N/A') {
-                                    $("#mpesa_receipt").html(
-                                        'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
-                                    );
-                                } else {
-                                    if ($("#mpesa-receipt-overview").length) {} else {
-                                        $(".woocommerce-order-overview").append(
-                                            '<li id="mpesa-receipt-overview" class="woocommerce-order-overview__payment-method method">Receipt number: <strong>' +
-                                            data.receipt +
-                                            '</strong></li>'
-                                        );
-                                    }
-
-                                    if ($("#mpesa-receipt-table-row").length) {} else {
-                                        $(".woocommerce-table--order-details > tfoot")
-                                            .find('tr:last-child')
-                                            .prev()
-                                            .after(
-                                                '<tr id="mpesa-receipt-table-row"><th scope="row">Receipt number:</th><td>' +
-                                                data.receipt +
-                                                '</td></tr>'
-                                            );
-                                    }
-
-                                    $("#mpesa_receipt").html(
-                                        'Payment confirmed. Receipt number: <b>' +
-                                        data.receipt +
-                                        '</b>'
-                                    );
-
-                                    $("#missed_stk").hide();
-                                    $("#resend_stk").hide();
-                                    $("#mpesa_request").hide();
-                                    clearInterval(checker);
-                                    return false;
-                                }
-                            });
+                    var checker = setInterval(() => {
+                        if ($("#payment_method").length && $("#payment_method").val() !== 'mpesa') {
+                            clearInterval(checker);
                         }
-                    }
-                },
-                3000);
-            });
-        </script>
+
+                        if ($("#current_order").length) {
+                            var order = $("#current_order").val();
+                            if (order.length) {
+                                $.get("{$url}" + order, [], function(data) {
+                                    if (data.receipt == '' || data.receipt == 'N/A') {
+                                        $("#mpesa_receipt").html(
+                                            'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
+                                        );
+                                    } else {
+                                        if ($("#mpesa-receipt-overview").length) {} else {
+                                            $(".woocommerce-order-overview").append(
+                                                '<li id="mpesa-receipt-overview" class="woocommerce-order-overview__payment-method method">Receipt number: <strong>' +
+                                                data.receipt +
+                                                '</strong></li>'
+                                            );
+                                        }
+
+                                        if ($("#mpesa-receipt-table-row").length) {} else {
+                                            $(".woocommerce-table--order-details > tfoot")
+                                                .find('tr:last-child')
+                                                .prev()
+                                                .after(
+                                                    '<tr id="mpesa-receipt-table-row"><th scope="row">Receipt number:</th><td>' +
+                                                    data.receipt +
+                                                    '</td></tr>'
+                                                );
+                                        }
+
+                                        $("#mpesa_receipt").html(
+                                            'Payment confirmed. Receipt number: <b>' +
+                                            data.receipt +
+                                            '</b>'
+                                        );
+
+                                        $("#missed_stk").hide();
+                                        $("#resend_stk").hide();
+                                        $("#mpesa_request").hide();
+                                        clearInterval(checker);
+                                        return false;
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    3000);
+                });
+            </script>
 JS;
     }
-    
-    function wc_mpesa_rewrite_add_rewrites()
+
+    public function wc_mpesa_rewrite_add_rewrites()
     {
         add_rewrite_rule('lipwa/([^/]*)/?', 'index.php?lipwa=$matches[1]', 'top');
     }
 
-    function wc_mpesa_rewrite_add_var($vars)
+    public function wc_mpesa_rewrite_add_var($vars)
     {
         array_push($vars, 'lipwa');
         return $vars;
     }
 
-    function wc_mpesa_process_ipn()
+    public function wc_mpesa_process_ipn()
     {
         $mpesa = get_option('woocommerce_mpesa_settings', []);
 
@@ -232,8 +231,7 @@ JS;
                     $phone      = $order->get_billing_phone();
                     $first_name = $order->get_billing_first_name();
                     $last_name  = $order->get_billing_last_name();
-
-                    $result = (new STK)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+                    $result     = (new STK)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
                     wp_send_json($result);
                     break;
@@ -262,13 +260,7 @@ JS;
                     $LastName           = $response['LastName'];
 
                     $post = wc_mpesa_post_id_by_meta_key_and_value('_reference', $BillRefNumber);
-                    if ($post !== false) {
-                        // wp_update_post(
-                        //     array(
-                        //         'post_content' => file_get_contents('php://input'), 'ID' => $post,
-                        //     )
-                        // );
-                    } else {
+                    if (!$post) {
                         $post_id = wp_insert_post(
                             array(
                                 'post_title'   => 'C2B',
@@ -344,10 +336,10 @@ JS;
 
                         exit(wp_redirect(
                             add_query_arg(
-                                [
+                                array(
                                     'mpesa-urls-registered' => $message,
                                     'reg-state'             => $state,
-                                ],
+                                ),
                                 wp_get_referer()
                             )
                         ));
@@ -385,8 +377,8 @@ JS;
                             $balance            = $response['Body']['stkCallback']['CallbackMetadata']['Item'][2]['Value'];
                             $transactionDate    = $response['Body']['stkCallback']['CallbackMetadata']['Item'][3]['Value'];
                             $phone              = $response['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value'];
-                            $after_ipn_paid = round($before_ipn_paid) + round($amount);
-                            $ipn_balance    = $after_ipn_paid - $amount_due;
+                            $after_ipn_paid     = round($before_ipn_paid) + round($amount);
+                            $ipn_balance        = $after_ipn_paid - $amount_due;
 
                             if ($ipn_balance == 0) {
                                 update_post_meta($post, '_order_status', 'complete');
@@ -513,7 +505,7 @@ JS;
         }
     }
 
-    function wcmpesa_new_order_column($columns)
+    public function wcmpesa_new_order_column($columns)
     {
         $columns['mpesa'] = 'Reinitiate Mpesa';
         return $columns;
@@ -526,7 +518,7 @@ JS;
      * @param string $column The name of the column being acted upon
      * @return void
      */
-    function shop_order_payments_table_column_content($column_id, $post_id)
+    public function shop_order_payments_table_column_content($column_id, $post_id)
     {
         $order_id = get_post_meta($post_id, '_order_id', true);
         switch ($column_id) {
@@ -548,7 +540,7 @@ JS;
         }
     }
 
-    function woocommerce_emails_attach_downloadables($attachments, $status, $order)
+    public function woocommerce_emails_attach_downloadables($attachments, $status, $order)
     {
         if (!is_object($order) || !isset($status)) {
             return $attachments;
@@ -576,7 +568,7 @@ JS;
     /**
      * @since 1.20.79
      */
-    function request_body($order_id)
+    public function request_body($order_id)
     {
         $c2b = get_option('woocommerce_mpesa_settings');
 
