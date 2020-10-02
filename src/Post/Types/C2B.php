@@ -47,14 +47,11 @@ class C2B
             'filter_items_list'     => __('Filter payments list', 'woocommerce'),
         );
 
-        $settings = get_option('woocommerce_mpesa_settings', []);
-        $supported = (isset($settings["env"]) && ($settings["env"] == 'live')) ? array() : array('editor');
-
         $args = array(
             'label'                 => __('Payment', 'woocommerce'),
             'description'           => __('Payment Description', 'woocommerce'),
             'labels'                => $labels,
-            'supports'              => $supported,
+            'supports'              => array(),
             'taxonomies'            => array(),
             'hierarchical'          => false,
             'public'                => false,

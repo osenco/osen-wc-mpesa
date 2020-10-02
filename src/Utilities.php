@@ -226,7 +226,7 @@ JS;
 
             switch ($action) {
                 case "request":
-                    $order_id   = $_POST['order'];
+                    $order_id   = sanitize_text_field($_POST['order']);
                     $order      = new \WC_Order($order_id);
                     $total      = $order->get_total();
                     $phone      = $order->get_billing_phone();
@@ -263,11 +263,11 @@ JS;
 
                     $post = wc_mpesa_post_id_by_meta_key_and_value('_reference', $BillRefNumber);
                     if ($post !== false) {
-                        wp_update_post(
-                            array(
-                                'post_content' => file_get_contents('php://input'), 'ID' => $post,
-                            )
-                        );
+                        // wp_update_post(
+                        //     array(
+                        //         'post_content' => file_get_contents('php://input'), 'ID' => $post,
+                        //     )
+                        // );
                     } else {
                         $post_id = wp_insert_post(
                             array(
@@ -367,7 +367,7 @@ JS;
                     $merchantRequestID = $response['Body']['stkCallback']['MerchantRequestID'];
 
                     $post = wc_mpesa_post_id_by_meta_key_and_value('_request_id', $merchantRequestID);
-                    wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
+                    //wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
 
                     $order_id        = get_post_meta($post, '_order_id', true);
                     $amount_due      = get_post_meta($post, '_amount', true);
@@ -428,7 +428,7 @@ JS;
                     break;
 
                 case "status":
-                    $transaction = $_POST['transaction'];
+                    $transaction = sanitize_text_field($_POST['transaction']);
                     exit(wp_send_json((new STK)->status($transaction)));
                     break;
 
@@ -481,7 +481,7 @@ JS;
                     $checkoutRequestID = $response['Body']['stkCallback']['CheckoutRequestID'];
 
                     $post = wc_mpesa_post_id_by_meta_key_and_value('_request_id', $merchantRequestID);
-                    wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
+                    //wp_update_post(['post_content' => file_get_contents('php://input'), 'ID' => $post]);
                     update_post_meta($post, '_order_status', 'pending');
 
                     $order_id = get_post_meta($post, '_order_id', true);
@@ -503,7 +503,7 @@ JS;
             $response = array('receipt' => '');
 
             if (!empty($_GET['order'])) {
-                $post     = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $_GET['order']);
+                $post     = wc_mpesa_post_id_by_meta_key_and_value('_order_id', esc_attr(sanitize_text_field($_GET['order'])));
                 $response = array(
                     'receipt' => get_post_meta($post, '_receipt', true),
                 );

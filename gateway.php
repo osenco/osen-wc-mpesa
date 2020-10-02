@@ -354,7 +354,7 @@ function wc_mpesa_gateway_init()
                         /**
                          * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
                          */
-                        $order->update_status('on-hold', __('Awaiting MPesa confirmation of payment from ' . $phone . '.', 'woocommerce'));
+                        $order->update_status('on-hold', __("Awaiting MPesa confirmation of payment from {$phone} for request {$request_id}.", 'woocommerce'));
 
                         /**
                          * Reduce stock levels
@@ -370,7 +370,6 @@ function wc_mpesa_gateway_init()
                         $post_id = wp_insert_post(
                             array(
                                 'post_title'   => 'Checkout',
-                                'post_content' => "Response: " . json_encode($result),
                                 'post_status'  => 'publish',
                                 'post_type'    => 'mpesaipn',
                                 'post_author'  => is_user_logged_in() ? get_current_user_id() : $this->get_option('accountant'),
