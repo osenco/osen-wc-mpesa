@@ -49,8 +49,8 @@ class Initialize
 
     function wc_mpesa_detect_plugin_activation($plugin, $network_activation)
     {
-        flush_rewrite_rules();
         if ($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php') {
+            flush_rewrite_rules();
             exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
         }
     }

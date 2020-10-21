@@ -16,7 +16,7 @@
  * Tested up to: 5.5.1
  *
  * WC requires at least: 3.5.0
- * WC tested up to: 4.5.2
+ * WC tested up to: 4.6
  *
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -64,7 +64,7 @@ function osen_setup_wc_mpesa()
     new Osen\Woocommerce\Post\Types\C2B;
 
     /**
-     * Initialize our admin Admin
+     * Initialize our admin menus
      */
     new Osen\Woocommerce\Admin\Menu;
 

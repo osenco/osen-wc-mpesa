@@ -116,10 +116,10 @@ class Utilities
                                     <li>Select <b>Lipa na M-PESA</b>.</li>
                                     <li>Select <b><?php echo $type; ?></b>.</li>
                                     <?php if ($idtype == 4) : ?>
-                                        <li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as business no.</li>
+                                        <li>Enter <b><?php echo (new C2B)->shortcode; ?></b> as business no.</li>
                                         <li>Enter <b><?php echo $reference; ?></b> as Account no.</li>
                                     <?php else : ?>
-                                        <li>Enter <b><?php echo $mpesa['shortcode']; ?></b> as till no.</li>
+                                        <li>Enter <b><?php echo (new C2B)->shortcode; ?></b> as till no.</li>
                                     <?php endif; ?>
                                     <li>Enter Amount <b><?php echo round($total); ?></b>.</li>
                                     <li>Enter your M-PESA PIN</li>
@@ -179,15 +179,22 @@ class Utilities
                                                     '</td></tr>'
                                                 );
                                         }
-
-                                        $("#mpesa_receipt").html(
-                                            'Payment confirmed. Receipt number: <b>' +
-                                            data.receipt +
-                                            '</b>'
-                                        );
+                                        if (data.receipt == 'fail') {
+                                            $("#mpesa_receipt").html(
+                                                '<b>' +
+                                                data.note.content +
+                                                '</b>'
+                                            );
+                                        } else {
+                                            $("#mpesa_receipt").html(
+                                                'Payment confirmed. Receipt number: <b>' +
+                                                data.receipt +
+                                                '</b>'
+                                            );
+                                        }
 
                                         $("#missed_stk").hide();
-                                        $("#resend_stk").hide();
+                                        $("#renitiate-button").hide();
                                         $("#mpesa_request").hide();
                                         clearInterval(checker);
                                         return false;
@@ -264,7 +271,6 @@ JS;
                         $post_id = wp_insert_post(
                             array(
                                 'post_title'   => 'C2B',
-                                'post_content' => "Response: " . json_encode($response),
                                 'post_status'  => 'publish',
                                 'post_type'    => 'mpesaipn',
                                 'post_author'  => 1,
@@ -350,6 +356,15 @@ JS;
                 case "reconcile":
                     $response = json_decode(file_get_contents('php://input'), true);
 
+                    if (!isset($_GET['sign'])) {
+                        exit(wp_send_json(['Error' => 'No Signature Supplied']));
+                    }
+                    $sign = sanitize_text_field($_GET['sign']);
+
+                    if ($sign !== $mpesa['signature']) {
+                        exit(wp_send_json(['Error' => 'Invalid Signature Supplied']));
+                    }
+
                     if (!isset($response['Body'])) {
                         exit(wp_send_json(['Error' => 'No response data received']));
                     }
@@ -408,6 +423,7 @@ JS;
                             update_post_meta($post, '_receipt', $mpesaReceiptNumber);
                         } else {
                             $order->update_status('on-hold');
+                            update_post_meta($post, '_receipt', 'fail');
                             $order->add_order_note(__("MPesa Error {$resultCode}: {$resultDesc}"));
                         }
 
@@ -495,9 +511,15 @@ JS;
             $response = array('receipt' => '');
 
             if (!empty($_GET['order'])) {
-                $post     = wc_mpesa_post_id_by_meta_key_and_value('_order_id', esc_attr(sanitize_text_field($_GET['order'])));
+                $order_id = sanitize_text_field($_GET['order']);
+                $post     = wc_mpesa_post_id_by_meta_key_and_value('_order_id', esc_attr($order_id));
+                $notes    = wc_get_order_notes(array(
+                    'post_id' => $order_id,
+                    'number'  => 1
+                ) );
                 $response = array(
                     'receipt' => get_post_meta($post, '_receipt', true),
+                    'note'    => $notes[0]
                 );
             }
 

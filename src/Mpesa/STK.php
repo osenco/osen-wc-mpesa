@@ -86,6 +86,11 @@ class STK
 	public $credentials;
 
 	/**
+	 * @param string  | Encryption Signature
+	 */
+	public $signature;
+
+	/**
 	 * @param array $config - Key-value pairs of settings
 	 */
 	public function __construct()
@@ -102,8 +107,10 @@ class STK
 			'validate'   => home_url('lipwa/validate/'),
 			'confirm'    => home_url('lipwa/confirm/'),
 			'reconcile'  => home_url('lipwa/reconcile/'),
-			'timeout'    => home_url('lipwa/timeout/')
+			'timeout'    => home_url('lipwa/timeout/'),
+			'signature'  => $c2b['signature'] ?? md5(random_bytes(8)),
 		);
+		
 		foreach ($config as $key => $value) {
 			$this->$key = $value;
 		}
@@ -217,7 +224,7 @@ class STK
 			'PartyA'            => $phone,
 			'PartyB'            => $this->shortcode,
 			'PhoneNumber'       => $phone,
-			'CallBackURL'       => $this->reconcile,
+			'CallBackURL'       => "{$this->reconcile}?sign={$this->signature}",
 			'AccountReference'  => $reference,
 			'TransactionDesc'   => $trxdesc,
 			'Remark'            => $remark,

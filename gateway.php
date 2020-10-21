@@ -259,6 +259,13 @@ function wc_mpesa_gateway_init()
                         'default'     => 'no',
                         'description' => '<small>' . __('Show Request Body(to send to Daraja team on request)', 'woocommerce') . '<small>',
                     ),
+                    'signature'             => array(
+                        'title'       => __('Encryption Signature', 'woocommerce'),
+                        'type'        => 'text',
+                        'description' => __('Callback Endpoint Encryption Signature', 'woocommerce'),
+                        'default'     => md5(random_bytes(8)),
+                        'desc_tip'    => true,
+                    ),
                 );
             }
 
@@ -346,6 +353,9 @@ function wc_mpesa_gateway_init()
                         $error_message = 'MPesa Error ' . $result['errorCode'] . ': ' . $result['errorMessage'];
                         $order->update_status('failed', __($error_message, 'woocommerce'));
                         wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
+                        if (($c2b['debug'] ?? 'no') == 'yes' && WC()->session->get('mpesa_request') ) {
+                            wc_add_notice(__('Request: ', 'woocommerce') . WC()->session->get('mpesa_request') , 'error');
+                        }
                         return array(
                             'result'   => 'fail',
                             'redirect' => '',

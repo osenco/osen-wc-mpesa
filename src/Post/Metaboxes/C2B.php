@@ -133,13 +133,13 @@ class C2B
     public function order_details($post)
     {
         $order   = ($value = get_post_meta($post->ID, '_order_id', true)) ? $value : $post->ID;
-        $order   = isset($_GET['order']) ? $_GET['order'] : $order;
+        $order   = isset($_GET['order']) ? esc_attr(sanitize_text_field($_GET['order'])) : $order;
         $amount  = get_post_meta($post->ID, '_amount', true);
         $paid    = get_post_meta($post->ID, '_paid', true);
         $balance = get_post_meta($post->ID, '_balance', true);
 
         if (isset($_GET['order'])) {
-            $order_details = new \WC_Order($_GET['order']);
+            $order_details = new \WC_Order($order);
             $amount        = wc_format_decimal($order_details->get_total(), 2);
             $phone         = $order_details->get_billing_phone();
             $first_name    = $order_details->get_billing_first_name();

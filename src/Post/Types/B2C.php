@@ -23,7 +23,6 @@ class B2C
     // Register Custom Post - Disbursement/Refunds
     public function b2c_payments_post_type()
     {
-
         $labels = array(
             'name'                  => _x('Business-Customer Payments/Refunds', 'Disbursement/Refund General Name', 'woocommerce'),
             'singular_name'         => _x('Disbursement/Refund', 'Disbursement/Refund Singular Name', 'woocommerce'),

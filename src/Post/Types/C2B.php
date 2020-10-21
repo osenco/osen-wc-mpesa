@@ -22,7 +22,6 @@ class C2B
     // Register Custom Post - Payments
     public function mpesaipn_post_type()
     {
-
         $labels = array(
             'name'                  => _x('Payments', 'Payment General Name', 'woocommerce'),
             'singular_name'         => _x('Payment', 'Payment Singular Name', 'woocommerce'),
