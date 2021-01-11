@@ -189,7 +189,7 @@ class C2B
             : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
 
         $post_data = array(
-            'ShortCode'       => $this->shortcode,
+            'ShortCode'       => $this->headoffice,
             'ResponseType'    => 'Cancelled',
             'ConfirmationURL' => $this->confirm,
             'ValidationURL'   => $this->validate,
@@ -207,7 +207,7 @@ class C2B
             )
         );
         $result = is_wp_error($response)
-            ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
+            ? array('errorCode' => 1, 'errorMessage' => wp_remote_retrieve_response_message($response))
             : json_decode($response['body'], true);
 
         return is_null($callback)
@@ -260,7 +260,7 @@ class C2B
             )
         );
         return is_wp_error($response)
-            ? array('errorCode' => 1, 'errorMessage' => 'Could not connect to Daraja')
+            ? array('errorCode' => 1, 'errorMessage' => wp_remote_retrieve_response_message($response))
             : json_decode($response['body'], true);
     }
 

@@ -19,9 +19,9 @@ class C2B
 
     public function mpesa_mb_sm()
     {
-        add_meta_box('c2b-payment-customer_details', 'Customer Details', [$this, 'customer_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
-        add_meta_box('c2b-payment-order_details', 'Order Details', [$this, 'order_details'], ['mpesaipn', 'b2c_payment'], 'normal', 'high');
-        add_meta_box('c2b-payment-payment_details', 'Payment Details', [$this, 'payment_details'], ['mpesaipn', 'b2c_payment'], 'side', 'high');
+        add_meta_box('c2b-payment-customer_details', 'Customer Details', [$this, 'customer_details'], ['mpesaipn'], 'normal', 'high');
+        add_meta_box('c2b-payment-order_details', 'Order Details', [$this, 'order_details'], ['mpesaipn'], 'normal', 'high');
+        add_meta_box('c2b-payment-payment_details', 'Payment Details', [$this, 'payment_details'], ['mpesaipn'], 'side', 'high');
         add_meta_box('c2b-payment-payment_status', 'Incase MPesa timed out', [$this, 'mpesa_status'], ['mpesaipn', 'shop_order'], 'side', 'low');
         add_meta_box('woocommerce-order-notes', 'Payment Order Notes', [$this, 'order_notes'], 'mpesaipn', 'normal', 'default');
         add_meta_box('c2b-payment-payment_create', 'Paid For Via MPesa?', [$this, 'mpesa_payment'], 'shop_order', 'side', 'low');

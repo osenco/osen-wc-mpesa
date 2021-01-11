@@ -60,19 +60,12 @@ function osen_setup_wc_mpesa()
     /**
      * Initialize all our custom post types
      */
-    // Osen\Woocommerce\Post\Types\(new B2C;
     new Osen\Woocommerce\Post\Types\C2B;
 
     /**
      * Initialize our admin menus
      */
     new Osen\Woocommerce\Admin\Menu;
-
-    /**
-     * Initialize settings pages for B2C API
-     */
-    // new Osen\Woocommerce\Admin\Settings\B2C;
-    // new Osen\Woocommerce\Admin\Withdraw;
 
     /**
      * Initialize metaboxes for C2B API

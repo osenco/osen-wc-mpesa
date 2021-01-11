@@ -68,7 +68,6 @@ class Initialize
             $links,
             array(
                 '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa') . '">&nbsp;STK & C2B Setup</a>',
-                // '<a href="'.admin_url('edit.php?post_type=mpesaipn&page=wc_mpesa_b2c_preferences').'">&nbsp;B2C</a>'
             )
         );
     }

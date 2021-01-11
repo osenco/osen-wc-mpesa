@@ -239,7 +239,13 @@ JS;
                     $first_name = $order->get_billing_first_name();
                     $last_name  = $order->get_billing_last_name();
                     $result     = (new STK)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+                    $post       = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $order_id);
 
+                    if ($post !== false) {
+                        $request_id = $result['MerchantRequestID'];
+                        update_post_meta($post, '_request_id', $request_id);
+                    }
+                    
                     wp_send_json($result);
                     break;
                 case "validate":
