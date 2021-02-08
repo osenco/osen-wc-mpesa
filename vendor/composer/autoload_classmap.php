@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Osen\\Woocommerce\\Admin\\Menu' => $baseDir . '/src/Admin/Menu.php',
     'Osen\\Woocommerce\\Initialize' => $baseDir . '/src/Initialize.php',
     'Osen\\Woocommerce\\Mpesa\\C2B' => $baseDir . '/src/Mpesa/C2B.php',
     'Osen\\Woocommerce\\Mpesa\\STK' => $baseDir . '/src/Mpesa/STK.php',

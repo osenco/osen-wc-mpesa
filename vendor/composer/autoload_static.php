@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62
 {
+    public static $files = array (
+        'dfceb480b9ce78a93ab4222e950a3686' => __DIR__ . '/../..' . '/gateway.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'O' => 
         array (
@@ -22,6 +26,7 @@ class ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Osen\\Woocommerce\\Admin\\Menu' => __DIR__ . '/../..' . '/src/Admin/Menu.php',
         'Osen\\Woocommerce\\Initialize' => __DIR__ . '/../..' . '/src/Initialize.php',
         'Osen\\Woocommerce\\Mpesa\\C2B' => __DIR__ . '/../..' . '/src/Mpesa/C2B.php',
         'Osen\\Woocommerce\\Mpesa\\STK' => __DIR__ . '/../..' . '/src/Mpesa/STK.php',
