@@ -247,13 +247,17 @@ function wc_mpesa_gateway_init()
                         'label'       => __('Check to enable debug mode and show request body', 'woocommerce'),
                         'type'        => 'checkbox',
                         'default'     => 'no',
-                        'description' => '<small>' . __('Show Request Body(to send to Daraja team on request)', 'woocommerce') . '<small>',
+                        'description' => '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
+                        <li>Validation URL for C2B: <a href="'.home_url('lipwa/validate').'">'.home_url('lipwa/validate').'</a></li>
+                        <li>Confirmation URL for C2B: <a href="'.home_url('lipwa/confirm').'">'.home_url('lipwa/confirm').'</a></li>
+                        <li>Reconciliation URL for STK Push: <a href="'.home_url('lipwa/reconcile').'">'.home_url('lipwa/reconcile').'</a></li>
+                        </ul>', 'woocommerce') . '<small>',
                     ),
                     'signature'             => array(
                         'title'       => __('Encryption Signature', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Callback Endpoint Encryption Signature', 'woocommerce'),
-                        'default'     => md5(random_bytes(8)),
+                        'default'     => md5(random_bytes(12)),
                         'desc_tip'    => true,
                     ),
                 );
