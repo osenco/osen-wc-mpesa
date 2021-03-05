@@ -2,7 +2,7 @@
 
 /**
  * @package MPesa For WooCommerce
-                             * @subpackage WooCommerce Mpesa Gateway
+ * @subpackage WooCommerce Mpesa Gateway
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
  */
@@ -58,7 +58,7 @@ function wc_mpesa_gateway_init()
                 $this->init_form_fields();
                 $this->init_settings();
 
-                $env          = $this->get_option('env', 'sandbox'); 
+                $env          = $this->get_option('env', 'sandbox');
                 $test_cred = ($env == 'sandbox')
                     ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
                     : '';
@@ -248,9 +248,9 @@ function wc_mpesa_gateway_init()
                         'type'        => 'checkbox',
                         'default'     => 'no',
                         'description' => '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
-                        <li>Validation URL for C2B: <a href="'.home_url('lipwa/validate').'">'.home_url('lipwa/validate').'</a></li>
-                        <li>Confirmation URL for C2B: <a href="'.home_url('lipwa/confirm').'">'.home_url('lipwa/confirm').'</a></li>
-                        <li>Reconciliation URL for STK Push: <a href="'.home_url('lipwa/reconcile').'">'.home_url('lipwa/reconcile').'</a></li>
+                        <li>Validation URL for C2B: <a href="' . home_url('lipwa/validate') . '">' . home_url('lipwa/validate') . '</a></li>
+                        <li>Confirmation URL for C2B: <a href="' . home_url('lipwa/confirm') . '">' . home_url('lipwa/confirm') . '</a></li>
+                        <li>Reconciliation URL for STK Push: <a href="' . home_url('lipwa/reconcile') . '">' . home_url('lipwa/reconcile') . '</a></li>
                         </ul>', 'woocommerce') . '<small>',
                     ),
                     'signature'             => array(
@@ -347,8 +347,8 @@ function wc_mpesa_gateway_init()
                         $error_message = 'MPesa Error ' . $result['errorCode'] . ': ' . $result['errorMessage'];
                         $order->update_status('failed', __($error_message, 'woocommerce'));
                         wc_add_notice(__('Failed! ', 'woocommerce') . $error_message, 'error');
-                        if (($c2b['debug'] ?? 'no') == 'yes' && WC()->session->get('mpesa_request') ) {
-                            wc_add_notice(__('Request: ', 'woocommerce') . WC()->session->get('mpesa_request') , 'error');
+                        if (($c2b['debug'] ?? 'no') == 'yes' && WC()->session->get('mpesa_request')) {
+                            wc_add_notice(__('Request: ', 'woocommerce') . WC()->session->get('mpesa_request'), 'error');
                         }
                         return array(
                             'result'   => 'fail',
@@ -358,7 +358,7 @@ function wc_mpesa_gateway_init()
                         /**
                          * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
                          */
-                        $order->update_status('on-hold', __("Awaiting MPesa confirmation of payment from {$phone} for request {$request_id}.", 'woocommerce'));
+                        $order->add_order_note(__("Awaiting MPesa confirmation of payment from {$phone} for request {$request_id}.", 'woocommerce'));
 
                         /**
                          * Reduce stock levels
