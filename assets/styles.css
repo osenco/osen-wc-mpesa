@@ -1,0 +1,38 @@
+@keyframes wave {
+	0%,
+	60%,
+	100% {
+		transform: initial;
+	}
+
+	30% {
+		transform: translateY(-15px);
+	}
+}
+
+@keyframes blink {
+	0% {
+		opacity: 0.2;
+	}
+
+	20% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0.2;
+	}
+}
+
+.saving span {
+	animation: blink 1.4s linear infinite;
+	animation-fill-mode: both;
+}
+
+.saving span:nth-child(2) {
+	animation-delay: 0.2s;
+}
+
+.saving span:nth-child(3) {
+	animation-delay: 0.4s;
+}

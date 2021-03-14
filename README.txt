@@ -30,5 +30,5 @@ Instructions on how to install the plugin and get it working:
 
 == Changelog ==
 = 2.0.0 =
-Initial release (migrating from Github releases - version number at 2.0.0 to ctaer for existing users with previous versions)
+Initial release (migrating from Github releases - version number at 2.0.0 to cater for existing users with previous versions)
 

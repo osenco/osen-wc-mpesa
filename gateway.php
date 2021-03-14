@@ -355,10 +355,7 @@ function wc_mpesa_gateway_init()
                             'redirect' => '',
                         );
                     } else {
-                        /**
-                         * Temporarily set status as "on-hold", incase the MPesa API times out before processing our request
-                         */
-                        $order->add_order_note(__("Awaiting MPesa confirmation of payment from {$phone} for request {$request_id}.", 'woocommerce'));
+                        //$order->add_order_note(__("Awaiting MPesa confirmation of payment from {$phone} for request {$request_id}.", 'woocommerce'));
 
                         /**
                          * Reduce stock levels
