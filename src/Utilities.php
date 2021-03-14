@@ -45,9 +45,6 @@ class Utilities
 
         $type = ($idtype == 4) ? 'Pay Bill' : 'Buy Goods and Services'; ?>
 
-        <?php wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
-        wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/scripts.js")); ?>
-
         <section class="woocommerce-order-details" id="resend_stk">
             <input type="hidden" id="current_order" value="<?php echo $order_id; ?>">
             <input type="hidden" id="payment_method" value="<?php echo $order->get_payment_method(); ?>">
@@ -202,15 +199,24 @@ class Utilities
                                         $order = new \WC_Order($order_id);
 
                                         if ($ipn_balance == 0) {
-                                            $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
                                             update_post_meta($post, '_order_status', 'complete');
+                                            update_post_meta($post, '_receipt', $mpesaReceiptNumber);
 
-                                            $headers = 'From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n";
-                                            wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . 'with receipt Number ' . $mpesaReceiptNumber . '.', $headers);
+                                            $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
+                                            $order->set_transaction_id($mpesaReceiptNumber);
+
+                                            $headers[] = 'From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n";
+                                            wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
                                         } elseif ($ipn_balance < 0) {
                                             $currency = get_woocommerce_currency();
                                             $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
+                                            $order->set_transaction_id($mpesaReceiptNumber);
+
+                                            $headers[] = 'From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n";
+                                            wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
+
                                             update_post_meta($post, '_order_status', 'complete');
+                                            update_post_meta($post, '_receipt', $mpesaReceiptNumber);
                                         } else {
                                             $order->update_status('on-hold');
                                             $order->add_order_note(__("MPesa Payment from {$phone} Incomplete"));
@@ -307,6 +313,11 @@ class Utilities
                                             } elseif ($ipn_balance < 0) {
                                                 $currency = get_woocommerce_currency();
                                                 $order->update_status((isset($mpesa['completion']) ? $mpesa['completion'] : 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
+                                                $order->set_transaction_id($mpesaReceiptNumber);
+
+                                                $headers[] = 'From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n";
+                                                wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
+
                                                 update_post_meta($post, '_order_status', 'complete');
                                                 update_post_meta($post, '_receipt', $mpesaReceiptNumber);
                                             } else {

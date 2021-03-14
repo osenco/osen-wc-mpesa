@@ -19,6 +19,8 @@ class Initialize
         add_action('activated_plugin', array($this, 'wc_mpesa_detect_plugin_activation'), 10, 2);
         add_action('deactivated_plugin', array($this, 'wc_mpesa_detect_woocommerce_deactivation'), 10, 2);
         add_filter('plugin_action_links_' . 'osen-wc-mpesa/osen-wc-mpesa.php', array($this, 'mpesa_action_links'));
+        add_action('wp_enqueue_scripts', array($this, 'osen_wc_scripts'));
+        add_action('admin_enqueue_scripts', array($this, 'osen_admin_scripts'));
     }
 
     function wc_mpesa_activation_check()
@@ -86,5 +88,18 @@ class Initialize
         }
 
         return (array) $links;
+    }
+
+    function osen_wc_scripts()
+    {
+        if (is_wc_endpoint_url('thank-you')) {
+            wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
+            wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/scripts.js"));
+        }
+    }
+
+    function osen_admin_scripts()
+    {
+        wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/admin_scripts.js"));
     }
 }
