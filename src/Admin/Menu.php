@@ -142,9 +142,6 @@ class Menu
                 $ms = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 $ps = array_values($payments);
 
-                wp_enqueue_style("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.min.css"));
-                wp_enqueue_script("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.bundle.js"));
-
                 $date = date("Y");
                 $cols = json_encode(array_merge(["data1"], $ps));
                 $categories = json_encode(array_unique($ms));

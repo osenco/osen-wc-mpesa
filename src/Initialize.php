@@ -92,14 +92,16 @@ class Initialize
 
     function osen_wc_scripts()
     {
-        if (is_wc_endpoint_url('thank-you')) {
-            wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
-            wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/scripts.js"));
-        }
+        //if (is_wc_endpoint_url('thank-you')) {
+        wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
+        wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/scripts.js", "jquery"));
+        //}
     }
 
     function osen_admin_scripts()
     {
-        wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/admin_scripts.js"));
+        wp_enqueue_style("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.min.css"));
+        wp_enqueue_script("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.bundle.js"));
+        wp_enqueue_script("wc-mpesa-settings", plugins_url("osen-wc-mpesa/assets/admin_scripts.js", "jquery"));
     }
 }

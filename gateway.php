@@ -2,7 +2,7 @@
 
 /**
  * @package MPesa For WooCommerce
- * @subpackage WooCommerce Mpesa Gateway
+                             * @subpackage WooCommerce Mpesa Gateway
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
  */
@@ -45,6 +45,8 @@ function wc_mpesa_gateway_init()
          */
         class WC_MPESA_Gateway extends WC_Payment_Gateway
         {
+            public $sign;
+
             /**
              * Constructor for the gateway.
              */
@@ -75,6 +77,8 @@ function wc_mpesa_gateway_init()
                 $this->enable_for_methods = $this->get_option('enable_for_methods', array());
                 $this->enable_for_virtual = $this->get_option('enable_for_virtual', 'yes') === 'yes' ? true : false;
                 $this->debug              = $this->get_option('debug', 'no') === 'yes' ? true : false;
+
+                $this->sign             = $this->get_option('signature', md5(random_bytes(12)));
 
                 add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
                 add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
@@ -136,9 +140,9 @@ function wc_mpesa_gateway_init()
                         'desc_tip'    => true,
                     ),
                     'headoffice'         => array(
-                        'title'       => __('Store Number/Paybill', 'woocommerce'),
+                        'title'       => __('Store Number', 'woocommerce'),
                         'type'        => 'text',
-                        'description' => __('Store Number (for Till) or Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
+                        'description' => __('Your Store Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
                         'default'     => __('174379', 'woocommerce'),
                         'desc_tip'    => true,
                     ),
@@ -229,6 +233,13 @@ function wc_mpesa_gateway_init()
                             'data-placeholder' => __('Select shipping methods', 'woocommerce'),
                         ),
                     ),
+                    'signature'             => array(
+                        'title'       => __('Encryption Signature', 'woocommerce'),
+                        'type'        => 'text',
+                        'description' => __('Callback Endpoint Encryption Signature', 'woocommerce'),
+                        'default'     => $this->sign,
+                        'desc_tip'    => true,
+                    ),
                     'enable_for_virtual' => array(
                         'title'   => __('Accept for virtual orders', 'woocommerce'),
                         'label'   => __('Accept MPesa if the order is virtual', 'woocommerce'),
@@ -248,17 +259,10 @@ function wc_mpesa_gateway_init()
                         'type'        => 'checkbox',
                         'default'     => 'no',
                         'description' => '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
-                        <li>Validation URL for C2B: <a href="' . home_url('lipwa/validate') . '">' . home_url('lipwa/validate') . '</a></li>
-                        <li>Confirmation URL for C2B: <a href="' . home_url('lipwa/confirm') . '">' . home_url('lipwa/confirm') . '</a></li>
-                        <li>Reconciliation URL for STK Push: <a href="' . home_url('lipwa/reconcile') . '">' . home_url('lipwa/reconcile') . '</a></li>
+                        <li>Validation URL for C2B: <a href="' . home_url('lipwa/validate?sign=' . $this->sign ). '">' . home_url('lipwa/validate?sign=' . $this->sign) . '</a></li>
+                        <li>Confirmation URL for C2B: <a href="' . home_url('lipwa/confirm?sign=' . $this->sign) . '">' . home_url('lipwa/confirm?sign=' . $this->sign) . '</a></li>
+                        <li>Reconciliation URL for STK Push: <a href="' . home_url('lipwa/reconcile?sign=' . $this->sign) . '">' . home_url('lipwa/reconcile?sign=' . $this->sign) . '</a></li>
                         </ul>', 'woocommerce') . '<small>',
-                    ),
-                    'signature'             => array(
-                        'title'       => __('Encryption Signature', 'woocommerce'),
-                        'type'        => 'text',
-                        'description' => __('Callback Endpoint Encryption Signature', 'woocommerce'),
-                        'default'     => md5(random_bytes(12)),
-                        'desc_tip'    => true,
                     ),
                 );
             }

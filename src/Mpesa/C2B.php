@@ -207,7 +207,7 @@ class C2B
             )
         );
         $result = is_wp_error($response)
-            ? array('errorCode' => 1, 'errorMessage' => wp_remote_retrieve_response_message($response))
+            ? array('errorCode' => 1, 'errorMessage' => $response->get_error_message())
             : json_decode($response['body'], true);
 
         return is_null($callback)
@@ -260,7 +260,7 @@ class C2B
             )
         );
         return is_wp_error($response)
-            ? array('errorCode' => 1, 'errorMessage' => wp_remote_retrieve_response_message($response))
+            ? array('errorCode' => 1, 'errorMessage' => $response->get_error_message())
             : json_decode($response['body'], true);
     }
 

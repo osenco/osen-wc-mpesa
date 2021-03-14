@@ -243,7 +243,7 @@ class STK
 		);
 
 		if (is_wp_error($response)) {
-			return array('errorCode' => 1, 'errorMessage' => wp_remote_retrieve_response_message($response));
+			return array('errorCode' => 1, 'errorMessage' => $response->get_error_message());
 		} else {
 			$body = json_decode($response['body'], true);
 			return is_null($request)
@@ -320,7 +320,7 @@ class STK
 		);
 
 		return is_wp_error($response)
-			? array('errorCode' => 1, 'errorMessage' => wp_remote_retrieve_response_message($response))
+			? array('errorCode' => 1, 'errorMessage' => $response->get_error_message())
 			: json_decode($response['body'], true);
 	}
 }
