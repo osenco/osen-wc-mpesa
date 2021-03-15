@@ -1,14 +1,15 @@
 <?php
 
-namespace Osen\Woocommerce\Post\Metaboxes;
-
 /**
  * @package MPesa For WooCommerce
- * @subpackage Metaboxes
+ * @subpackage C2B Metaboxes
  * @author Mauko Maunde < hi@mauko.co.ke >
  * @version 2.0.0
  * @since 0.18.01
  */
+
+namespace Osen\Woocommerce\Post\Metaboxes;
+
 class C2B
 {
     public function __construct()
@@ -68,7 +69,7 @@ class C2B
             <tr valign="top" >
                 <td>
                     ' . (($status == 'complete')
-                    ? '<button id="mpesaipn_status" name="mpesaipn_status" class="button button-large">Check Payment Status</button>
+            ? '<button id="mpesaipn_status" name="mpesaipn_status" class="button button-large">Check Payment Status</button>
                     <script>
                         jQuery(document).ready(function($){
                             $("#mpesaipn_status").click(function(e){
@@ -78,18 +79,18 @@ class C2B
                                 });
                             });
                         });
-                    </script>' 
-                    : '<button id="mpesaipn_reinitiate" name="mpesaipn_reinitiate" class="button button-large">Reinitiate Prompt</button>
+                    </script>'
+            : '<button id="mpesaipn_reinitiate" name="mpesaipn_reinitiate" class="button button-large">Reinitiate Prompt</button>
                     <script>
                         jQuery(document).ready(function($){
                             $("#mpesaipn_reinitiate").click(function(e){
                                 e.preventDefault();
-                                $.post("' . home_url("lipwa/request") . '", [order: ' . $post->ID . '], function(data){
+                                $.post("' . home_url("wc-api/lipwa?action=request") . '", [order: ' . $post->ID . '], function(data){
                                     $("#mpesaipn_status_result").html("STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>");
                                 });
                             });
                         });
-                    </script>'). '
+                    </script>') . '
                 </td>
             </tr>
         </table>';

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package MPesa For WooCommerce
+                             * @package MPesa For WooCommerce
  * @subpackage WooCommerce Mpesa Gateway
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
@@ -38,7 +38,6 @@ function wc_mpesa_add_to_gateways($gateways)
 add_action('plugins_loaded', 'wc_mpesa_gateway_init', 11);
 function wc_mpesa_gateway_init()
 {
-
     if (class_exists('WC_Payment_Gateway')) {
         /**
          * @class WC_Gateway_MPesa
@@ -46,6 +45,8 @@ function wc_mpesa_gateway_init()
          */
         class WC_MPESA_Gateway extends WC_Payment_Gateway
         {
+            public $sign;
+
             /**
              * Constructor for the gateway.
              */
@@ -56,16 +57,18 @@ function wc_mpesa_gateway_init()
                 $this->method_title = __('Lipa Na MPesa', 'woocommerce');
 
                 $this->has_fields = true;
+                $this->sign       = $this->get_option('signature', md5(random_bytes(12)));
+                $this->enable_c2b = $this->get_option('enable_c2b', 'no') === 'yes';
+                $this->debug      = $this->get_option('debug', 'no') === 'yes';
 
                 // Load settings
                 $this->init_form_fields();
                 $this->init_settings();
 
-                $this->shortcode              = $this->get_option('shortcode');
-                $this->type              = $this->get_option('type');
-                $this->enable_c2b              = $this->get_option('enable_c2b', 'no') === 'yes';
-                $this->env          = $this->get_option('env', 'sandbox');
-                $test_cred = ($this->env == 'sandbox')
+                $this->shortcode = $this->get_option('shortcode');
+                $this->type      = $this->get_option('type');
+                $this->env       = $this->get_option('env', 'sandbox');
+                $test_cred       = ($this->env == 'sandbox')
                     ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
                     : '';
                 $color    = isset($_GET['reg-state']) ? $_GET['reg-state'] : 'black';
@@ -80,9 +83,6 @@ function wc_mpesa_gateway_init()
                 $this->instructions       = $this->get_option('instructions');
                 $this->enable_for_methods = $this->get_option('enable_for_methods', array());
                 $this->enable_for_virtual = $this->get_option('enable_for_virtual', 'yes') === 'yes';
-                $this->debug              = $this->get_option('debug', 'no') === 'yes';
-
-                $this->sign             = $this->get_option('signature', md5(random_bytes(12)));
 
                 add_action('woocommerce_thankyou_mpesa', array($this, 'thankyou_page'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'));
@@ -93,8 +93,8 @@ function wc_mpesa_gateway_init()
                 add_action('woocommerce_email_before_order_table', array($this, 'email_instructions'), 10, 3);
                 add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-                add_action('woocommerce_api_' . strtolower(get_class($this)), array($this, 'webhook'));
-                add_action('woocommerce_api_receipt_' . strtolower(get_class($this)), array($this, 'get_receipt'));
+                add_action('woocommerce_api_lipwa', array($this, 'webhook'));
+                add_action('woocommerce_api_lipwa_receipt', array($this, 'get_receipt'));
             }
 
             /**
@@ -179,10 +179,12 @@ function wc_mpesa_gateway_init()
                     ),
                     'passkey'            => array(
                         'title'       => __('Online Pass Key', 'woocommerce'),
-                        'type'        => 'textarea',
+                        'type'        => 'text',
                         'description' => __('Used to create a password for use when making a Lipa Na M-Pesa Online Payment API call.', 'woocommerce'),
                         'default'     => __('bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', 'woocommerce'),
                         'desc_tip'    => true,
+                        'class'       => 'wide-input',
+                        'css'         => 'min-width: 45%;',
                     ),
                     'resend'             => array(
                         'title'       => __('Resend STK Button Text', 'woocommerce'),
@@ -194,7 +196,7 @@ function wc_mpesa_gateway_init()
                     'description'        => array(
                         'title'       => __('Method Description', 'woocommerce'),
                         'type'        => 'textarea',
-                        'description' => __('Payment method description that the customer will see on your checkout.', 'woocommerce'),
+                        'description' => __('Payment method description that the customer will see during checkout.', 'woocommerce'),
                         'default'     => __("Cross-check your details before pressing the button below.\nYour phone number MUST be registered with MPesa(and ON) for this to work.\nYou will get a pop-up on your phone asking you to confirm the payment.\nEnter your service (MPesa) PIN to proceed.\nIn case you don't see the pop up on your phone, please upgrade your SIM card by dialing *234*1*6#.\nYou will receive a confirmation message shortly thereafter.", 'woocommerce'),
                         'desc_tip'    => true,
                     ),
@@ -219,6 +221,7 @@ function wc_mpesa_gateway_init()
                         'description' => __('WordPress user to assign authorship of payments generated by this plugin', 'woocommerce'),
                         'default'     => __('1', 'woocommerce'),
                         'desc_tip'    => true,
+                        'class'       => 'wc-enhanced-select',
                     ),
                     'completion'         => array(
                         'title'       => __('Order Status on Payment', 'woocommerce'),
@@ -243,7 +246,7 @@ function wc_mpesa_gateway_init()
                             'data-placeholder' => __('Select shipping methods', 'woocommerce'),
                         ),
                     ),
-                    'signature'             => array(
+                    'signature'          => array(
                         'title'       => __('Encryption Signature', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Callback Endpoint Encryption Signature', 'woocommerce'),
@@ -260,7 +263,7 @@ function wc_mpesa_gateway_init()
                         'title'       => __('Manual Payments', 'woocommerce'),
                         'label'       => __('Enable C2B API(Offline Payments)', 'woocommerce'),
                         'type'        => 'checkbox',
-                        'description' => '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('lipwa/register/') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>',
+                        'description' => $this->enable_c2b ? '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('wc-api/lipwa?action=register/') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>' : '',
                         'default'     => 'no',
                     ),
                     'debug'              => array(
@@ -268,11 +271,11 @@ function wc_mpesa_gateway_init()
                         'label'       => __('Check to enable debug mode and show request body', 'woocommerce'),
                         'type'        => 'checkbox',
                         'default'     => 'no',
-                        'description' => '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
-                        <li>Validation URL for C2B: <a href="' . home_url('lipwa/validate?sign=' . $this->sign) . '">' . home_url('lipwa/validate?sign=' . $this->sign) . '</a></li>
-                        <li>Confirmation URL for C2B: <a href="' . home_url('lipwa/confirm?sign=' . $this->sign) . '">' . home_url('lipwa/confirm?sign=' . $this->sign) . '</a></li>
-                        <li>Reconciliation URL for STK Push: <a href="' . home_url('lipwa/reconcile?sign=' . $this->sign) . '">' . home_url('lipwa/reconcile?sign=' . $this->sign) . '</a></li>
-                        </ul>', 'woocommerce') . '<small>',
+                        'description' => $this->debug ? '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
+                        <li>Validation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '</a></li>
+                        <li>Confirmation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '</a></li>
+                        <li>Reconciliation URL for STK Push: <a href="' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '</a></li>
+                        </ul>', 'woocommerce') . '<small>' : '',
                     ),
                 );
             }
@@ -338,7 +341,7 @@ function wc_mpesa_gateway_init()
                 }
                 echo '<div id="custom_input">
                     <p class="form-row form-row-wide">
-                        <label for="mobile" class="form-label">'.__("Safaricom M-PESA Number", "woocommerce").' </label>
+                        <label for="mobile" class="form-label">' . __("Confirm M-PESA Number", "woocommerce") . ' </label>
                         <input type="text" class="form-control" name="billing_mpesa_phone" id="billing_mpesa_phone" />
                     </p>
                 </div>';
@@ -407,10 +410,10 @@ function wc_mpesa_gateway_init()
                         // Insert the payment into the database
                         $post_id = wp_insert_post(
                             array(
-                                'post_title'   => 'Checkout',
-                                'post_status'  => 'publish',
-                                'post_type'    => 'mpesaipn',
-                                'post_author'  => is_user_logged_in() ? get_current_user_id() : $this->get_option('accountant'),
+                                'post_title'  => 'Checkout',
+                                'post_status' => 'publish',
+                                'post_type'   => 'mpesaipn',
+                                'post_author' => is_user_logged_in() ? get_current_user_id() : $this->get_option('accountant'),
                             )
                         );
 
@@ -452,10 +455,10 @@ function wc_mpesa_gateway_init()
                     $total     = $order->get_total();
                     $reference = $order_id;
                 }
-        
+
                 $type = ($this->type == 4) ? 'Pay Bill' : 'Buy Goods and Services';
-        
-                echo 
+
+                echo
                 '<section class="woocommerce-order-details" id="resend_stk">
                     <input type="hidden" id="current_order" value="' . $order_id . '">
                     <input type="hidden" id="payment_method" value="' . $order->get_payment_method() . '">
@@ -464,7 +467,7 @@ function wc_mpesa_gateway_init()
                         <tbody>
                             <tr class="woocommerce-table__line-item order_item">
                                 <td class="woocommerce-table__product-name product-name">
-                                    <form action="' . home_url("lipwa/request") . '" method="POST" id="renitiate-form">
+                                    <form action="' . home_url("wc-api/lipwa?action=request") . '" method="POST" id="renitiate-form">
                                         <input type="hidden" name="order" value="' . $order_id . '">
                                         <button id="renitiate-button" class="button alt" type="submit">' . ($this->resend ?? 'Resend STK Push') . '</button>
                                     </form>
@@ -473,9 +476,9 @@ function wc_mpesa_gateway_init()
                         </tbody>
                     </table>
                 </section>';
-        
+
                 if ($this->enable_c2b) {
-                    echo 
+                    echo
                     '<section class="woocommerce-order-details" id="missed_stk">
                         <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
                             <thead>
@@ -485,7 +488,7 @@ function wc_mpesa_gateway_init()
                                     </th>
                                 </tr>
                             </thead>
-        
+
                             <tbody>
                                 <tr class="woocommerce-table__line-item order_item">
                                     <td class="woocommerce-table__product-name product-name">
@@ -505,13 +508,13 @@ function wc_mpesa_gateway_init()
                     </section>';
                 }
             }
-        
+
             /**
              * @since 1.20.79
              */
             public function request_body($order_id)
             {
-        
+
                 if ($this->debug) {
                     echo '
                     <section class="woocommerce-order-details" id="mpesa_request">
@@ -523,12 +526,12 @@ function wc_mpesa_gateway_init()
 
             public function webhook()
             {
-                $action = $_GET['action'] ?? 'validate';
+                $action  = $_GET['action'] ?? 'validate';
                 $headers = array('From: ' . get_bloginfo('name') . ' <' . get_bloginfo('admin_email') . '>' . "\r\n");
 
                 switch ($action) {
                     case "request":
-                        $order_id   = sanitize_text_field($_POST['order']);
+                        $order_id = sanitize_text_field($_POST['order']);
 
                         //return $this->process_payment($order_id);
                         $order      = new \WC_Order($order_id);
@@ -611,12 +614,14 @@ function wc_mpesa_gateway_init()
 
                                 $order->update_status($this->get_option('completion', 'completed'), __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
                                 $order->set_transaction_id($mpesaReceiptNumber);
+                                $order->save();
 
                                 wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
                             } elseif ($ipn_balance < 0) {
                                 $currency = get_woocommerce_currency();
                                 $order->update_status($this->get_option('completion', 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
                                 $order->set_transaction_id($mpesaReceiptNumber);
+                                $order->save();
 
                                 wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
 
@@ -712,12 +717,14 @@ function wc_mpesa_gateway_init()
 
                                     $order->update_status($this->get_option('completion', 'completed'), __("Full MPesa Payment Received From {$phone}. Receipt Number {$mpesaReceiptNumber}"));
                                     $order->set_transaction_id($mpesaReceiptNumber);
+                                    $order->save();
 
                                     wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
                                 } elseif ($ipn_balance < 0) {
                                     $currency = get_woocommerce_currency();
                                     $order->update_status($this->get_option('completion', 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
                                     $order->set_transaction_id($mpesaReceiptNumber);
+                                    $order->save();
 
                                     wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
 
@@ -828,14 +835,15 @@ function wc_mpesa_gateway_init()
 
                 if (!empty($_GET['order'])) {
                     $order_id = sanitize_text_field($_GET['order']);
-                    $post     = wc_mpesa_post_id_by_meta_key_and_value('_order_id', esc_attr($order_id));
+                    $order    = wc_get_order(esc_attr($order_id));
+                    
                     $notes    = wc_get_order_notes(array(
                         'post_id' => $order_id,
                         'number'  => 1,
                     ));
 
                     $response = array(
-                        'receipt' => get_post_meta($post, '_receipt', true),
+                        'receipt' => $order->get_transaction_id(),
                         'note'    => $notes[0],
                     );
                 }

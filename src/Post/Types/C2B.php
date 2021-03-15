@@ -1,13 +1,13 @@
 <?php
 
-namespace Osen\Woocommerce\Post\Types;
-
 /**
  * @package MPesa For WooCommerce
- * @subpackage Admin
+ * @subpackage C2B Post Type
  * @author Mauko Maunde < hi@mauko.co.ke >
  * @since 0.18.01
  */
+
+namespace Osen\Woocommerce\Post\Types;
 
 class C2B
 {
@@ -85,7 +85,7 @@ class C2B
         $columns['title']       = "Type";
         $columns['customer']    = "Customer";
         $columns['amount']      = "Amount";
-        $columns['reference']   = "Reference";
+        $columns['reference']   = "Order";
         // $columns['request']     = "Request";
         $columns['receipt']     = "Receipt";
         $columns['status']      = "Status";
@@ -152,7 +152,7 @@ class C2B
     {
         $columns['title']       = "Type";
         $columns['customer']    = "Customer";
-        $columns['reference']   = "Reference";
+        $columns['reference']   = "Order";
         $columns['receipt']     = "Receipt";
         $columns['status']      = "Status";
 

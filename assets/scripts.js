@@ -1,8 +1,8 @@
 jQuery(document).ready(function ($) {
-    $('#billing_phone').keyup(function (e) {
-        var phone = $(this).val();
+    $("#billing_mpesa_phone").val($('#billing_phone').val())
 
-        $("#billing_mpesa_phone").val(phone)
+    $('#billing_phone').keyup(function (e) {
+        $("#billing_mpesa_phone").val($(this).val())
     });
 
     $('#renitiate-form').submit(function (e) {
@@ -17,7 +17,7 @@ jQuery(document).ready(function ($) {
     });
 
     var checker = setInterval(() => {
-        if ($("#payment_method").length && $("#payment_method").val() !== 'mpesa') {
+        if (!$("#payment_method").length || $("#payment_method").val() !== 'mpesa') {
             clearInterval(checker);
         }
 
@@ -25,7 +25,7 @@ jQuery(document).ready(function ($) {
             var order = $("#current_order").val();
 
             if (order.length) {
-                $.get(`/?pesaipn&order=${order}`, [], function (data) {
+                $.get(`/wc-api/lipwa_receipt?order=${order}`, [], function (data) {
                     if (data.receipt == '' || data.receipt == 'N/A') {
                         $("#mpesa_receipt").html(
                             'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
@@ -65,6 +65,5 @@ jQuery(document).ready(function ($) {
                 });
             }
         }
-    },
-        3000);
+    }, 3000);
 });

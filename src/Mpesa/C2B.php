@@ -83,10 +83,10 @@ class C2B
             'shortcode'  => $c2b['shortcode'] ?? '174379',
             'type'       => $c2b['idtype'] ?? 4,
             'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-            'validate'   => home_url('lipwa/validate/'),
-            'confirm'    => home_url('lipwa/confirm/'),
-            'reconcile'  => home_url('lipwa/reconcile/'),
-            'timeout'    => home_url('lipwa/timeout/'),
+            'validate'   => home_url('wc-api/lipwa?action=validate/'),
+            'confirm'    => home_url('wc-api/lipwa?action=confirm/'),
+            'reconcile'  => home_url('wc-api/lipwa?action=reconcile/'),
+            'timeout'    => home_url('wc-api/lipwa?action=timeout/'),
         );
 
         foreach ($config as $key => $value) {
