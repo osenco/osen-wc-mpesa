@@ -72,22 +72,38 @@ class C2B
     /**
      * @param array $config - Key-value pairs of settings
      */
-    public function __construct()
+    public function __construct($vendor_id = null)
     {
-        $c2b = get_option('woocommerce_mpesa_settings');
-        $config = array(
-            'env'        => $c2b['env'] ?? 'sandbox',
-            'appkey'     => $c2b['key'] ?? 'bclwIPkcRqw61yUt',
-            'appsecret'  => $c2b['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-            'headoffice' => $c2b['headoffice'] ?? '174379',
-            'shortcode'  => $c2b['shortcode'] ?? '174379',
-            'type'       => $c2b['idtype'] ?? 4,
-            'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-            'validate'   => home_url('wc-api/lipwa?action=validate/'),
-            'confirm'    => home_url('wc-api/lipwa?action=confirm/'),
-            'reconcile'  => home_url('wc-api/lipwa?action=reconcile/'),
-            'timeout'    => home_url('wc-api/lipwa?action=timeout/'),
-        );
+        if (is_null($vendor_id)) {
+            $c2b = get_option('woocommerce_mpesa_settings');
+            $config = array(
+                'env'        => $c2b['env'] ?? 'sandbox',
+                'appkey'     => $c2b['key'] ?? 'bclwIPkcRqw61yUt',
+                'appsecret'  => $c2b['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                'headoffice' => $c2b['headoffice'] ?? '174379',
+                'shortcode'  => $c2b['shortcode'] ?? '174379',
+                'type'       => $c2b['idtype'] ?? 4,
+                'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+                'validate'   => home_url('wc-api/lipwa?action=validate/'),
+                'confirm'    => home_url('wc-api/lipwa?action=confirm/'),
+                'reconcile'  => home_url('wc-api/lipwa?action=reconcile/'),
+                'timeout'    => home_url('wc-api/lipwa?action=timeout/'),
+            );
+        } else {
+            $config = array(
+                'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
+                'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? 'bclwIPkcRqw61yUt',
+                'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
+                'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
+                'type'       => get_user_meta($vendor_id, 'mpesa_idtype', true) ?? 4,
+                'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+                'validate'   => home_url('wc-api/lipwa?action=validate/'),
+                'confirm'    => home_url('wc-api/lipwa?action=confirm/'),
+                'reconcile'  => home_url('wc-api/lipwa?action=reconcile/'),
+                'timeout'    => home_url('wc-api/lipwa?action=timeout/'),
+            );
+        }
 
         foreach ($config as $key => $value) {
             $this->$key = $value;
@@ -98,29 +114,31 @@ class C2B
      * Function to generate access token
      * @return string/mixed
      */
-    public function token()
+    public function authorize($token = null)
     {
-        $endpoint = ($this->env == 'live')
-            ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-            : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+        if (is_null($token) || !$token) {
+            $endpoint = ($this->env == 'live')
+                ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+                : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-        $credentials = base64_encode($this->appkey . ':' . $this->appsecret);
-        $response    = wp_remote_get(
-            $endpoint,
-            array(
-                'headers' => array(
-                    'Authorization' => 'Basic ' . $credentials,
-                ),
-            )
-        );
+            $credentials = base64_encode($this->appkey . ':' . $this->appsecret);
+            $response    = wp_remote_get(
+                $endpoint,
+                array(
+                    'headers' => array(
+                        'Authorization' => 'Basic ' . $credentials,
+                    ),
+                )
+            );
 
-        $return = is_wp_error($response)
-            ? 'null'
-            : json_decode($response['body']);
+            $return      = is_wp_error($response) ? 'null' : json_decode($response['body']);
+            $this->token = isset($return->access_token) ? $return->access_token : '';
+            set_transient('mpesa_token', $this->token, 60 * 55);
+        } else {
+            $this->token = $token;
+        }
 
-        return is_null($return)
-            ? '' : (isset($return->access_token)
-                ? $return->access_token : '');
+        return $this;
     }
 
     /**
@@ -201,7 +219,7 @@ class C2B
             array(
                 'headers' => array(
                     'Content-Type'  => 'application/json',
-                    'Authorization' => 'Bearer ' . $this->token(),
+                    'Authorization' => 'Bearer ' . $this->token,
                 ),
                 'body'    => $data_string,
             )
@@ -254,7 +272,7 @@ class C2B
             array(
                 'headers' => array(
                     'Content-Type'  => 'application/json',
-                    'Authorization' => 'Bearer ' . $this->token(),
+                    'Authorization' => 'Bearer ' . $this->token,
                 ),
                 'body'    => $data_string,
             )

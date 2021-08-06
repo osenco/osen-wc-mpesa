@@ -1,7 +1,7 @@
 <?php
 
 /**
-                             * @package MPesa For WooCommerce
+ * @package MPesa For WooCommerce
  * @subpackage WooCommerce Mpesa Gateway
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01
@@ -46,6 +46,7 @@ function wc_mpesa_gateway_init()
         class WC_MPESA_Gateway extends WC_Payment_Gateway
         {
             public $sign;
+            public $token;
 
             /**
              * Constructor for the gateway.
@@ -54,7 +55,7 @@ function wc_mpesa_gateway_init()
             {
                 $this->id           = 'mpesa';
                 $this->icon         = apply_filters('woocommerce_mpesa_icon', plugins_url('assets/mpesa.png', __FILE__));
-                $this->method_title = __('Lipa Na MPesa', 'woocommerce');
+                $this->method_title = __('Lipa Na M-Pesa', 'woocommerce');
 
                 $this->has_fields = true;
                 $this->sign       = $this->get_option('signature', md5(random_bytes(12)));
@@ -64,6 +65,8 @@ function wc_mpesa_gateway_init()
                 // Load settings
                 $this->init_form_fields();
                 $this->init_settings();
+
+                $this->token      = get_transient('mpesa_token') ?? null;
 
                 $this->shortcode = $this->get_option('shortcode');
                 $this->type      = $this->get_option('type');
@@ -339,7 +342,7 @@ function wc_mpesa_gateway_init()
                 if ($description = $this->get_description()) {
                     echo wpautop(wptexturize($description));
                 }
-                echo '<div id="custom_input">
+                echo '<div id="custom_input"><br>
                     <p class="form-row form-row-wide">
                         <label for="mobile" class="form-label">' . __("Confirm M-PESA Number", "woocommerce") . ' </label>
                         <input type="text" class="form-control" name="billing_mpesa_phone" id="billing_mpesa_phone" />
@@ -373,11 +376,11 @@ function wc_mpesa_gateway_init()
                 $c2b        = get_option('woocommerce_mpesa_settings');
 
                 if (($c2b['debug'] ?? 'no') == 'yes') {
-                    $result  = (new STK)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa', true);
+                    $result  = (new STK)->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa', true);
                     $message = json_encode($result['requested']);
                     WC()->session->set('mpesa_request', $message);
                 } else {
-                    $result = (new STK)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+                    $result = (new STK)->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
                 }
 
                 if ($result) {
@@ -390,6 +393,7 @@ function wc_mpesa_gateway_init()
                         if (($c2b['debug'] ?? 'no') == 'yes' && WC()->session->get('mpesa_request')) {
                             wc_add_notice(__('Request: ', 'woocommerce') . WC()->session->get('mpesa_request'), 'error');
                         }
+
                         return array(
                             'result'   => 'fail',
                             'redirect' => '',
@@ -539,7 +543,7 @@ function wc_mpesa_gateway_init()
                         $phone      = $order->get_billing_phone();
                         $first_name = $order->get_billing_first_name();
                         $last_name  = $order->get_billing_last_name();
-                        $result     = (new STK)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+                        $result     = (new STK)->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
                         $post       = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $order_id);
 
                         if ($post !== false) {
@@ -836,8 +840,8 @@ function wc_mpesa_gateway_init()
                 if (!empty($_GET['order'])) {
                     $order_id = sanitize_text_field($_GET['order']);
                     $order    = wc_get_order(esc_attr($order_id));
-                    
-                    $notes    = wc_get_order_notes(array(
+
+                    $notes = wc_get_order_notes(array(
                         'post_id' => $order_id,
                         'number'  => 1,
                     ));

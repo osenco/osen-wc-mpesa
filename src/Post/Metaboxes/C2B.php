@@ -190,7 +190,7 @@ class C2B
             "refunded"   => "This Order Is Refunded",
             "failed"     => "This Order Failed",
         ); ?>
-        <p>Add here the MPesa confirmation code received and set the appropriate order status for <b>Request ID: <?php echo $request; ?></b>.</p>
+        <p>Add here the MPesa transaction ID received and set the appropriate order status for <b>Request ID: <?php echo $request; ?></b>.</p>
         <?php echo '<p>MPesa Receipt Number <input type="text" name="receipt" value="' . esc_attr($receipt) . ' " /></p>'; ?>
         <p>Set Order(Payment) Status
             <select name="status">

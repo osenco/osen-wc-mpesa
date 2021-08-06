@@ -57,6 +57,7 @@ jQuery(document).ready(function ($) {
                         $("#missed_stk").hide();
                         $("#renitiate-button").hide();
                         $("#mpesa_request").hide();
+                        location.reload()
 
                         clearInterval(checker);
 
@@ -65,5 +66,5 @@ jQuery(document).ready(function ($) {
                 });
             }
         }
-    }, 3000);
+    }, 10000);
 });

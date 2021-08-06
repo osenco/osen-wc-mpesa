@@ -21,7 +21,7 @@
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
- * Copyright 2020  Osen Concepts
+ * Copyright 2021  Osen Concepts
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 3, as

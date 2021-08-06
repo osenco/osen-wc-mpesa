@@ -94,6 +94,7 @@ class Initialize
     {
         if (is_checkout()) {
             wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
+            wp_enqueue_script('jquery');
             wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/scripts.js", "jquery"));
         }
     }
