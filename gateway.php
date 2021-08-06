@@ -56,17 +56,17 @@ function wc_mpesa_gateway_init()
                 $this->id           = 'mpesa';
                 $this->icon         = apply_filters('woocommerce_mpesa_icon', plugins_url('assets/mpesa.png', __FILE__));
                 $this->method_title = __('Lipa Na M-Pesa', 'woocommerce');
-
-                $this->has_fields = true;
-                $this->sign       = $this->get_option('signature', md5(random_bytes(12)));
-                $this->enable_c2b = $this->get_option('enable_c2b', 'no') === 'yes';
-                $this->debug      = $this->get_option('debug', 'no') === 'yes';
+                $this->has_fields   = true;
+                $this->sign         = $this->get_option('signature', md5(random_bytes(12)));
+                $this->enable_c2b   = $this->get_option('enable_c2b', 'no') === 'yes';
+                $this->enable_bonga = $this->get_option('enable_bonga', 'no') === 'yes';
+                $this->debug        = $this->get_option('debug', 'no') === 'yes';
 
                 // Load settings
                 $this->init_form_fields();
                 $this->init_settings();
 
-                $this->token      = get_transient('mpesa_token') ?? null;
+                $this->token      = get_transient('mpesa_token');
 
                 $this->shortcode = $this->get_option('shortcode');
                 $this->type      = $this->get_option('type');
@@ -268,17 +268,26 @@ function wc_mpesa_gateway_init()
                         'type'        => 'checkbox',
                         'description' => $this->enable_c2b ? '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('wc-api/lipwa?action=register/') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>' : '',
                         'default'     => 'no',
+                        'desc_tip'    => true,
+                    ),
+                    'enable_bonga'         => array(
+                        'title'       => __('Bonga Points', 'woocommerce'),
+                        'label'       => __('Enable Lipa Na Bonga Points', 'woocommerce'),
+                        'type'        => 'checkbox',
+                        'description' => $this->enable_c2b ? '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('wc-api/lipwa?action=register/') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>' : '',
+                        'default'     => 'no',
+                        'desc_tip'    => true,
                     ),
                     'debug'              => array(
                         'title'       => __('Debug Mode', 'woocommerce'),
                         'label'       => __('Check to enable debug mode and show request body', 'woocommerce'),
                         'type'        => 'checkbox',
                         'default'     => 'no',
-                        'description' => $this->debug ? '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
+                        'description' => '<small>' . __('Show Request Body(to send to Daraja team on request). Use the following URLs: <ul>
                         <li>Validation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '</a></li>
                         <li>Confirmation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '</a></li>
                         <li>Reconciliation URL for STK Push: <a href="' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '</a></li>
-                        </ul>', 'woocommerce') . '<small>' : '',
+                        </ul>', 'woocommerce') . '<small>',
                     ),
                 );
             }
@@ -369,18 +378,30 @@ function wc_mpesa_gateway_init()
             public function process_payment($order_id)
             {
                 $order      = new \WC_Order($order_id);
+                $items      = $order->get_items('line_item');
                 $total      = $order->get_total();
                 $phone      = sanitize_text_field($_POST['billing_mpesa_phone']); //$order->get_billing_phone();
                 $first_name = $order->get_billing_first_name();
                 $last_name  = $order->get_billing_last_name();
                 $c2b        = get_option('woocommerce_mpesa_settings');
 
+                $vendor_id = null;
+                if (function_exists('wcfm_get_vendor_store_by_post')) {
+                    if (!empty($items)) {
+                        foreach ($items as $order_item_id => $item) {
+                            $line_item = new WC_Order_Item_Product($item);
+                            $product_id = $line_item->get_product_id();
+                            $vendor_id  = wcfm_get_vendor_id_by_post($product_id);
+                        }
+                    }
+                }
+
                 if (($c2b['debug'] ?? 'no') == 'yes') {
-                    $result  = (new STK)->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa', true);
+                    $result  = (new STK($vendor_id))->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa', true);
                     $message = json_encode($result['requested']);
                     WC()->session->set('mpesa_request', $message);
                 } else {
-                    $result = (new STK)->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
+                    $result = (new STK($vendor_id))->authorize($this->token)->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
                 }
 
                 if ($result) {
@@ -460,7 +481,7 @@ function wc_mpesa_gateway_init()
                     $reference = $order_id;
                 }
 
-                $type = ($this->type == 4) ? 'Pay Bill' : 'Buy Goods and Services';
+                $type = (STK::$type == 4) ? 'Pay Bill' : 'Buy Goods and Services';
 
                 echo
                 '<section class="woocommerce-order-details" id="resend_stk">
@@ -489,7 +510,9 @@ function wc_mpesa_gateway_init()
                                 <tr>
                                     <th class="woocommerce-table__product-name product-name">
                                         ' . __("STK Push didn\'t work? Pay Manually Via M-PESA", "woocommerce") . '
-                                    </th>
+                                    </th>'
+                        . ($this->enable_bonga ?
+                            '<th>&nbsp;</th>' : '') . '
                                 </tr>
                             </thead>
 
@@ -499,13 +522,25 @@ function wc_mpesa_gateway_init()
                                         <ol>
                                             <li>Select <b>Lipa na M-PESA</b>.</li>
                                             <li>Select <b>' . $type . '</b>.</li>
-                                            ' . (($this->type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                            ' . ((STK::$type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
                                             <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                             <li>Enter your M-PESA PIN</li>
                                             <li>Confirm your details and press OK.</li>
                                             <li>Wait for a confirmation message from M-PESA.</li>
                                         </ol>
-                                    </td>
+                                    </td>'
+                        . ($this->enable_bonga ?
+                            '<td class="woocommerce-table__product-name product-name">
+                                        <ol>
+                                            <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
+                                            <li>Select <b>' . $type . '</b>.</li>
+                                            ' . ((STK::$type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                            <li>Enter Amount <b>' . round($total) . '</b>.</li>
+                                            <li>Enter your M-PESA PIN</li>
+                                            <li>Confirm your details and press OK.</li>
+                                            <li>Wait for a confirmation message from M-PESA.</li>
+                                        </ol>
+                                    </td>' : '') . '
                                 </tr>
                             </tbody>
                         </table>

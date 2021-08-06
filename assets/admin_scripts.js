@@ -7,9 +7,17 @@ jQuery(document).ready(function ($) {
         $('#woocommerce_mpesa_headoffice').closest('tr').show()
     }
 
-    $('#woocommerce_mpesa_idtype').change(function (e) {
-        const v = $(this).val()
-
+    $('#woocommerce_mpesa_idtype').change(function () {
         $('#woocommerce_mpesa_headoffice').closest('tr').toggle()
+    });
+
+    if ($('#woocommerce_mpesa_enable_c2b').is(':checked')) {
+        $('#woocommerce_mpesa_enable_bonga').closest('tr').show()
+    } else {
+        $('#woocommerce_mpesa_enable_bonga').closest('tr').hide()
+    }
+
+    $('#woocommerce_mpesa_enable_c2b').change(function () {
+        $('#woocommerce_mpesa_enable_bonga').closest('tr').toggle()
     });
 });
