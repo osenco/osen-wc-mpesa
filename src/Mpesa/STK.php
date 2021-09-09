@@ -83,20 +83,28 @@ class STK
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public $credentials;
+	public $password;
 
 	/**
 	 * @param string  | Encryption Signature
 	 */
 	public $signature;
 
+	/**
+	 * @param string  | generated/Stored Token
+	 */
 	public $token;
+
+	/**
+	 * @param string  | Base API URL
+	 */
+	private $url = 'https://api.safaricom.co.ke';
 
 	/**
 	 * @param array $config - Key-value pairs of settings
 	 */
 	public function __construct($vendor_id = null)
-    {
+	{
         if (is_null($vendor_id)) {
             $c2b = get_option('woocommerce_mpesa_settings');
             $config = array(
@@ -105,6 +113,8 @@ class STK
                 'appsecret'  => $c2b['secret'] ?? 'bclwIPkcRqw61yUt',
                 'headoffice' => $c2b['headoffice'] ?? '174379',
                 'shortcode'  => $c2b['shortcode'] ?? '174379',
+                'initiator' => $c2b['initiator'] ?? 'test',
+                'password' => $c2b['password'] ?? 'lipia',
                 'type'       => $c2b['idtype'] ?? 4,
                 'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                 'validate'   => home_url('wc-api/lipwa?action=validate/'),
@@ -119,6 +129,8 @@ class STK
                 'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? 'bclwIPkcRqw61yUt',
                 'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
                 'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
+                'initiator' => get_user_meta($vendor_id, 'mpesa_initiator', true) ?? 'test',
+                'password' => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
                 'type'       => get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
                 'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                 'validate'   => home_url('wc-api/lipwa?action=validate/'),
@@ -128,10 +140,14 @@ class STK
             );
         }
 
-        foreach ($config as $key => $value) {
-            $this->$key = $value;
-        }
-    }
+		if ($config['env'] === 'sanbox') {
+			$this->url =  'https://sandbox.safaricom.co.ke';
+		}
+
+		foreach ($config as $key => $value) {
+			$this->$key = $value;
+		}
+	}
 
 	/**
 	 * Function to generate access token
@@ -140,9 +156,7 @@ class STK
 	public function authorize($token = null)
 	{
 		if (is_null($token) || !$token) {
-			$endpoint = ($this->env == 'live')
-				? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-				: 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+			$endpoint = $this->url . '/oauth/v1/generate?grant_type=client_credentials';
 
 			$credentials = base64_encode($this->appkey . ':' . $this->appsecret);
 			$response    = wp_remote_get(
@@ -231,9 +245,7 @@ class STK
 	{
 		$phone = preg_replace('/^0/', '254', str_replace("+", "", $phone));
 
-		$endpoint = ($this->env == 'live')
-			? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-			: 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+		$endpoint = $this->url . '/mpesa/stkpush/v1/processrequest';
 
 		$timestamp = date('YmdHis');
 		$password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
@@ -312,10 +324,7 @@ class STK
 
 	public function status($transaction, $command = 'TransactionStatusQuery', $remarks = 'Transaction Status Query', $occasion = '')
 	{
-		$token    = $this->token;
-		$endpoint = ($this->env == 'live')
-			? 'https://api.safaricom.co.ke/mpesa/transactionstatus/v1/query'
-			: 'https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query';
+		$endpoint = $this->url . '/mpesa/transactionstatus/v1/query';
 
 		$post_data = array(
 			'Initiator'          => $this->username,

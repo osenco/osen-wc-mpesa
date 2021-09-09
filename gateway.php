@@ -69,7 +69,7 @@ function wc_mpesa_gateway_init()
                 $this->token      = get_transient('mpesa_token');
 
                 $this->shortcode = $this->get_option('shortcode');
-                $this->type      = $this->get_option('type');
+                $this->type      = $this->get_option('type', 4);
                 $this->env       = $this->get_option('env', 'sandbox');
                 $test_cred       = ($this->env == 'sandbox')
                     ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
@@ -98,6 +98,14 @@ function wc_mpesa_gateway_init()
 
                 add_action('woocommerce_api_lipwa', array($this, 'webhook'));
                 add_action('woocommerce_api_lipwa_receipt', array($this, 'get_receipt'));
+
+                $statuses = $this->get_option('statuses', array());
+
+                foreach ((array) $statuses as $status) {
+                    $status_array = explode('-', $status);
+                    $status = array_pop($status_array);
+                    add_action("woocommerce_order_status_{$status}", array($this, 'process_mpesa_reversal'), 1);
+                }
             }
 
             /**
@@ -277,6 +285,36 @@ function wc_mpesa_gateway_init()
                         'description' => $this->enable_c2b ? '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('wc-api/lipwa?action=register/') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>' : '',
                         'default'     => 'no',
                         'desc_tip'    => true,
+                    ),
+                    'enable_reversal'         => array(
+                        'title'       => __('Reversals', 'woocommerce'),
+                        'label'       => __('Enable Reversal on Status change', 'woocommerce'),
+                        'type'        => 'checkbox',
+                        'description' => $this->enable_c2b ? '<small>This requires a user with Transaction Reversal Change</small>' : '',
+                        'default'     => 'no',
+                        'desc_tip'    => true,
+                    ),
+                    'initiator' => array(
+                        'title'       => __('Initiator Username', 'woocommerce'),
+                        'type'        => 'text',
+                        'description' => __('Username for user with Reversal Role.', 'woocommerce'),
+                        'default'     => __('test', 'woocommerce'),
+                        'desc_tip'    => true,
+                    ),
+                    'password'  => array(
+                        'title'       => __('Initiator Password', 'woocommerce'),
+                        'type'        => 'password',
+                        'description' => __('Password for user with Reversal Role.', 'woocommerce'),
+                        'desc_tip'    => true,
+                    ),
+                    'statuses'  => array(
+                        'title'       => __('Order Statuses', 'woocommerce'),
+                        'type'        => 'multiselect',
+                        'options'     => wc_get_order_statuses(),
+                        'placeholder' => __('Select statuses', 'woocommerce'),
+                        'description' => __('Status changes for which to reverse transactions.', 'woocommerce'),
+                        'desc_tip'    => true,
+                        'class'       => 'select2 wc-enhanced-select',
                     ),
                     'debug'              => array(
                         'title'       => __('Debug Mode', 'woocommerce'),
@@ -807,33 +845,49 @@ function wc_mpesa_gateway_init()
                         $result = $response['Result'];
 
                         $ResultType               = $result['ResultType'];
-                        $ResultCode               = $result['ResultType'];
-                        $ResultDesc               = $result['ResultType'];
-                        $OriginatorConversationID = $result['ResultType'];
-                        $ConversationID           = $result['ResultType'];
-                        $TransactionID            = $result['ResultType'];
-                        $ResultParameters         = $result['ResultType'];
+                        $ResultCode               = $result['ResultCode'];
+                        $ResultDesc               = $result['ResultDesc'];
+                        $OriginatorConversationID = $result['OriginatorConversationID'];
+                        $TransactionID            = $result['TransactionID'];
 
-                        $ResultParameter = $result['ResultType'];
+                        $ResultParameters = $result['ResultParameters'];
+                        $ResultParameter  = $ResultParameters['ResultParameters']['ResultParameter'];
 
-                        $ReceiptNo                = $ResultParameter[0]['Value'];
-                        $ConversationID           = $ResultParameter[0]['Value'];
-                        $FinalisedTime            = $ResultParameter[0]['Value'];
-                        $Amount                   = $ResultParameter[0]['Value'];
-                        $ReceiptNo                = $ResultParameter[0]['Value'];
-                        $TransactionStatus        = $ResultParameter[0]['Value'];
-                        $ReasonType               = $ResultParameter[0]['Value'];
-                        $TransactionReason        = $ResultParameter[0]['Value'];
-                        $DebitPartyCharges        = $ResultParameter[0]['Value'];
-                        $DebitAccountType         = $ResultParameter[0]['Value'];
-                        $InitiatedTime            = $ResultParameter[0]['Value'];
-                        $OriginatorConversationID = $ResultParameter[0]['Value'];
-                        $CreditPartyName          = $ResultParameter[0]['Value'];
-                        $DebitPartyName           = $ResultParameter[0]['Value'];
+                        $ReceiptNo         = $ResultParameter[0]['Value'];
+                        $ConversationID    = $ResultParameter[0]['Value'];
+                        $FinalisedTime     = $ResultParameter[0]['Value'];
+                        $Amount            = $ResultParameter[0]['Value'];
+                        $TransactionStatus = $ResultParameter[0]['Value'];
+                        $ReasonType        = $ResultParameter[0]['Value'];
+                        $TransactionReason = $ResultParameter[0]['Value'];
+                        $DebitPartyCharges = $ResultParameter[0]['Value'];
+                        $DebitAccountType  = $ResultParameter[0]['Value'];
+                        $InitiatedTime     = $ResultParameter[0]['Value'];
+                        $CreditPartyName   = $ResultParameter[0]['Value'];
+                        $DebitPartyName    = $ResultParameter[0]['Value'];
 
                         $ReferenceData = $result['ReferenceData'];
                         $ReferenceItem = $ReferenceData['ReferenceItem'];
                         $Occasion      = $ReferenceItem[0]['Value'];
+
+                        $post = wc_mpesa_post_id_by_meta_key_and_value('_request_id', $OriginatorConversationID);
+
+                        $order_id        = get_post_meta($post, '_order_id', true);
+                        $amount_due      = get_post_meta($post, '_amount', true);
+                        $before_ipn_paid = get_post_meta($post, '_paid', true);
+
+                        $order = new \WC_Order($order_id);
+
+                        if (wc_get_order($order_id)) {
+                            update_post_meta($post, '_order_status', 'complete');
+                            update_post_meta($post, '_receipt', $TransactionID);
+
+                            $order->update_status('refunded', __($ResultDesc));
+                            $order->set_transaction_id($TransactionID);
+                            $order->save();
+                        } else {
+                            $order->update_status('processing', "{$ResultCode}: {$ResultDesc}");
+                        }
                         exit(wp_send_json((new STK)->validate()));
                         break;
 
@@ -912,6 +966,28 @@ function wc_mpesa_gateway_init()
             {
                 if ($this->instructions && !$sent_to_admin && $this->id === $order->get_payment_method()) {
                     echo wpautop(wptexturize($this->instructions)) . PHP_EOL;
+                }
+            }
+
+            function process_mpesa_reversal($order_id)
+            {
+                $post        = wc_mpesa_post_id_by_meta_key_and_value('_order_id', $order_id);
+                $order       = wc_get_order($order_id);
+                $transaction = $order->get_transaction_id();
+                $total       = $order->get_total();
+                $phone       = $order->get_billing_phone();
+                $amount      = round($total);
+                $method      = $order->get_payment_method();
+
+                if ($method == 'mpesa') {
+                    $response = (new C2B)->reverse($transaction, $amount, $phone);
+
+                    if (isset($response['OriginatorConversationID'])) {
+                        update_post_meta($post, '_request_id', $response['OriginatorConversationID']);
+                        $order->update_status('refunded');
+                    } elseif (isset($response['errorCode'])) {
+                        $order->update_status('failed', $response['errorMessage']);
+                    }
                 }
             }
         }

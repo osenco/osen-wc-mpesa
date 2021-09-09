@@ -69,9 +69,32 @@ class C2B
      * @param string  | Timeout URI   | lipia/reconcile
      */
     public $timeout;
-    /**
-     * @param array $config - Key-value pairs of settings
-     */
+
+	/**
+	 * @param string  | Timeout URI   | lipia/reconcile
+	 */
+	public $username;
+
+	/**
+	 * @param string  | Timeout URI   | lipia/reconcile
+	 */
+	public $password;
+
+	/**
+	 * @param string  | Encryption Signature
+	 */
+	public $signature;
+
+	/**
+	 * @param string  | generated/Stored Token
+	 */
+	public $token;
+
+	/**
+	 * @param string  | Base API URL
+	 */
+	private $url = 'https://api.safaricom.co.ke';
+
     public function __construct($vendor_id = null)
     {
         if (is_null($vendor_id)) {
@@ -82,6 +105,8 @@ class C2B
                 'appsecret'  => $c2b['secret'] ?? 'bclwIPkcRqw61yUt',
                 'headoffice' => $c2b['headoffice'] ?? '174379',
                 'shortcode'  => $c2b['shortcode'] ?? '174379',
+                'initiator' => $c2b['initiator'] ?? 'test',
+                'password' => $c2b['password'] ?? 'lipia',
                 'type'       => $c2b['idtype'] ?? 4,
                 'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                 'validate'   => home_url('wc-api/lipwa?action=validate/'),
@@ -96,6 +121,8 @@ class C2B
                 'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? 'bclwIPkcRqw61yUt',
                 'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
                 'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
+                'initiator' => get_user_meta($vendor_id, 'mpesa_initiator', true) ?? 'test',
+                'password' => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
                 'type'       => get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
                 'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                 'validate'   => home_url('wc-api/lipwa?action=validate/'),
@@ -104,6 +131,10 @@ class C2B
                 'timeout'    => home_url('wc-api/lipwa?action=timeout/'),
             );
         }
+
+		if ($config['env'] === 'sanbox') {
+			$this->url =  'https://sandbox.safaricom.co.ke';
+		}
 
         foreach ($config as $key => $value) {
             $this->$key = $value;
@@ -117,9 +148,7 @@ class C2B
     public function authorize($token = null)
     {
         if (is_null($token) || !$token) {
-            $endpoint = ($this->env == 'live')
-                ? 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-                : 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+            $endpoint = $this->url . '/oauth/v1/generate?grant_type=client_credentials';
 
             $credentials = base64_encode($this->appkey . ':' . $this->appsecret);
             $response    = wp_remote_get(
@@ -202,9 +231,7 @@ class C2B
      */
     public function register($callback = null)
     {
-        $endpoint = ($this->env == 'live')
-            ? 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl'
-            : 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+        $endpoint = $this->url . '/mpesa/c2b/v1/registerurl';
 
         $post_data = array(
             'ShortCode'       => $this->headoffice,
@@ -247,9 +274,7 @@ class C2B
         $phone     = preg_replace('/^0/', '254', str_replace("+", "", $phone));
         $timestamp = date('YmdHis');
         $password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
-        $endpoint  = ($this->env == 'live')
-            ? 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-            : 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+        $endpoint  = $this->url . '/mpesa/stkpush/v1/processrequest';
 
         $post_data = array(
             'BusinessShortCode' => $this->headoffice,
@@ -302,6 +327,71 @@ class C2B
         return is_null($callback)
             ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
             : call_user_func_array($callback, array($response));
+    }
+
+    /**
+     * Reverse a Transaction
+     *
+     * @param string $transaction
+     * @param Integer $amount
+     * @param Integer $receiver
+     * @param string $receiver_type
+     * @param string $remarks
+     * @param string $occassion
+     *
+     * @return array Result
+     */
+    public function reverse(
+        $transaction,
+        $amount,
+        $receiver = "",
+        $receiver_type = 3,
+        $remarks = "Transaction Reversal",
+        $occasion = "Transaction Reversal",
+        $callback = null
+    ) {
+        $phone     = preg_replace('/^0/', '254', str_replace("+", "", $receiver));
+        $endpoint  = $this->url . '/mpesa/reversal/v1/request';
+        $env       = $this->env;
+        $plaintext = $this->password;
+        $publicKey = file_get_contents(__DIR__ . "/cert/{$env}/cert.cer");
+
+        openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
+        $password = base64_encode($encrypted);
+
+        $post_data = array(
+            "CommandID"              => "TransactionReversal",
+            "Initiator"              => $this->initiator,
+            "SecurityCredential"     => $password,
+            "TransactionID"          => $transaction,
+            "Amount"                 => $amount,
+            "ReceiverParty"          => $phone,
+            "RecieverIdentifierType" => $receiver_type,
+            "ResultURL"              => $this->result,
+            "QueueTimeOutURL"        => $this->timeout,
+            "Remarks"                => $remarks,
+            "Occasion"               => $occasion,
+        );
+
+        $data_string = json_encode($post_data);
+        $response    = wp_remote_post(
+            $endpoint,
+            array(
+                'headers' => array(
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => 'Bearer ' . $this->token,
+                ),
+                'body'    => $data_string,
+            )
+        );
+
+        $result = is_wp_error($response)
+            ? array('errorCode' => 1, 'errorMessage' => $response->get_error_message())
+            : json_decode($response['body'], true);
+
+        return is_null($callback)
+            ? $result
+            : $callback($result);
     }
 
     /**

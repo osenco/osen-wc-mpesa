@@ -11,7 +11,7 @@ namespace Osen\Woocommerce;
 
 class Initialize
 {
-    function __construct()
+    public function __construct()
     {
         register_activation_hook('osen-wc-mpesa/osen-wc-mpesa.php', array($this, 'wc_mpesa_activation_check'));
         add_filter('plugin_row_meta', array($this, 'mpesa_row_meta'), 10, 2);
@@ -23,7 +23,7 @@ class Initialize
         add_action('admin_enqueue_scripts', array($this, 'osen_admin_scripts'));
     }
 
-    function wc_mpesa_activation_check()
+    public function wc_mpesa_activation_check()
     {
         if (!get_option('wc_mpesa_flush_rewrite_rules_flag')) {
             add_option('wc_mpesa_flush_rewrite_rules_flag', true);
@@ -41,7 +41,7 @@ class Initialize
         }
     }
 
-    function wc_mpesa_flush_rewrite_rules_maybe()
+    public function wc_mpesa_flush_rewrite_rules_maybe()
     {
         if (get_option('wc_mpesa_flush_rewrite_rules_flag')) {
             flush_rewrite_rules();
@@ -49,7 +49,7 @@ class Initialize
         }
     }
 
-    function wc_mpesa_detect_plugin_activation($plugin, $network_activation)
+    public function wc_mpesa_detect_plugin_activation($plugin, $network_activation)
     {
         if ($plugin == 'osen-wc-mpesa/osen-wc-mpesa.php') {
             flush_rewrite_rules();
@@ -57,14 +57,14 @@ class Initialize
         }
     }
 
-    function wc_mpesa_detect_woocommerce_deactivation($plugin, $network_activation)
+    public function wc_mpesa_detect_woocommerce_deactivation($plugin, $network_activation)
     {
         if ($plugin == 'woocommerce/woocommerce.php') {
             deactivate_plugins('osen-wc-mpesa/osen-wc-mpesa.php');
         }
     }
 
-    function mpesa_action_links($links)
+    public function mpesa_action_links($links)
     {
         return array_merge(
             $links,
@@ -74,7 +74,7 @@ class Initialize
         );
     }
 
-    function mpesa_row_meta($links, $file)
+    public function mpesa_row_meta($links, $file)
     {
         $plugin = 'osen-wc-mpesa/osen-wc-mpesa.php';
 
@@ -90,7 +90,7 @@ class Initialize
         return (array) $links;
     }
 
-    function osen_wc_scripts()
+    public function osen_wc_scripts()
     {
         if (is_checkout()) {
             wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
@@ -99,7 +99,7 @@ class Initialize
         }
     }
 
-    function osen_admin_scripts()
+    public function osen_admin_scripts()
     {
         wp_enqueue_style("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.min.css", "jquery"));
         wp_enqueue_script("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.bundle.js", "jquery"));
