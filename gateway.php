@@ -66,7 +66,7 @@ function wc_mpesa_gateway_init()
                 $this->init_form_fields();
                 $this->init_settings();
 
-                $this->token      = get_transient('mpesa_token');
+                $this->token = get_transient('mpesa_token');
 
                 $this->shortcode = $this->get_option('shortcode');
                 $this->type      = $this->get_option('type', 4);
@@ -103,7 +103,7 @@ function wc_mpesa_gateway_init()
 
                 foreach ((array) $statuses as $status) {
                     $status_array = explode('-', $status);
-                    $status = array_pop($status_array);
+                    $status       = array_pop($status_array);
                     add_action("woocommerce_order_status_{$status}", array($this, 'process_mpesa_reversal'), 1);
                 }
             }
@@ -278,7 +278,7 @@ function wc_mpesa_gateway_init()
                         'default'     => 'no',
                         'desc_tip'    => true,
                     ),
-                    'enable_bonga'         => array(
+                    'enable_bonga'       => array(
                         'title'       => __('Bonga Points', 'woocommerce'),
                         'label'       => __('Enable Lipa Na Bonga Points', 'woocommerce'),
                         'type'        => 'checkbox',
@@ -286,7 +286,7 @@ function wc_mpesa_gateway_init()
                         'default'     => 'no',
                         'desc_tip'    => true,
                     ),
-                    'enable_reversal'         => array(
+                    'enable_reversal'    => array(
                         'title'       => __('Reversals', 'woocommerce'),
                         'label'       => __('Enable Reversal on Status change', 'woocommerce'),
                         'type'        => 'checkbox',
@@ -294,20 +294,20 @@ function wc_mpesa_gateway_init()
                         'default'     => 'no',
                         'desc_tip'    => true,
                     ),
-                    'initiator' => array(
+                    'initiator'          => array(
                         'title'       => __('Initiator Username', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Username for user with Reversal Role.', 'woocommerce'),
                         'default'     => __('test', 'woocommerce'),
                         'desc_tip'    => true,
                     ),
-                    'password'  => array(
+                    'password'           => array(
                         'title'       => __('Initiator Password', 'woocommerce'),
                         'type'        => 'password',
                         'description' => __('Password for user with Reversal Role.', 'woocommerce'),
                         'desc_tip'    => true,
                     ),
-                    'statuses'  => array(
+                    'statuses'           => array(
                         'title'       => __('Order Statuses', 'woocommerce'),
                         'type'        => 'multiselect',
                         'options'     => wc_get_order_statuses(),
@@ -422,12 +422,12 @@ function wc_mpesa_gateway_init()
                 $first_name = $order->get_billing_first_name();
                 $last_name  = $order->get_billing_last_name();
                 $c2b        = get_option('woocommerce_mpesa_settings');
+                $vendor_id  = null;
 
-                $vendor_id = null;
-                if (function_exists('wcfm_get_vendor_store_by_post')) {
+                if (function_exists('wcfm_get_vendor_id_by_post')) {
                     if (!empty($items)) {
                         foreach ($items as $order_item_id => $item) {
-                            $line_item = new WC_Order_Item_Product($item);
+                            $line_item  = new WC_Order_Item_Product($item);
                             $product_id = $line_item->get_product_id();
                             $vendor_id  = wcfm_get_vendor_id_by_post($product_id);
                         }
@@ -755,7 +755,11 @@ function wc_mpesa_gateway_init()
                         $sign = sanitize_text_field($_GET['sign']);
 
                         if ($sign !== $this->get_option('signature')) {
-                            exit(wp_send_json(['Error' => 'Invalid Signature Supplied']));
+                            exit(wp_send_json([
+                                'Error'     => 'Invalid Signature Supplied',
+                                'Signature' => $sign,
+                                'Expected'  => $this->get_option('signature'),
+                            ]));
                         }
 
                         if (!isset($response['Body'])) {
