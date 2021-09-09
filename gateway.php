@@ -481,7 +481,7 @@ function wc_mpesa_gateway_init()
                     $reference = $order_id;
                 }
 
-                $type = (STK::$type == 4) ? 'Pay Bill' : 'Buy Goods and Services';
+                $type = ($this->type == 4) ? 'Pay Bill' : 'Buy Goods and Services';
 
                 echo
                 '<section class="woocommerce-order-details" id="resend_stk">
@@ -509,7 +509,7 @@ function wc_mpesa_gateway_init()
                             <thead>
                                 <tr>
                                     <th class="woocommerce-table__product-name product-name">
-                                        ' . __("STK Push didn\'t work? Pay Manually Via M-PESA", "woocommerce") . '
+                                        ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                     </th>'
                         . ($this->enable_bonga ?
                             '<th>&nbsp;</th>' : '') . '
@@ -522,7 +522,7 @@ function wc_mpesa_gateway_init()
                                         <ol>
                                             <li>Select <b>Lipa na M-PESA</b>.</li>
                                             <li>Select <b>' . $type . '</b>.</li>
-                                            ' . ((STK::$type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                            ' . (($this->type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
                                             <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                             <li>Enter your M-PESA PIN</li>
                                             <li>Confirm your details and press OK.</li>
@@ -534,7 +534,7 @@ function wc_mpesa_gateway_init()
                                         <ol>
                                             <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                             <li>Select <b>' . $type . '</b>.</li>
-                                            ' . ((STK::$type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                            ' . (($this->type == 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
                                             <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                             <li>Enter your M-PESA PIN</li>
                                             <li>Confirm your details and press OK.</li>

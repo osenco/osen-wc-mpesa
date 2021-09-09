@@ -101,8 +101,8 @@ class STK
             $c2b = get_option('woocommerce_mpesa_settings');
             $config = array(
                 'env'        => $c2b['env'] ?? 'sandbox',
-                'appkey'     => $c2b['key'] ?? 'bclwIPkcRqw61yUt',
-                'appsecret'  => $c2b['secret'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                'appkey'     => $c2b['key'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                'appsecret'  => $c2b['secret'] ?? 'bclwIPkcRqw61yUt',
                 'headoffice' => $c2b['headoffice'] ?? '174379',
                 'shortcode'  => $c2b['shortcode'] ?? '174379',
                 'type'       => $c2b['idtype'] ?? 4,
@@ -115,11 +115,11 @@ class STK
         } else {
             $config = array(
                 'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
-                'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? 'bclwIPkcRqw61yUt',
-                'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? 'bclwIPkcRqw61yUt',
                 'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
                 'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
-                'type'       => get_user_meta($vendor_id, 'mpesa_idtype', true) ?? 4,
+                'type'       => get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
                 'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                 'validate'   => home_url('wc-api/lipwa?action=validate/'),
                 'confirm'    => home_url('wc-api/lipwa?action=confirm/'),
