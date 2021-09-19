@@ -73,7 +73,7 @@ class C2B
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public $username;
+	public $initiator;
 
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
@@ -326,7 +326,8 @@ class C2B
 
         return is_null($callback)
             ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
-            : call_user_func_array($callback, array($response));
+            : (call_user_func_array($callback, array($response))? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
+            : array('resultCode' => 1, 'resultDesc' => 'Reconciliation failed'));
     }
 
     /**

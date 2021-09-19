@@ -78,7 +78,7 @@ class STK
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
 	 */
-	public $username;
+	public $initiator;
 
 	/**
 	 * @param string  | Timeout URI   | lipia/reconcile
@@ -296,9 +296,10 @@ class STK
 	{
 		$response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
 
-		return is_null($callback)
-			? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
-			: call_user_func_array($callback, array($response));
+        return is_null($callback)
+            ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
+            : (call_user_func_array($callback, array($response))? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
+            : array('resultCode' => 1, 'resultDesc' => 'Reconciliation failed'));
 	}
 
 	/**
@@ -327,7 +328,7 @@ class STK
 		$endpoint = $this->url . '/mpesa/transactionstatus/v1/query';
 
 		$post_data = array(
-			'Initiator'          => $this->username,
+			'Initiator'          => $this->initiator,
 			'SecurityCredential' => $this->credentials,
 			'CommandID'          => $command,
 			'TransactionID'      => $transaction,

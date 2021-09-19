@@ -28,7 +28,7 @@ function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 /**
  * Register our gateway with woocommerce
  */
-add_filter('woocommerce_payment_gateways', 'wc_mpesa_add_to_gateways');
+add_filter('woocommerce_payment_gateways', 'wc_mpesa_add_to_gateways', 9);
 function wc_mpesa_add_to_gateways($gateways)
 {
     $gateways[] = 'WC_MPESA_Gateway';
@@ -693,12 +693,15 @@ function wc_mpesa_gateway_init()
                                 $order->set_transaction_id($mpesaReceiptNumber);
                                 $order->save();
 
+                                do_action('send_to_external_api', $order, $response);
                                 wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
                             } elseif ($ipn_balance < 0) {
                                 $currency = get_woocommerce_currency();
                                 $order->update_status($this->get_option('completion', 'completed'), __("{$phone} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$mpesaReceiptNumber}"));
                                 $order->set_transaction_id($mpesaReceiptNumber);
                                 $order->save();
+
+                                do_action('send_to_external_api', $order, $response);
 
                                 wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
 
@@ -779,6 +782,7 @@ function wc_mpesa_gateway_init()
 
                         if (wc_get_order($order_id)) {
                             $order      = new \WC_Order($order_id);
+
                             $first_name = $order->get_billing_first_name();
                             $last_name  = $order->get_billing_last_name();
                             $customer   = "{$first_name} {$last_name}";
@@ -800,6 +804,7 @@ function wc_mpesa_gateway_init()
                                     $order->set_transaction_id($mpesaReceiptNumber);
                                     $order->save();
 
+                                    do_action('send_to_external_api', $order, $response);
                                     wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
                                 } elseif ($ipn_balance < 0) {
                                     $currency = get_woocommerce_currency();
@@ -807,6 +812,7 @@ function wc_mpesa_gateway_init()
                                     $order->set_transaction_id($mpesaReceiptNumber);
                                     $order->save();
 
+                                    do_action('send_to_external_api', $order, $response);
                                     wp_mail($order->get_billing_email(), 'Your Mpesa payment', 'We acknowledge receipt of your payment via MPesa of KSh. ' . $amount . ' on ' . $transactionDate . '. Receipt number ' . $mpesaReceiptNumber, $headers);
 
                                     update_post_meta($post, '_order_status', 'complete');
