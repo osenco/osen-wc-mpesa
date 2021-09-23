@@ -2,42 +2,42 @@
 
 namespace Osen\Woocommerce\Admin;
 
+/**
+ * @package M-Pesa For WooCommerce
+ * @subpackage Plugin Functions
+ * @author Mauko Maunde < hi@mauko.co.ke >
+ * @since 0.18.01
+ */
 class Menu
 {
     public function __construct()
     {
-        add_action("admin_menu", [$this, "wc_mpesa_menu"]);
+        add_action("admin_menu", array($this, "wc_mpesa_menu"), 55);
     }
-    
-    /**
-     * @package M-Pesa For WooCommerce
-     * @subpackage Plugin Functions
-     * @author Mauko Maunde < hi@mauko.co.ke >
-     * @since 0.18.01
-     */
+
     public function wc_mpesa_menu()
     {
         add_submenu_page(
-            "edit.php?post_type=mpesaipn",
-            __("About this Plugin", "woocommerce"),
-            __("About Plugin", "woocommerce"),
+            null,
+            __("About M-Pesa for WooCommerce", "woocommerce"),
+            __("About M-Pesa for WooCommerce", "woocommerce"),
             "manage_options",
             "wc_mpesa_about",
-            [$this, "wc_mpesa_menu_about"]
+            [$this, "wc_mpesa_menu_about"],
         );
 
         add_submenu_page(
-            "edit.php?post_type=mpesaipn",
-            __("Configuration", "woocommerce"),
-            __("Configuration", "woocommerce"),
+            'woocommerce',
+            __("M-Pesa Configuration", "woocommerce"),
+            __("Configure M-Pesa", "woocommerce"),
             "manage_options",
             "wc_mpesa_preferences",
             [$this, "wc_mpesa_menu_settings"]
         );
 
         add_submenu_page(
-            "edit.php?post_type=mpesaipn",
-            __("Analytics", "woocommerce"),
+            'woocommerce',
+            __("M-Pesa Analytics", "woocommerce"),
             __("M-Pesa Analytics", "woocommerce"),
             "manage_options",
             "wc_mpesa_analytics",
@@ -123,7 +123,7 @@ class Menu
             </article>
 
             <h3>Contact</h3>
-            <h4>Get in touch with us either via email (<a href="mail-to:hi@osen.co.ke">hi@osen.co.ke</a>) or via phone(<a href="tel:+254204404993">+254204404993</a>)</h4>
+            <h4>Get in touch with us either via email (<a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a>) or via phone(<a href="tel:+254204404993">+254204404993</a>)</h4>
 
             <img src="<?php echo plugins_url("osen-wc-mpesa/assets/wcmpesa.png"); ?>" width="100px">
         </div>
@@ -133,39 +133,34 @@ class Menu
     public function wc_mpesa_menu_analytics()
     {
         $payments = array();
-        $months = array();
-        $monthly = array();
+        $orders   = wc_get_orders(array(
+            'numberposts' => -1,
+            'status'      => 'wc-completed',
+        ));
 
-        foreach (get_posts(["post_type" => "mpesaipn"]) as $post) {
-            \setup_postdata($post);
-            for ($i = 1; $i <= 12; $i++) {
-                if (date("Y", strtotime($post->post_date)) == date("Y")) {
-                    if (date("m", strtotime($post->post_date)) == $i) {
-                        $months[$i][] = (int) get_post_meta($post->ID, "_amount", true);
-                    } else {
-                        $months[$i][] = 0;
-                    }
-                }
+        for ($i = 1; $i < 13; $i++) {
+            $payments[$i] = 0;
+        }
+
+        foreach ($orders as $order) {
+            $method = $order->get_payment_method();
+            $year   = $order->get_date_created()->format('Y');
+            $month  = $order->get_date_created()->format('n');
+
+            if ($year === date('Y') && $method === 'mpesa') {
+                $payments[$month] += $order->get_total();
             }
-
-            array_push($monthly, date("m", strtotime($post->post_date)));
         }
 
-        foreach ($months as $month => $values) {
-            $payments[$month] = array_sum($values);
-        }
-
-        $ms = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        $ps = array_values($payments);
-
-        $year = date("Y");
-        $cols = json_encode(array_merge(["data1"], $ps));
-        $categories = json_encode(array_unique($ms));
+        $ms         = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        $ps         = array_values($payments);
+        $cols       = json_encode(array_merge(["data1"], $ps));
+        $categories = json_encode($ms);
 
         echo
         '<div class="wrap">
         <h1 class="wp-heading">Payments Analytics</h1>
-        <h4>Total monthly payments received via MPESA for the year ' . $year . '</h4>
+        <h3>Total monthly payments received via M-Pesa for the year ' . date('Y') . '</h3>
         <br>
         <div id="chart-bar" style="height: 500px"></div>
             <script type="text/javascript">

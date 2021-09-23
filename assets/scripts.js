@@ -5,27 +5,34 @@ jQuery(document).ready(function ($) {
         $("#billing_mpesa_phone").val($(this).val())
     });
 
-    $('#renitiate-form').submit(function (e) {
+    $('#renitiate-mpesa-form').submit(function (e) {
         e.preventDefault();
+        $('#renitiate-button').prop('disabled', true);
 
         var form = $(this);
 
-        $.post(form.attr('action'), form.serialize(), function () {
-            $("#mpesa_receipt")
+        $.post(form.attr('action'), form.serialize(), function (data) {
+            if(data.errorCode) {
+                $('#renitiate-mpesa-button').prop('disabled', false);
+                alert(data.errorMessage);
+            } else {
+                $("#mpesa_receipt")
                 .html('STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>');
-        });
+            }
+         });
     });
 
     var checker = setInterval(() => {
         if (!$("#payment_method").length || $("#payment_method").val() !== 'mpesa') {
             clearInterval(checker);
+            return
         }
 
         if ($("#current_order").length) {
             var order = $("#current_order").val();
 
             if (order.length) {
-                $.get(`/wc-api/lipwa_receipt?order=${order}`, [], function (data) {
+                $.get(`${MPESA_RECEIPT_URL}?order=${order}`, [], function (data) {
                     if (data.receipt == '' || data.receipt == 'N/A') {
                         $("#mpesa_receipt").html(
                             'Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>'
@@ -49,15 +56,14 @@ jQuery(document).ready(function ($) {
                                     `<tr id="mpesa-receipt-table-row"><th scope="row">Receipt number:</th><td>${data.receipt}</td></tr>`
                                 );
                         }
-
+                        
                         $("#mpesa_receipt").html(
-                            `Payment confirmed. Receipt number: <b>${data.receipt}</b>`
+                            `Payment confirmed. Receipt number: <b>${data.receipt}</b>.`
                         );
 
                         $("#missed_stk").hide();
-                        $("#renitiate-button").hide();
+                        $("#renitiate-mpesa-button").hide();
                         $("#mpesa_request").hide();
-                        location.reload()
 
                         clearInterval(checker);
 

@@ -24,11 +24,11 @@ jQuery(document).ready(function ($) {
     if ($('#woocommerce_mpesa_enable_reversal').is(':checked')) {
         $('#woocommerce_mpesa_initiator').closest('tr').show()
         $('#woocommerce_mpesa_password').closest('tr').show()
-        $('#woocommerce_mpesa_statuses').closest('tr').toggle()
+        $('#woocommerce_mpesa_statuses').closest('tr').show()
     } else {
         $('#woocommerce_mpesa_initiator').closest('tr').hide()
         $('#woocommerce_mpesa_password').closest('tr').hide()
-        $('#woocommerce_mpesa_statuses').closest('tr').toggle()
+        $('#woocommerce_mpesa_statuses').closest('tr').hide()
     }
 
     $('#woocommerce_mpesa_enable_reversal').change(function () {

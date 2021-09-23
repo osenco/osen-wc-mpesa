@@ -12,6 +12,5 @@ return array(
     'Osen\\Woocommerce\\Mpesa\\C2B' => $baseDir . '/src/Mpesa/C2B.php',
     'Osen\\Woocommerce\\Mpesa\\STK' => $baseDir . '/src/Mpesa/STK.php',
     'Osen\\Woocommerce\\Post\\Metaboxes\\C2B' => $baseDir . '/src/Post/Metaboxes/C2B.php',
-    'Osen\\Woocommerce\\Post\\Types\\C2B' => $baseDir . '/src/Post/Types/C2B.php',
     'Osen\\Woocommerce\\Utilities' => $baseDir . '/src/Utilities.php',
 );

@@ -18,7 +18,7 @@ class Initialize
         add_action('init', array($this, 'wc_mpesa_flush_rewrite_rules_maybe'), 20);
         add_action('activated_plugin', array($this, 'wc_mpesa_detect_plugin_activation'), 10, 2);
         add_action('deactivated_plugin', array($this, 'wc_mpesa_detect_woocommerce_deactivation'), 10, 2);
-        add_filter('plugin_action_links_' . 'osen-wc-mpesa/osen-wc-mpesa.php', array($this, 'mpesa_action_links'));
+        add_filter('plugin_action_links_osen-wc-mpesa/osen-wc-mpesa.php', array($this, 'mpesa_action_links'));
         add_action('wp_enqueue_scripts', array($this, 'osen_wc_scripts'));
         add_action('admin_enqueue_scripts', array($this, 'osen_admin_scripts'));
     }
@@ -70,6 +70,7 @@ class Initialize
             $links,
             array(
                 '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa') . '">&nbsp;STK & C2B Setup</a>',
+                '<a href="' . admin_url('admin.php?page=wc_mpesa_about') . '">&nbsp;About</a>',
             )
         );
     }
@@ -78,7 +79,7 @@ class Initialize
     {
         $plugin = 'osen-wc-mpesa/osen-wc-mpesa.php';
 
-        if ($plugin == $file) {
+        if ($plugin === $file) {
             $row_meta = array(
                 'github'  => '<a href="' . esc_url('https://github.com/osenco/osen-wc-mpesa/') . '" target="_blank" aria-label="' . esc_attr__('Contribute on Github', 'woocommerce') . '">' . esc_html__('Github', 'woocommerce') . '</a>',
                 'apidocs' => '<a href="' . esc_url('https://developer.safaricom.co.ke/docs/') . '" target="_blank" aria-label="' . esc_attr__('MPesa API Docs (Daraja)', 'woocommerce') . '">' . esc_html__('API docs', 'woocommerce') . '</a>',
@@ -90,12 +91,20 @@ class Initialize
         return (array) $links;
     }
 
+    function js_home_url()
+    {
+        echo '<script type="text/javascript">
+        var MPESA_HOME_URL = "' . \home_url('') . '"
+        </script>';
+    }
+
     public function osen_wc_scripts()
     {
         if (is_checkout()) {
-            wp_enqueue_style("wc-mpesa", plugins_url("osen-wc-mpesa/assets/styles.css"));
+            wp_enqueue_style("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/styles.css"));
             wp_enqueue_script('jquery');
-            wp_enqueue_script("wc-mpesa", plugins_url("osen-wc-mpesa/assets/scripts.js", "jquery"));
+            wp_enqueue_script("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/scripts.js"), array("jquery"), time(), true);
+            wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');
         }
     }
 

@@ -31,7 +31,6 @@ class ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62
         'Osen\\Woocommerce\\Mpesa\\C2B' => __DIR__ . '/../..' . '/src/Mpesa/C2B.php',
         'Osen\\Woocommerce\\Mpesa\\STK' => __DIR__ . '/../..' . '/src/Mpesa/STK.php',
         'Osen\\Woocommerce\\Post\\Metaboxes\\C2B' => __DIR__ . '/../..' . '/src/Post/Metaboxes/C2B.php',
-        'Osen\\Woocommerce\\Post\\Types\\C2B' => __DIR__ . '/../..' . '/src/Post/Types/C2B.php',
         'Osen\\Woocommerce\\Utilities' => __DIR__ . '/../..' . '/src/Utilities.php',
     );
 

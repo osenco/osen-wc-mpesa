@@ -3,13 +3,13 @@
 /**
  * @package Mpesa for WooCommerce
  * @author Osen Concepts < hi@osen.co.ke >
- * @version 2.3.15
+ * @version 3.0.0
  *
  * Plugin Name: Osen WC Mpesa 
  * Plugin URI: https://wcmpesa.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
- * Version: 2.3.15
+ * Version: 3.0.0
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
@@ -56,11 +56,6 @@ function osen_setup_wc_mpesa()
      */
     new Osen\Woocommerce\Initialize;
     new Osen\Woocommerce\Utilities;
-
-    /**
-     * Initialize all our custom post types
-     */
-    new Osen\Woocommerce\Post\Types\C2B;
 
     /**
      * Initialize metaboxes for C2B API
