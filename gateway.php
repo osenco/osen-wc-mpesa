@@ -396,7 +396,7 @@ add_action('plugins_loaded', function () {
             public function validate_fields()
             {
                 if (empty($_POST['billing_mpesa_phone'])) {
-                    wc_add_notice(' M-PESA phone number is required!', 'error');
+                    wc_add_notice('M-PESA phone number is required!', 'error');
                     return false;
                 }
 
@@ -505,10 +505,10 @@ add_action('plugins_loaded', function () {
             public function validate_payment($order_id)
             {
                 if (wc_get_order($order_id)) {
-                    $reference = $order_id;
-                    $order     = new \WC_Order($order_id);
-                    $total     = $order->get_total();
-                    $type = ($this->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
+                    $order      = new \WC_Order($order_id);
+                    $total      = $order->get_total();
+                    $mpesa      = new STK($this->check_vendor($order));
+                    $type       = ($mpesa->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
 
                     echo
                     '<section class="woocommerce-order-details" id="resend_stk">
@@ -521,7 +521,7 @@ add_action('plugins_loaded', function () {
                                     <td class="woocommerce-table__product-name product-name">
                                         <form action="' . home_url("wc-api/lipwa?action=request") . '" method="POST" id="renitiate-mpesa-form">
                                             <input type="hidden" name="order" value="' . $order_id . '">
-                                            <button id="renitiate-mpesa-button" class="button alt" type="submit">' . ($this->resend ?? 'Resend STK Push') . '</button>
+                                            <button id="renitiate-mpesa-button" class="button alt" type="submit">' . ($this->settings['resend'] ?? 'Resend STK Push') . '</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -529,7 +529,7 @@ add_action('plugins_loaded', function () {
                         </table>
                     </section>';
 
-                    if ($this->enable_c2b) {
+                    if ($this->settings['enable_c2b']) {
                         echo
                         '<section class="woocommerce-order-details" id="missed_stk">
                             <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
@@ -538,7 +538,7 @@ add_action('plugins_loaded', function () {
                                         <th class="woocommerce-table__product-name product-name">
                                             ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                         </th>'
-                            . ($this->enable_bonga ?
+                            . ($this->settings['enable_bonga'] ?
                                 '<th>&nbsp;</th>' : '') . '
                                     </tr>
                                 </thead>
@@ -549,19 +549,19 @@ add_action('plugins_loaded', function () {
                                             <ol>
                                                 <li>Select <b>Lipa na M-PESA</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
-                                                ' . (($this->type === 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                                ' . (($mpesa->type === 4) ? "<li>Enter <b>{$mpesa->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$mpesa->shortcode}</b> as till no.</li>") . '
                                                 <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                                 <li>Enter your M-PESA PIN</li>
                                                 <li>Confirm your details and press OK.</li>
                                                 <li>Wait for a confirmation message from M-PESA.</li>
                                             </ol>
                                         </td>'
-                            . ($this->enable_bonga ?
+                            . ($this->settings['enable_bonga'] ?
                                 '<td class="woocommerce-table__product-name product-name">
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
-                                                ' . (($this->type === 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$reference}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                                ' . (($mpesa->type === 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
                                                 <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                                 <li>Enter your M-PESA PIN</li>
                                                 <li>Confirm your details and press OK.</li>
