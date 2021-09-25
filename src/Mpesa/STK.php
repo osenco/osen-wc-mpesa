@@ -215,7 +215,7 @@ class STK
 	 */
 	public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
 	{
-		$phone     = '254'.substr($phone, -9);
+		$phone     = '254' . substr($phone, -9);
 		$timestamp = date('YmdHis');
 		$password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
 		$post_data = array(
@@ -227,13 +227,20 @@ class STK
 			'PartyA'            => $phone,
 			'PartyB'            => $this->shortcode,
 			'PhoneNumber'       => $phone,
-			'CallBackURL'       => home_url("wc-api/lipwa?action=reconcile&sign={$this->signature}&order={$reference}"),
+			'CallBackURL'       => add_query_arg(
+				array(
+					'action' => 'reconcile',
+					'sign' => $this->signature,
+					'order' => $reference
+				),
+				home_url("wc-api/lipwa")
+			),
 			'AccountReference'  => $reference,
 			'TransactionDesc'   => $trxdesc,
 			'Remark'            => $remark,
 		);
 
-		$data_string = json_encode($post_data);
+		$data_string = wp_json_encode($post_data);
 		$response    = wp_remote_post(
 			$this->url . '/mpesa/stkpush/v1/processrequest',
 			array(
@@ -308,7 +315,7 @@ class STK
 			'Occasion'           => $occasion,
 		);
 
-		$data_string = json_encode($post_data);
+		$data_string = wp_json_encode($post_data);
 		$response    = wp_remote_post(
 			$this->url . '/mpesa/transactionstatus/v1/query',
 			array(

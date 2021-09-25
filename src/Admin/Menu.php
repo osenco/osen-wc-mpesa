@@ -154,8 +154,9 @@ class Menu
 
         $ms         = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         $ps         = array_values($payments);
-        $cols       = json_encode(array_merge(["data1"], $ps));
-        $categories = json_encode($ms);
+        $cols       = wp_json_encode(array_merge(["data1"], $ps));
+        $cols2       = wp_json_encode(array_merge(["data1"], $ps));
+        $categories = wp_json_encode($ms);
 
         echo
         '<div class="wrap">
@@ -170,14 +171,21 @@ class Menu
                         bindto: "#chart-bar",
                         data: {
                             type: "bar",
+                            // types: {
+                            //     data1: "bar"
+                            //     data2: "spline"
+                            // },
                             columns: [
                                 ' . $cols . ' ,
+                                // ' . $cols2 . ' ,
                             ],
                             colors: {
-                                "data1": "#0073aa", // blue
+                                data1: "#0073aa", // blue
+                                // data2: "#f39c12", // orange
                             },
                             names: {
-                                "data1": "KSH",
+                                data1: "Amount in KSh",
+                                // data2: "Orders",
                             }
                         },
                         axis: {

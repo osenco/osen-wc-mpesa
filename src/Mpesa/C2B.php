@@ -220,7 +220,7 @@ class C2B
             'ValidationURL'   => home_url("wc-api/lipwa?action=validate&sign={$this->signature}"),
         );
 
-        $data_string = json_encode($post_data);
+        $data_string = wp_json_encode($post_data);
         $response    = wp_remote_post(
             $this->url . '/mpesa/c2b/v1/registerurl',
             array(
@@ -271,7 +271,7 @@ class C2B
             'Remark'            => $remark,
         );
 
-        $data_string = json_encode($post_data);
+        $data_string = wp_json_encode($post_data);
         $response    = wp_remote_post(
             $this->url . '/mpesa/stkpush/v1/processrequest',
             array(
@@ -347,7 +347,7 @@ class C2B
             "Occasion"               => $occasion,
         );
 
-        $data_string = json_encode($post_data);
+        $data_string = wp_json_encode($post_data);
         $response    = wp_remote_post(
             $this->url . '/mpesa/reversal/v1/request',
             array(

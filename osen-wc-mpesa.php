@@ -49,6 +49,21 @@ if (!defined('WCM_PLUGIN_FILE')) {
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
+register_activation_hook(__FILE__, function () {
+    set_transient('wc-mpesa-activation-notice', true, 5);
+});
+
+add_action('admin_notices', function () {
+    /* Check transient, if available display notice */
+    if (get_transient('wc-mpesa-activation-notice')) {
+        echo '<div class="updated notice is-dismissible">
+            <p>Thank you for using the local delivery options plugin! <strong>You are awesome</strong>.</p>
+        </div>';
+        /* Delete transient, only display this notice once. */
+        delete_transient('wc-mpesa-activation-notice');
+    }
+});
+
 function osen_setup_wc_mpesa()
 {
     /**
