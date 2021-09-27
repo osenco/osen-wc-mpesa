@@ -1,24 +1,23 @@
-<?php return array (
-  'root' => 
-  array (
-    'pretty_version' => 'dev-master',
-    'version' => 'dev-master',
-    'aliases' => 
-    array (
+<?php return array(
+    'root' => array(
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'reference' => '9c02c173a1fd7675c9b1592f4d744731898a18a7',
+        'name' => 'osenco/wc-mpesa',
+        'dev' => true,
     ),
-    'reference' => '6300fdcbf447acf4dd600da452fb65ec91480dfa',
-    'name' => 'osenco/wc-mpesa',
-  ),
-  'versions' => 
-  array (
-    'osenco/wc-mpesa' => 
-    array (
-      'pretty_version' => 'dev-master',
-      'version' => 'dev-master',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '6300fdcbf447acf4dd600da452fb65ec91480dfa',
+    'versions' => array(
+        'osenco/wc-mpesa' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'reference' => '9c02c173a1fd7675c9b1592f4d744731898a18a7',
+            'dev_requirement' => false,
+        ),
     ),
-  ),
 );

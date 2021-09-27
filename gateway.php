@@ -423,6 +423,14 @@ add_action('plugins_loaded', function () {
                     }
                 }
 
+                if (class_exists('WC_Product_Vendors_Utils')) {
+                    foreach ($items as $item) {
+                        $line_item  = new WC_Order_Item_Product($item);
+                        $product_id = $line_item->get_product_id();
+                        $vendor_id  = WC_Product_Vendors_Utils::get_vendor_id_from_product($product_id);
+                    }
+                }
+
                 return $vendor_id;
             }
 

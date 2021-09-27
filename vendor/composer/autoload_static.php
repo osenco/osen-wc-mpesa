@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62
+class ComposerStaticInit801684042b62ff3c3c29b0fc243abaae
 {
     public static $files = array (
         'dfceb480b9ce78a93ab4222e950a3686' => __DIR__ . '/../..' . '/gateway.php',
@@ -37,9 +37,9 @@ class ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit9ef90733c370dc3492fb45fc718e2b62::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit801684042b62ff3c3c29b0fc243abaae::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit801684042b62ff3c3c29b0fc243abaae::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit801684042b62ff3c3c29b0fc243abaae::$classMap;
 
         }, null, ClassLoader::class);
     }
