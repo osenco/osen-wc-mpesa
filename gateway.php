@@ -79,10 +79,11 @@ add_action('plugins_loaded', function () {
                 $this->env                = $this->get_option('env', 'sandbox');
 
                 $test_cred = ($this->env === 'sandbox')
-                    ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
-                    : '';
-                $color    = isset($_GET['reg-state']) ? $_GET['reg-state'] : 'black';
-                $register = isset($_GET['mpesa-urls-registered']) ? "<div style='color: {$color}'>{$_GET['mpesa-urls-registered']}</div>" : '';
+                ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
+                : '';
+                $register = isset($_GET['mpesa-urls-registered']) ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
+                                        <p>' . $_GET['mpesa-urls-registered'] . '</p>
+                                    </div>' : '';
 
                 $this->method_description = $register . (($this->env === 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this to go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work seamlessly, ensure your site is running over https(with valid SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wcmpesa.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
 
@@ -112,8 +113,8 @@ add_action('plugins_loaded', function () {
              */
             public function init_form_fields()
             {
-                $this->sign  = $this->get_option('signature', md5(rand(12, 999)));
-                $this->debug = $this->get_option('debug', 'no') === 'yes';
+                $this->sign       = $this->get_option('signature', md5(rand(12, 999)));
+                $this->debug      = $this->get_option('debug', 'no') === 'yes';
                 $this->enable_c2b = $this->get_option('enable_c2b', 'no') === 'yes';
 
                 $shipping_methods = array();
@@ -314,13 +315,13 @@ add_action('plugins_loaded', function () {
                         'desc_tip'    => true,
                     ),
                     'statuses'           => array(
-                        'title'       => __('Order Statuses', 'woocommerce'),
-                        'type'        => 'multiselect',
-                        'options'     => wc_get_order_statuses(),
-                        'placeholder' => __('Select statuses', 'woocommerce'),
-                        'description' => __('Status changes for which to reverse transactions.', 'woocommerce'),
-                        'desc_tip'    => true,
-                        'class'       => 'select2 wc-enhanced-select',
+                        'title'             => __('Order Statuses', 'woocommerce'),
+                        'type'              => 'multiselect',
+                        'options'           => wc_get_order_statuses(),
+                        'placeholder'       => __('Select statuses', 'woocommerce'),
+                        'description'       => __('Status changes for which to reverse transactions.', 'woocommerce'),
+                        'desc_tip'          => true,
+                        'class'             => 'select2 wc-enhanced-select',
                         'custom_attributes' => array(
                             'data-placeholder' => __('Select order statuses to reverse', 'woocommerce'),
                         ),
@@ -405,7 +406,7 @@ add_action('plugins_loaded', function () {
 
             /**
              * Check for current vendor ID
-             * 
+             *
              * @param WC_Order $order
              * @return int|null
              */
@@ -505,10 +506,10 @@ add_action('plugins_loaded', function () {
             public function validate_payment($order_id)
             {
                 if (wc_get_order($order_id)) {
-                    $order      = new \WC_Order($order_id);
-                    $total      = $order->get_total();
-                    $mpesa      = new STK($this->check_vendor($order));
-                    $type       = ($mpesa->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
+                    $order = new \WC_Order($order_id);
+                    $total = $order->get_total();
+                    $mpesa = new STK($this->check_vendor($order));
+                    $type  = ($mpesa->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
 
                     echo
                     '<section class="woocommerce-order-details" id="resend_stk">
@@ -538,8 +539,8 @@ add_action('plugins_loaded', function () {
                                         <th class="woocommerce-table__product-name product-name">
                                             ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                         </th>'
-                            . ($this->settings['enable_bonga'] ?
-                                '<th>&nbsp;</th>' : '') . '
+                        . ($this->settings['enable_bonga'] ?
+                            '<th>&nbsp;</th>' : '') . '
                                     </tr>
                                 </thead>
 
@@ -557,7 +558,7 @@ add_action('plugins_loaded', function () {
                                             </ol>
                                         </td>'
                             . ($this->settings['enable_bonga'] ?
-                                '<td class="woocommerce-table__product-name product-name">
+                            '<td class="woocommerce-table__product-name product-name">
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
@@ -606,7 +607,7 @@ add_action('plugins_loaded', function () {
                     $receipt = $order->get_transaction_id();
                     echo '<dl>
                         <dt>Payment received via MPesa</dt>
-                        <dd>Receipt Number: ' . $receipt . '</dd>
+                        <dd>Transaction ID: ' . $receipt . '</dd>
                     </dl>';
                 }
             }
@@ -621,14 +622,14 @@ add_action('plugins_loaded', function () {
 
                 switch ($action) {
                     case "request":
-                        $order_id = sanitize_text_field($_POST['order']);
-                        $order    = new \WC_Order($order_id);
+                        $order_id  = sanitize_text_field($_POST['order']);
+                        $order     = new \WC_Order($order_id);
                         $vendor_id = $this->check_vendor($order);
-                        $total    = $order->get_total();
-                        $phone    = $order->get_billing_phone();
-                        $mpesa = new STK($vendor_id);
+                        $total     = $order->get_total();
+                        $phone     = $order->get_billing_phone();
+                        $mpesa     = new STK($vendor_id);
 
-                        $result   = $mpesa->authorize(get_transient('mpesa_token'))
+                        $result = $mpesa->authorize(get_transient('mpesa_token'))
                             ->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
                         if (isset($result['MerchantRequestID'])) {
@@ -643,7 +644,7 @@ add_action('plugins_loaded', function () {
 
                     case "reconcile":
                         $mpesa = new STK();
-                        $sign     = sanitize_text_field($_GET['sign']);
+                        $sign  = sanitize_text_field($_GET['sign']);
 
                         wp_send_json($mpesa->reconcile(function ($response) use ($sign, $mpesa) {
                             if (isset($sign) && $sign === $this->get_option('signature')) {
@@ -762,10 +763,10 @@ add_action('plugins_loaded', function () {
                             $status = isset($response['ResponseDescription']) ? 'success' : 'fail';
                             if ($status === 'fail') {
                                 $message = isset($response['errorMessage']) ? $response['errorMessage'] : 'Could not register M-PESA URLs, try again later.';
-                                $state   = 'red';
+                                $state   = 'error';
                             } else {
                                 $message = isset($response['ResponseDescription']) ? $response['ResponseDescription'] : 'M-PESA URL registered successfully. You will now receive C2B Payment Notifications.';
-                                $state   = 'green';
+                                $state   = 'success';
                             }
 
                             exit(wp_redirect(
@@ -914,7 +915,7 @@ add_action('plugins_loaded', function () {
 
             /**
              * Process Mpesa transaction reversals on slected statuses
-             * 
+             *
              * @since 3.0.0
              * @param int $order_id
              */

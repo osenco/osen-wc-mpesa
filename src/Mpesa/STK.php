@@ -91,7 +91,7 @@ class STK
 				'shortcode'  => $c2b['shortcode'] ?? '174379',
 				'initiator'  => $c2b['initiator'] ?? 'test',
 				'password'   => $c2b['password'] ?? 'lipia',
-				'type'       => $c2b['idtype'] ?? 4,
+				'type'       => (int)$c2b['idtype'] ?? 4,
 				'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
 				'signature'  => $c2b['signature'] ?? md5(rand(12, 999))
 			);
@@ -104,7 +104,7 @@ class STK
 				'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
 				'initiator'  => get_user_meta($vendor_id, 'mpesa_initiator', true) ?? 'test',
 				'password'   => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
-				'type'       => get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
+				'type'       => (int)get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
 				'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
 				'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999))
 			);
