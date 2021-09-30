@@ -79,8 +79,8 @@ add_action('plugins_loaded', function () {
                 $this->env                = $this->get_option('env', 'sandbox');
 
                 $test_cred = ($this->env === 'sandbox')
-                ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
-                : '';
+                    ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
+                    : '';
                 $register = isset($_GET['mpesa-urls-registered']) ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
                                         <p>' . $_GET['mpesa-urls-registered'] . '</p>
                                     </div>' : '';
@@ -523,7 +523,7 @@ add_action('plugins_loaded', function () {
                     '<section class="woocommerce-order-details" id="resend_stk">
                         <input type="hidden" id="current_order" value="' . $order_id . '">
                         <input type="hidden" id="payment_method" value="' . $order->get_payment_method() . '">
-                        <p class="saving" id="mpesa_receipt">Confirming receipt, please wait</p>
+                        <p class="checking" id="mpesa_receipt">Confirming receipt, please wait</p>
                         <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
                             <tbody>
                                 <tr class="woocommerce-table__line-item order_item">
@@ -547,8 +547,8 @@ add_action('plugins_loaded', function () {
                                         <th class="woocommerce-table__product-name product-name">
                                             ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                         </th>'
-                        . ($this->settings['enable_bonga'] ?
-                            '<th>&nbsp;</th>' : '') . '
+                            . ($this->settings['enable_bonga'] ?
+                                '<th>&nbsp;</th>' : '') . '
                                     </tr>
                                 </thead>
 
@@ -566,7 +566,7 @@ add_action('plugins_loaded', function () {
                                             </ol>
                                         </td>'
                             . ($this->settings['enable_bonga'] ?
-                            '<td class="woocommerce-table__product-name product-name">
+                                '<td class="woocommerce-table__product-name product-name">
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
@@ -899,7 +899,7 @@ add_action('plugins_loaded', function () {
             public function thankyou_page()
             {
                 if ($this->instructions) {
-                    echo wpautop(wptexturize($this->instructions));
+                    echo ''; //wpautop(wptexturize($this->instructions));
                 }
             }
 

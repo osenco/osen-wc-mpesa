@@ -1,4 +1,5 @@
 jQuery(document).ready(function ($) {
+    $('#woocommerce_mpesa_signature').closest('tr').hide()
     const s = $('#woocommerce_mpesa_idtype').val()
 
     if (Number(s) == 4) {

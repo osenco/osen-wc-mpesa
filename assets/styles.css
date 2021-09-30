@@ -24,15 +24,15 @@
 	}
 }
 
-.saving span {
+.checking span {
 	animation: blink 1.4s linear infinite;
 	animation-fill-mode: both;
 }
 
-.saving span:nth-child(2) {
+.checking span:nth-child(2) {
 	animation-delay: 0.2s;
 }
 
-.saving span:nth-child(3) {
+.checking span:nth-child(3) {
 	animation-delay: 0.4s;
 }
