@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'dfceb480b9ce78a93ab4222e950a3686' => $baseDir . '/gateway.php',
+    '77033b5b8b39cf79d116bd9e5055c54e' => $baseDir . '/deprecated.php',
 );
