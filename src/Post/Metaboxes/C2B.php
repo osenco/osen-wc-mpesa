@@ -101,16 +101,19 @@ class C2B
     public function save_order(int $post_id, \WP_Post $post, bool $update): void
     {
         $order          = wc_get_order($post_id);
-        $transaction_id = $order->get_transaction_id();
+        
+        if ($order) {
+            $transaction_id = $order->get_transaction_id();
 
-        if ($order && $update && !$transaction_id && isset($_POST['receipt'])) {
-            if (isset($_POST['full_amount'])) {
-                $order->payment_complete(sanitize_text_field($_POST['receipt']));
-                $order->add_order_note("Full mpesa payment received. Receipt Number {$_POST['receipt']}");
-            } else {
-                $order->set_transaction_id(sanitize_text_field($_POST['receipt']));
-                $order->add_order_note("Mpesa payment received. Receipt Number {$_POST['receipt']}");
-                $order->save();
+            if ($update && !$transaction_id && isset($_POST['receipt'])) {
+                if (isset($_POST['full_amount'])) {
+                    $order->payment_complete(sanitize_text_field($_POST['receipt']));
+                    $order->add_order_note("Full mpesa payment received. Receipt Number {$_POST['receipt']}");
+                } else {
+                    $order->set_transaction_id(sanitize_text_field($_POST['receipt']));
+                    $order->add_order_note("Mpesa payment received. Receipt Number {$_POST['receipt']}");
+                    $order->save();
+                }
             }
         }
     }

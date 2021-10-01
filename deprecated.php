@@ -42,7 +42,7 @@ function wc_depecrated_check_vendor(WC_Order $order)
     return $vendor_id;
 }
 
-add_action('init',    function () {
+add_action('init', function () {
     add_rewrite_rule('lipwa/([^/]*)/?', 'index.php?lipwa=$matches[1]', 'top');
 });
 

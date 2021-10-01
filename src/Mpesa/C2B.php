@@ -46,7 +46,7 @@ class C2B
     public $shortcode;
 
     /**
-     * @param integer | Identifier Type   | 1(MSISDN)/2(Till)/4(Paybill)
+     * @param int | Identifier Type   | 1(MSISDN)/2(Till)/4(Paybill)
      */
     public $type = 4;
 
@@ -93,7 +93,7 @@ class C2B
                 'shortcode'  => $c2b['shortcode'] ?? '174379',
                 'initiator'  => $c2b['initiator'] ?? 'test',
                 'password'   => $c2b['password'] ?? 'lipia',
-                'type'       => (int)$c2b['idtype'] ?? 4,
+                'type'       => (int)($c2b['idtype'] ?? 4),
                 'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                 'signature'  => $c2b['signature'] ?? md5(rand(12, 999)),
             );

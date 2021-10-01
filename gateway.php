@@ -28,12 +28,10 @@ function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 /**
  * Register our gateway with woocommerce
  */
-add_filter('woocommerce_payment_gateways', 'wc_mpesa_add_to_gateways', 9);
-function wc_mpesa_add_to_gateways($gateways)
-{
+add_filter('woocommerce_payment_gateways', function ($gateways) {
     $gateways[] = 'WC_MPESA_Gateway';
     return $gateways;
-}
+}, 9);
 
 add_action('plugins_loaded', function () {
     if (class_exists('WC_Payment_Gateway')) {
@@ -381,6 +379,9 @@ add_action('plugins_loaded', function () {
                 return parent::is_available();
             }
 
+            /**
+             * 
+             */
             public function payment_fields()
             {
                 if ($description = $this->get_description()) {
@@ -394,6 +395,9 @@ add_action('plugins_loaded', function () {
                 </div>';
             }
 
+            /**
+             * 
+             */
             public function validate_fields()
             {
                 if (empty($_POST['billing_mpesa_phone'])) {
@@ -570,7 +574,7 @@ add_action('plugins_loaded', function () {
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
-                                                ' . (($mpesa->type === 4) ? "<li>Enter <b>{$this->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$this->shortcode}</b> as till no.</li>") . '
+                                                ' . (($mpesa->type === 4) ? "<li>Enter <b>{$mpesa->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$mpesa->shortcode}</b> as till no.</li>") . '
                                                 <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                                 <li>Enter your M-PESA PIN</li>
                                                 <li>Confirm your details and press OK.</li>
@@ -622,6 +626,7 @@ add_action('plugins_loaded', function () {
 
             /**
              * Process webhook information such as IPN
+             * 
              * @since 2.3.1
              */
             public function webhook()
@@ -870,6 +875,7 @@ add_action('plugins_loaded', function () {
 
             /**
              * Get order's Transaction ID via AJAX
+             * 
              * @since 2.3.1
              */
             public function get_transaction_id()
@@ -899,7 +905,7 @@ add_action('plugins_loaded', function () {
             public function thankyou_page()
             {
                 if ($this->instructions) {
-                    echo ''; //wpautop(wptexturize($this->instructions));
+                    echo wpautop(wptexturize($this->instructions));
                 }
             }
 
