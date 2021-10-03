@@ -28,22 +28,21 @@ class C2B
     {
         $order   = new \WC_Order($post);
         $receipt = $order->get_transaction_id();
+        $status  = $order->get_status();
 
         echo '<table class="form-table" >
         <tr valign="top" >
-            <th scope="row" >
-                ' . ($receipt ? "" : "Enter ") . 'M-Pesa Transaction ID
-            </th>
-        </tr>
-        <tr valign="top" >
             <td>
+                <label scope="rows" >
+                    ' . ($receipt ? "" : "Enter ") . 'Transaction ID:
+                </label>
                 <input class="input-text" type="text" name="receipt" value="' . esc_attr($receipt) . ' " class="regular-text" / >
              </td>
         </tr>
         <tr valign="top" >
             <td>
                 <label>
-                    <input type="checkbox" name="full_amount" value="yes" />
+                    <input type="checkbox" name="full_amount" value="yes" ' . ($status === 'completed' ? 'checked' : '') . ' />
                     Full Amount Paid
                 </label>
             </td>
@@ -100,18 +99,20 @@ class C2B
 
     public function save_order(int $post_id, \WP_Post $post, bool $update): void
     {
-        $order          = wc_get_order($post_id);
-        
+        $order = wc_get_order($post_id);
+
         if ($order) {
             $transaction_id = $order->get_transaction_id();
 
             if ($update && !$transaction_id && isset($_POST['receipt'])) {
                 if (isset($_POST['full_amount'])) {
                     $order->payment_complete(sanitize_text_field($_POST['receipt']));
-                    $order->add_order_note("Full mpesa payment received. Receipt Number {$_POST['receipt']}");
+                    $order->add_order_note("Full MPesa payment received. Transaction ID {$_POST['receipt']}");
+                    $order->add_order_note("Full MPesa payment received. Transaction ID {$_POST['receipt']}", true);
                 } else {
                     $order->set_transaction_id(sanitize_text_field($_POST['receipt']));
-                    $order->add_order_note("Mpesa payment received. Receipt Number {$_POST['receipt']}");
+                    $order->add_order_note("Mpesa payment received. Transaction ID {$_POST['receipt']}");
+                    $order->update_status('on-hold', "M-Pesa payment received. Transaction ID {$_POST['receipt']}", true);
                     $order->save();
                 }
             }

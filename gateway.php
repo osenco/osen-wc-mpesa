@@ -195,6 +195,13 @@ add_action('plugins_loaded', function () {
                         'class'       => 'wide-input',
                         'css'         => 'min-width: 45%;',
                     ),
+                    'account'             => array(
+                        'title'       => __('Account Reference', 'woocommerce'),
+                        'type'        => 'text',
+                        'description' => __('Account number for transactions. Leave blank to use order ID/Number.', 'woocommerce'),
+                        'default'     => __('', 'woocommerce'),
+                        'desc_tip'    => true,
+                    ),
                     'signature'          => array(
                         'title'       => __('Encryption Signature', 'woocommerce'),
                         'type'        => 'password',
@@ -456,8 +463,8 @@ add_action('plugins_loaded', function () {
                     $result = (new STK($vendor_id))
                         ->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa', true);
-                    $message = wp_json_encode($result['requested']);
-                    WC()->session->set('mpesa_request', $message);
+                    $payload = wp_json_encode($result['requested']);
+                    WC()->session->set('mpesa_request', $payload);
                 } else {
                     $result = (new STK($vendor_id))
                         ->authorize(get_transient('mpesa_token'))
@@ -479,6 +486,7 @@ add_action('plugins_loaded', function () {
                     }
 
                     if (isset($result['MerchantRequestID'])) {
+                        update_post_meta($order_id, 'mpesa_phone', $phone);
                         update_post_meta($order_id, 'mpesa_request_id', $result['MerchantRequestID']);
                         $order->add_order_note(
                             __("Awaiting MPesa confirmation of payment from {$phone} for request {$result['MerchantRequestID']}.", 'woocommerce')
@@ -683,7 +691,7 @@ add_action('plugins_loaded', function () {
 
                                             $order->update_status(
                                                 $this->get_option('completion', 'completed'),
-                                                __("Full MPesa Payment Received From {$parsed['PhoneNumber']}. Receipt Number {$parsed['MpesaReceiptNumber']}.")
+                                                __("Full MPesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
                                             );
                                             $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                             $order->set_transaction_id($parsed['MpesaReceiptNumber']);
@@ -737,7 +745,7 @@ add_action('plugins_loaded', function () {
                                 if ($ipn_balance === 0) {
                                     $order->update_status(
                                         $this->get_option('completion', 'completed'),
-                                        __("Full MPesa Payment Received From {$PhoneNumber}. Receipt Number {$MpesaReceiptNumber}")
+                                        __("Full MPesa Payment Received From {$PhoneNumber}. Transaction ID {$MpesaReceiptNumber}")
                                     );
                                     $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                     $order->set_transaction_id($MpesaReceiptNumber);
@@ -750,7 +758,7 @@ add_action('plugins_loaded', function () {
                                     $currency = get_woocommerce_currency();
                                     $order->update_status(
                                         $this->get_option('completion', 'completed'),
-                                        __("{$PhoneNumber} has overpayed by {$currency} {$ipn_balance}. Receipt Number {$MpesaReceiptNumber}")
+                                        __("{$PhoneNumber} has overpayed by {$currency} {$ipn_balance}. Transaction ID {$MpesaReceiptNumber}")
                                     );
                                     $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                     $order->set_transaction_id($MpesaReceiptNumber);

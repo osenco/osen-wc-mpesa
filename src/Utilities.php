@@ -31,6 +31,7 @@ class Utilities
 
         foreach ($columns as $key => $column) {
             $ordered_columns[$key] = $column;
+
             if ('order_date' === $key) {
                 $ordered_columns['transaction_id'] = __('Receipt', 'woocommerce');
             }
@@ -56,24 +57,17 @@ class Utilities
 
     public function woocommerce_emails_attach_downloadables($attachments, $status, \WC_Order $order)
     {
-        if (!is_object($order) || !isset($status)) {
-            return $attachments;
-        }
+        if (is_object($order) || isset($status) || !empty($order)) {
+            if (method_exists($order, 'has_downloadable_item')) {
+                if ($order->has_downloadable_item()) {
 
-        if (empty($order)) {
-            return $attachments;
-        }
-
-        if (method_exists($order, 'has_downloadable_item')) {
-            if (!$order->has_downloadable_item()) {
-                return $attachments;
-            }
-
-            $allowed_statuses = array('customer_invoice', 'customer_completed_order');
-            if (isset($status) && in_array($status, $allowed_statuses)) {
-                foreach ($order->get_items() as $item) {
-                    foreach ($order->get_item_downloads($item) as $download) {
-                        $attachments[] = str_replace(content_url(), WP_CONTENT_DIR, $download['file']);
+                    $allowed_statuses = array('customer_invoice', 'customer_completed_order');
+                    if (isset($status) && in_array($status, $allowed_statuses)) {
+                        foreach ($order->get_items() as $item) {
+                            foreach ($order->get_item_downloads($item) as $download) {
+                                $attachments[] = str_replace(content_url(), WP_CONTENT_DIR, $download['file']);
+                            }
+                        }
                     }
                 }
             }

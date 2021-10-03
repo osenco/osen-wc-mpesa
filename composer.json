@@ -1,0 +1,25 @@
+{
+    "name": "osenco/wc-mpesa",
+    "description": "This plugin extends WordPress and WooCommerce functionality to integrate Mpesa for making and receiving online payments.",
+    "type": "library",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Osen Concepts",
+            "email": "hi@osen.co.ke"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Osen\\Woocommerce\\": "src/"
+        },
+        "files": [
+            "gateway.php",
+            "deprecated.php"
+        ]
+    }
+}

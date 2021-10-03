@@ -91,17 +91,11 @@ class Initialize
         return (array) $links;
     }
 
-    function js_home_url()
-    {
-        echo '<script type="text/javascript">
-        var MPESA_HOME_URL = "' . \home_url('') . '"
-        </script>';
-    }
-
     public function osen_wc_scripts()
     {
         if (is_checkout()) {
             wp_enqueue_style("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/styles.css"));
+            
             wp_enqueue_script('jquery');
             wp_enqueue_script("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/scripts.js"), array("jquery"), time(), true);
             wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');

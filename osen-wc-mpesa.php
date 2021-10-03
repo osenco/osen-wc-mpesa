@@ -13,7 +13,7 @@
  * Author URI: https://osen.co.ke/
  *
  * Requires at least: 4.6
- * Tested up to: 5.5.1
+ * Tested up to: 5.8.1
  *
  * WC requires at least: 3.5.0
  * WC tested up to: 5.1
@@ -57,33 +57,25 @@ add_action('admin_notices', function () {
     /* Check transient, if available display notice */
     if (get_transient('wc-mpesa-activation-notice')) {
         echo '<div class="updated notice is-dismissible">
-            <p>Thank you for using the local delivery options plugin! <strong>You are awesome</strong>.</p>
+            <p>Thank you for using the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>.</p>
         </div>';
         /* Delete transient, only display this notice once. */
         delete_transient('wc-mpesa-activation-notice');
     }
 });
 
-function osen_setup_wc_mpesa()
-{
-    /**
-     * Initialize all plugin features and utilities
-     */
-    new Osen\Woocommerce\Initialize;
-    new Osen\Woocommerce\Utilities;
-
-    /**
-     * Initialize metaboxes for C2B API
-     */
-    new Osen\Woocommerce\Post\Metaboxes\C2B;
-
-    /**
-     * Initialize our admin menus
-     */
-    new Osen\Woocommerce\Admin\Menu;
-}
+/**
+ * Initialize all plugin features and utilities
+ */
+new Osen\Woocommerce\Initialize;
+new Osen\Woocommerce\Utilities;
 
 /**
- * Setup the plugin
+ * Initialize metaboxes for C2B API
  */
-osen_setup_wc_mpesa();
+new Osen\Woocommerce\Post\Metaboxes\C2B;
+
+/**
+ * Initialize our admin menus (submenus under WooCommerce)
+ */
+new Osen\Woocommerce\Admin\Menu;

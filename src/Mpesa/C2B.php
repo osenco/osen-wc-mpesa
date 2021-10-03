@@ -315,8 +315,8 @@ class C2B
      * Reverse a Transaction
      *
      * @param string $transaction
-     * @param Integer $amount
-     * @param Integer $receiver
+     * @param int $amount
+     * @param string|int $receiver
      * @param string $receiver_type
      * @param string $remarks
      * @param string $occassion

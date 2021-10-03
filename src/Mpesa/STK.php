@@ -61,6 +61,11 @@ class STK
 	public $password;
 
 	/**
+	 * @param string  | Account Reference  | defaults to 'order_id'
+	 */
+	public $account = '';
+
+	/**
 	 * @param string  | Encryption Signature
 	 */
 	public $signature;
@@ -93,6 +98,7 @@ class STK
 				'password'   => $c2b['password'] ?? 'lipia',
 				'type'       => (int)($c2b['idtype'] ?? 4),
 				'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+				'account'    => $c2b['account'] ?? '',
 				'signature'  => $c2b['signature'] ?? md5(rand(12, 999))
 			);
 		} else {
@@ -106,6 +112,7 @@ class STK
 				'password'   => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
 				'type'       => (int)get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
 				'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+				'account'    => get_user_meta($vendor_id, 'mpesa_account', true) ?? '',
 				'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999))
 			);
 		}
@@ -235,7 +242,7 @@ class STK
 				),
 				home_url("wc-api/lipwa")
 			),
-			'AccountReference'  => $reference,
+			'AccountReference'  => empty($this->account) ? $reference : $this->account,
 			'TransactionDesc'   => $trxdesc,
 			'Remark'            => $remark,
 		);
