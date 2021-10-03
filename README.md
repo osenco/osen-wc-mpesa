@@ -14,7 +14,8 @@
 # MPESA For WooCommerce
 
 WordPress Plugin that extends WordPress and WooCommerce functionality to integrate MPESA for making payments, remittances, checking account balance transaction status and reversals. It also adds Kenyan Counties to the WooCommerce states list.
-![Wc MPesa Configuration](https://user-images.githubusercontent.com/14233942/61905978-04c93980-af33-11e9-93c4-1b1ec6719e66.png)
+![M-Pesa Config](https://user-images.githubusercontent.com/14233942/135764516-659438ea-fba9-4090-933a-12421590a767.png)
+![Futher config](https://user-images.githubusercontent.com/14233942/135764518-33bd316c-3a51-4d78-abce-76be5abcca8c.png)
 
 ## Installation
 
