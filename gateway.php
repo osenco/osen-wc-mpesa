@@ -77,8 +77,8 @@ add_action('plugins_loaded', function () {
                 $this->env                = $this->get_option('env', 'sandbox');
 
                 $test_cred = ($this->env === 'sandbox')
-                    ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
-                    : '';
+                ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
+                : '';
                 $register = isset($_GET['mpesa-urls-registered']) ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
                                         <p>' . $_GET['mpesa-urls-registered'] . '</p>
                                     </div>' : '';
@@ -195,7 +195,7 @@ add_action('plugins_loaded', function () {
                         'class'       => 'wide-input',
                         'css'         => 'min-width: 45%;',
                     ),
-                    'account'             => array(
+                    'account'            => array(
                         'title'       => __('Account Reference', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Account number for transactions. Leave blank to use order ID/Number.', 'woocommerce'),
@@ -387,7 +387,7 @@ add_action('plugins_loaded', function () {
             }
 
             /**
-             * 
+             *
              */
             public function payment_fields()
             {
@@ -403,7 +403,7 @@ add_action('plugins_loaded', function () {
             }
 
             /**
-             * 
+             *
              */
             public function validate_fields()
             {
@@ -559,8 +559,8 @@ add_action('plugins_loaded', function () {
                                         <th class="woocommerce-table__product-name product-name">
                                             ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                         </th>'
-                            . ($this->settings['enable_bonga'] ?
-                                '<th>&nbsp;</th>' : '') . '
+                        . ($this->settings['enable_bonga'] ?
+                            '<th>&nbsp;</th>' : '') . '
                                     </tr>
                                 </thead>
 
@@ -578,7 +578,7 @@ add_action('plugins_loaded', function () {
                                             </ol>
                                         </td>'
                             . ($this->settings['enable_bonga'] ?
-                                '<td class="woocommerce-table__product-name product-name">
+                            '<td class="woocommerce-table__product-name product-name">
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
@@ -604,7 +604,7 @@ add_action('plugins_loaded', function () {
             {
                 if ($this->debug) {
                     echo '
-                    <section class="woocommerce-order-details" id="mpesa_request">
+                    <section class="woocommerce-order-details" id="mpesa_request_output">
                     <p>Mpesa request body</p>
                         <code>' . WC()->session->get('mpesa_request') . '</code>
                     </section>';
@@ -625,6 +625,7 @@ add_action('plugins_loaded', function () {
             {
                 if ($email->id === 'customer_completed_order' && $order->get_transaction_id() && $order->get_payment_method() === 'mpesa') {
                     $receipt = $order->get_transaction_id();
+
                     echo '<dl>
                         <dt>Payment received via MPesa</dt>
                         <dd>Transaction ID: ' . $receipt . '</dd>
@@ -634,7 +635,7 @@ add_action('plugins_loaded', function () {
 
             /**
              * Process webhook information such as IPN
-             * 
+             *
              * @since 2.3.1
              */
             public function webhook()
@@ -883,7 +884,7 @@ add_action('plugins_loaded', function () {
 
             /**
              * Get order's Transaction ID via AJAX
-             * 
+             *
              * @since 2.3.1
              */
             public function get_transaction_id()

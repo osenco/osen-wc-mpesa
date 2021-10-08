@@ -64,12 +64,16 @@ class Initialize
         }
     }
 
+    /**
+     * @param array $links
+     * @return array
+     */
     public function mpesa_action_links($links)
     {
         return array_merge(
             $links,
             array(
-                '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa') . '">&nbsp;STK & C2B Setup</a>',
+                '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa') . '">&nbsp;Configuration</a>',
                 '<a href="' . admin_url('admin.php?page=wc_mpesa_about') . '">&nbsp;About</a>',
             )
         );

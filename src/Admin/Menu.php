@@ -23,7 +23,7 @@ class Menu
             __("About M-Pesa for WooCommerce", "woocommerce"),
             "manage_options",
             "wc_mpesa_about",
-            [$this, "wc_mpesa_menu_about"],
+            array($this, "wc_mpesa_menu_about"),
         );
 
         add_submenu_page(
@@ -32,7 +32,7 @@ class Menu
             __("Configure M-Pesa", "woocommerce"),
             "manage_options",
             "wc_mpesa_preferences",
-            [$this, "wc_mpesa_menu_settings"]
+            array($this, "wc_mpesa_menu_settings")
         );
 
         add_submenu_page(
@@ -41,7 +41,7 @@ class Menu
             __("M-Pesa Analytics", "woocommerce"),
             "manage_options",
             "wc_mpesa_analytics",
-            [$this, "wc_mpesa_menu_analytics"]
+            array($this, "wc_mpesa_menu_analytics")
         );
     }
 

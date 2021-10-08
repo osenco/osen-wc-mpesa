@@ -50,7 +50,7 @@ class Utilities
         global $post;
         $the_order = wc_get_order($post->ID);
 
-        if ('transaction_id' === $column) {
+        if ('transaction_id' === $column && $the_order->get_payment_method() === 'mpesa') {
             echo $the_order->get_transaction_id() ?? 'N/A';
         }
     }
