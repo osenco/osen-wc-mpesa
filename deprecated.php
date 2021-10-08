@@ -64,6 +64,7 @@ add_action(
             header("Content-Type: Application/json");
 
             $action = get_query_var('lipwa', 'something_ominous');
+            $settings = get_option('woocommerce_mpesa_settings');
 
             switch ($action) {
                 case "request":
@@ -74,7 +75,7 @@ add_action(
                     $phone     = $order->get_billing_phone();
                     $mpesa     = new STK($vendor_id);
 
-                    $result    = $mpesa->authorize(get_transient('mpesa_token'))
+                    $result = $mpesa->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
                     if (isset($result['MerchantRequestID'])) {
@@ -89,10 +90,8 @@ add_action(
 
                 case "reconcile":
                     $mpesa = new STK();
-                    $sign  = sanitize_text_field($_GET['sign']);
 
-                    wp_send_json($mpesa->reconcile(function ($response) use ($sign, $mpesa) {
-                        if (isset($sign) && $sign === $this->get_option('signature')) {
+                    wp_send_json($mpesa->reconcile(function ($response) use ($settings) {
                             if (isset($response['Body'])) {
                                 $resultCode        = $response['Body']['stkCallback']['ResultCode'];
                                 $resultDesc        = $response['Body']['stkCallback']['ResultDesc'];
@@ -114,10 +113,9 @@ add_action(
                                         }
 
                                         $order->update_status(
-                                            $this->get_option('completion', 'completed'),
+                                            ($settings['completion'] ?? 'completed'),
                                             __("Full MPesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
                                         );
-                                        $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                         $order->set_transaction_id($parsed['MpesaReceiptNumber']);
                                         $order->save();
 
@@ -132,7 +130,6 @@ add_action(
                                     return true;
                                 }
                             }
-                        }
 
                         return false;
                     }));
@@ -168,10 +165,9 @@ add_action(
 
                             if ($ipn_balance === 0) {
                                 $order->update_status(
-                                    $this->get_option('completion', 'completed'),
+                                    ($settings['completion'] ?? 'completed'),
                                     __("Full MPesa Payment Received From {$PhoneNumber}. Transaction ID {$MpesaReceiptNumber}")
                                 );
-                                $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                 $order->set_transaction_id($MpesaReceiptNumber);
                                 $order->save();
 
@@ -181,10 +177,9 @@ add_action(
                             } elseif ($ipn_balance < 0) {
                                 $currency = get_woocommerce_currency();
                                 $order->update_status(
-                                    $this->get_option('completion', 'completed'),
+                                    ($settings['completion'] ?? 'completed'),
                                     __("{$PhoneNumber} has overpayed by {$currency} {$ipn_balance}. Transaction ID {$MpesaReceiptNumber}")
                                 );
-                                $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                 $order->set_transaction_id($MpesaReceiptNumber);
                                 $order->save();
 
@@ -234,6 +229,7 @@ add_action(
 
                 case "result":
                     $response = json_decode(file_get_contents('php://input'), true);
+
                     $result = $response['Result'];
                     $ResultType               = $result['ResultType'];
                     $ResultCode               = $result['ResultCode'];
@@ -244,22 +240,32 @@ add_action(
                     $ResultParameters = $result['ResultParameters'];
                     $ResultParameter  = $ResultParameters['ResultParameters']['ResultParameter'];
 
-                    if (isset($ResultParameter)) {
-                        $parsed = array();
-                        foreach ($ResultParameter as $item) {
-                            $parsed[$item['Name']] = $item['Value'];
-                        }
+                    $ReceiptNo         = $ResultParameter[0]['Value'];
+                    $ConversationID    = $ResultParameter[0]['Value'];
+                    $FinalisedTime     = $ResultParameter[0]['Value'];
+                    $Amount            = $ResultParameter[0]['Value'];
+                    $TransactionStatus = $ResultParameter[0]['Value'];
+                    $ReasonType        = $ResultParameter[0]['Value'];
+                    $TransactionReason = $ResultParameter[0]['Value'];
+                    $DebitPartyCharges = $ResultParameter[0]['Value'];
+                    $DebitAccountType  = $ResultParameter[0]['Value'];
+                    $InitiatedTime     = $ResultParameter[0]['Value'];
+                    $CreditPartyName   = $ResultParameter[0]['Value'];
+                    $DebitPartyName    = $ResultParameter[0]['Value'];
 
-                        $order_id = wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $OriginatorConversationID);
-                        $order    = new \WC_Order($order_id);
-    
-                        if (wc_get_order($order_id)) {
-                            $order->update_status('refunded', __($ResultDesc, 'woocommerce'));
-                            $order->set_transaction_id($TransactionID);
-                            $order->save();
-                        } else {
-                            $order->update_status('processing', __("{$ResultCode}: {$ResultDesc}", 'woocommerce'));
-                        }
+                    $ReferenceData = $result['ReferenceData'];
+                    $ReferenceItem = $ReferenceData['ReferenceItem'];
+                    $Occasion      = $ReferenceItem[0]['Value'];
+
+                    $order_id = wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $OriginatorConversationID);
+                    $order    = new \WC_Order($order_id);
+
+                    if (wc_get_order($order_id)) {
+                        $order->update_status('refunded', __($ResultDesc, 'woocommerce'));
+                        $order->set_transaction_id($TransactionID);
+                        $order->save();
+                    } else {
+                        $order->update_status('processing', __("{$ResultCode}: {$ResultDesc}", 'woocommerce'));
                     }
 
                     wp_send_json((new STK)->validate());

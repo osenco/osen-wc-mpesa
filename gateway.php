@@ -10,8 +10,38 @@
 use Osen\Woocommerce\Mpesa\C2B;
 use Osen\Woocommerce\Mpesa\STK;
 
+/**
+ * Handle a custom 'mpesa_request_id' query var to get orders with the 'mpesa_request_id' meta.
+ * @param array $query - Args for WP_Query.
+ * @param array $query_vars - Query vars from WC_Order_Query.
+ * @return array modified $query
+ */
+add_filter('woocommerce_order_data_store_cpt_get_orders_query', function ($query, $query_vars) {
+    if (!empty($query_vars['mpesa_request_id'])) {
+        $query['meta_query'][] = array(
+            'key'   => 'mpesa_request_id',
+            'value' => esc_attr($query_vars['mpesa_request_id']),
+        );
+    }
+
+    if (!empty($query_vars['mpesa_phone'])) {
+        $query['meta_query'][] = array(
+            'key'   => 'mpesa_phone',
+            'value' => esc_attr($query_vars['mpesa_phone']),
+        );
+    }
+
+    return $query;
+}, 10, 2);
+
 function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 {
+    // $orders = wc_get_orders(array($key => $value));
+
+    // if (!empty($orders)) {
+    //     return $orders[0]->get_id();
+    // }
+
     global $wpdb;
     $meta = $wpdb->get_results("SELECT * FROM `" . $wpdb->postmeta . "` WHERE meta_key='" . $key . "' AND meta_value='" . $value . "'");
     if (is_array($meta) && !empty($meta) && isset($meta[0])) {
@@ -76,23 +106,22 @@ add_action('plugins_loaded', function () {
                 $this->type               = $this->get_option('type', 4);
                 $this->env                = $this->get_option('env', 'sandbox');
 
-                $test_cred = ($this->env === 'sandbox')
-                ? '<li>You can <a href="https://developer.safaricom.co.ke/test_credentials" target="_blank" >get sandbox test credentials here</a>.</li>'
-                : '';
-                $register = isset($_GET['mpesa-urls-registered']) ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
-                                        <p>' . $_GET['mpesa-urls-registered'] . '</p>
-                                    </div>' : '';
+                $register = isset($_GET['mpesa-urls-registered']) 
+                ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
+                        <p>' . $_GET['mpesa-urls-registered'] . '</p>
+                    </div>' 
+                    : '';
 
-                $this->method_description = $register . (($this->env === 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this to go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work seamlessly, ensure your site is running over https(with valid SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wcmpesa.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a flat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
-
+                $this->method_description = $register . ($this->env === 'live') 
+                ? __('Receive payments via Safaricom M-PESA', 'woocommerce') 
+                : __('This plugin comes preconfigured so you can test it out of the box. Afterwards, you can view instructions on <a href="'.admin_url('admin.php?page=wc_mpesa_go_live').'">how to Go Live</a>', 'woocommerce');
+                
                 add_action('woocommerce_thankyou_mpesa', array($this, 'thankyou_page'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'validate_payment'));
 
                 add_filter('woocommerce_payment_complete_order_status', array($this, 'change_payment_complete_order_status'), 10, 3);
                 add_action('woocommerce_email_before_order_table', array($this, 'email_mpesa_receipt'), 10, 4);
-
-                add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
                 add_action('woocommerce_api_lipwa', array($this, 'webhook'));
                 add_action('woocommerce_api_lipwa_receipt', array($this, 'get_transaction_id'));
@@ -104,6 +133,8 @@ add_action('plugins_loaded', function () {
 
                     add_action("woocommerce_order_status_{$status}", array($this, 'process_mpesa_reversal'), 1);
                 }
+
+                add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
             }
 
             /**
@@ -486,7 +517,7 @@ add_action('plugins_loaded', function () {
                     }
 
                     if (isset($result['MerchantRequestID'])) {
-                        update_post_meta($order_id, 'mpesa_phone', "254".substr($phone, -9));
+                        update_post_meta($order_id, 'mpesa_phone', "254" . substr($phone, -9));
                         update_post_meta($order_id, 'mpesa_request_id', $result['MerchantRequestID']);
                         $order->add_order_note(
                             __("Awaiting MPesa confirmation of payment from {$phone} for request {$result['MerchantRequestID']}.", 'woocommerce')
@@ -805,8 +836,7 @@ add_action('plugins_loaded', function () {
                     case "result":
                         $response = json_decode(file_get_contents('php://input'), true);
 
-                        $result = $response['Result'];
-
+                        $result                   = $response['Result'];
                         $ResultType               = $result['ResultType'];
                         $ResultCode               = $result['ResultCode'];
                         $ResultDesc               = $result['ResultDesc'];

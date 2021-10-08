@@ -121,6 +121,10 @@ class STK
 			$this->url = 'https://sandbox.safaricom.co.ke';
 		}
 
+        if($config['type'] == 4) {
+            $config['headoffice'] = $config['shortcode'];
+        }
+
 		foreach ($config as $key => $value) {
 			$this->$key = $value;
 		}

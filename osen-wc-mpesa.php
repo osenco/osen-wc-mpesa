@@ -58,6 +58,10 @@ add_action('admin_notices', function () {
     if (get_transient('wc-mpesa-activation-notice')) {
         echo '<div class="updated notice is-dismissible">
             <p>Thank you for installing the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>.</p>
+            <p>
+            <a class="button" href="'.admin_url('admin.php?page=wc_mpesa_about').'">About M-Pesa for WooCommerce</a>
+            <a class="button button-primary" href="'.admin_url('admin.php?page=wc_mpesa_go_live').'">How to Go Live</a>
+            </p>
         </div>';
         /* Delete transient, only display this notice once. */
         delete_transient('wc-mpesa-activation-notice');

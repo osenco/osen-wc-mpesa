@@ -9,8 +9,6 @@
 
 namespace Osen\Woocommerce;
 
-use WC_Orders_Tracking;
-
 class Utilities
 {
     public function __construct()
@@ -26,31 +24,36 @@ class Utilities
     /**
      * @param \WC_Order $order
      */
-    function show_transaction_id($order)
+    public function show_transaction_id($order)
     {
         if ($order->get_payment_method() === 'mpesa') {
             echo '<tfoot>
                 <tr>
-                    <th scope="row">' . __('Transaction ID') . '</th>
+                    <th scope="row">' . __('Transaction ID', 'woocommerce') . ':</th>
                     <td><span class="woocommerce-Price-amount amount">' . $order->get_transaction_id() . '</td>
                 </tr>
                 <tr>
-                    <th scope="row">' . __('Paying Phone') . '</th>
-                    <td>' . $order->get_meta('mpesa_phone') . '</td>
+                    <th scope="row">' . __('Paying Phone', 'woocommerce') . ':</th>
+                    <td>' . $order->get_meta('mpesa_phone', 'woocommerce') . '</td>
                 </tr>
             </tfoot>';
         }
     }
 
-    function add_transaction_id_column($columns)
+    /**
+     * Add a custom column before "actions" last column
+     *
+     * @param array $columns
+     */
+    public function add_transaction_id_column($columns)
     {
         $new_columns = array();
 
         foreach ($columns as $key => $name) {
             $new_columns[$key] = $name;
 
-            // add ship-to after order status column
-            if ('order-total' === $key) {  //this is the line!
+            // add transaction ID after order total column
+            if ('order-total' === $key) {
                 $new_columns['receipt'] = __('Transaction ID', 'woocommerce');
             }
         }
@@ -61,7 +64,7 @@ class Utilities
     /**
      * @param \WC_Order $order
      */
-    function add_transaction_id_column_row($order)
+    public function add_transaction_id_column_row($order)
     {
         // Example with a custom field
         if ($value = $order->get_transaction_id()) {
@@ -71,7 +74,7 @@ class Utilities
 
     /**
      * Add a custom column before "actions" last column
-     * 
+     *
      * @param array $columns
      */
     public function wc_mpesa_order_column($columns)
@@ -91,7 +94,7 @@ class Utilities
 
     /**
      * Column
-     * 
+     *
      * @param string $column
      */
     public function wc_mpesa_order_list_column_content($column)
