@@ -18,6 +18,55 @@ class Utilities
         add_action('manage_shop_order_posts_custom_column', array($this, 'wc_mpesa_order_list_column_content'), 10, 1);
         add_filter('woocommerce_email_attachments', array($this, 'woocommerce_emails_attach_downloadables'), 10, 3);
         add_filter('manage_edit-shop_order_columns', array($this, 'wc_mpesa_order_column'), 100);
+        add_filter('woocommerce_account_orders_columns', array($this, 'add_transaction_id_column'), 10, 1);
+        add_action('woocommerce_my_account_my_orders_column_receipt', array($this, 'add_transaction_id_column_row'));
+        add_action('woocommerce_order_details_after_order_table_items', array($this, 'show_transaction_id'), 10, 1);
+    }
+
+    /**
+     * @param \WC_Order $order
+     */
+    function show_transaction_id($order)
+    {
+        if ($order->get_payment_method() === 'mpesa') {
+            echo '<tfoot>
+                <tr>
+                    <th scope="row">' . __('Transaction ID') . '</th>
+                    <td><span class="woocommerce-Price-amount amount">' . $order->get_transaction_id() . '</td>
+                </tr>
+                <tr>
+                    <th scope="row">' . __('Paying Phone') . '</th>
+                    <td>' . $order->get_meta('mpesa_phone') . '</td>
+                </tr>
+            </tfoot>';
+        }
+    }
+
+    function add_transaction_id_column($columns)
+    {
+        $new_columns = array();
+
+        foreach ($columns as $key => $name) {
+            $new_columns[$key] = $name;
+
+            // add ship-to after order status column
+            if ('order-total' === $key) {  //this is the line!
+                $new_columns['receipt'] = __('Transaction ID', 'woocommerce');
+            }
+        }
+
+        return $new_columns;
+    }
+
+    /**
+     * @param \WC_Order $order
+     */
+    function add_transaction_id_column_row($order)
+    {
+        // Example with a custom field
+        if ($value = $order->get_transaction_id()) {
+            echo esc_html($value);
+        }
     }
 
     /**

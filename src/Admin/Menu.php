@@ -89,7 +89,7 @@ class Menu
                 </p>
                 <p>
                     We have made a <a href="https://wcmpesa.co.ke/going-live">tutorial here</a> to walk you through the
-                    process. We however have a team ready on call to assist you in this are, at a fiat fee of KSh 4000 one-off,
+                    process. We however have a team ready on call to assist you in this are, at a flat fee of KSh 4000 one-off,
                     should you find it difficult.
                 </p>
             </article>

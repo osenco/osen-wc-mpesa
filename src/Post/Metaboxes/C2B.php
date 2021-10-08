@@ -108,11 +108,9 @@ class C2B
                 if (isset($_POST['full_amount'])) {
                     $order->payment_complete(sanitize_text_field($_POST['receipt']));
                     $order->add_order_note("Full MPesa payment received. Transaction ID {$_POST['receipt']}");
-                    $order->add_order_note("Full MPesa payment received. Transaction ID {$_POST['receipt']}", true);
                 } else {
                     $order->set_transaction_id(sanitize_text_field($_POST['receipt']));
                     $order->add_order_note("Mpesa payment received. Transaction ID {$_POST['receipt']}");
-                    $order->update_status('on-hold', "M-Pesa payment received. Transaction ID {$_POST['receipt']}", true);
                     $order->save();
                 }
             }

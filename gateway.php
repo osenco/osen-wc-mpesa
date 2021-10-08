@@ -83,7 +83,7 @@ add_action('plugins_loaded', function () {
                                         <p>' . $_GET['mpesa-urls-registered'] . '</p>
                                     </div>' : '';
 
-                $this->method_description = $register . (($this->env === 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this to go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work seamlessly, ensure your site is running over https(with valid SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wcmpesa.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a fiat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
+                $this->method_description = $register . (($this->env === 'live') ? __('Receive payments via Safaricom M-PESA', 'woocommerce') : __('<h4 style="color: red;">IMPORTANT!</h4>' . '<li>Please <a href="https://developer.safaricom.co.ke/" target="_blank" >create an app on Daraja</a> if you haven\'t. If yoou already have a production app, fill in the app\'s consumer key and secret below.</li><li>Ensure you have access to the <a href="https://org.ke.m-pesa.com/">MPesa Web Portal</a>. You\'ll need this to go LIVE.</li><li>For security purposes, and for the MPesa Instant Payment Notification to work seamlessly, ensure your site is running over https(with valid SSL).</li>' . $test_cred) . '<li>We have a <a target="_blank" href="https://wcmpesa.co.ke/going-live">nice tutorial</a> here on migrating from Sandbox(test) environment, to Production(live) environment.<br> We offer the service  at a flat fee of KSh 4000. Call <a href="tel:+254204404993">+254204404993</a> or email <a href="mailto:hi@osen.co.ke">hi@osen.co.ke</a> if you need help.</li>');
 
                 add_action('woocommerce_thankyou_mpesa', array($this, 'thankyou_page'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'));
@@ -486,14 +486,10 @@ add_action('plugins_loaded', function () {
                     }
 
                     if (isset($result['MerchantRequestID'])) {
-                        update_post_meta($order_id, 'mpesa_phone', $phone);
+                        update_post_meta($order_id, 'mpesa_phone', "254".substr($phone, -9));
                         update_post_meta($order_id, 'mpesa_request_id', $result['MerchantRequestID']);
                         $order->add_order_note(
                             __("Awaiting MPesa confirmation of payment from {$phone} for request {$result['MerchantRequestID']}.", 'woocommerce')
-                        );
-                        $order->add_order_note(
-                            __("Your order #{$order_id} has been received and is awaiting MPesa confirmation. Request ID: {$result['MerchantRequestID']}.", 'woocommerce'),
-                            true
                         );
 
                         /**
@@ -694,7 +690,6 @@ add_action('plugins_loaded', function () {
                                                 $this->get_option('completion', 'completed'),
                                                 __("Full MPesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
                                             );
-                                            $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                             $order->set_transaction_id($parsed['MpesaReceiptNumber']);
                                             $order->save();
 
@@ -748,7 +743,6 @@ add_action('plugins_loaded', function () {
                                         $this->get_option('completion', 'completed'),
                                         __("Full MPesa Payment Received From {$PhoneNumber}. Transaction ID {$MpesaReceiptNumber}")
                                     );
-                                    $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                     $order->set_transaction_id($MpesaReceiptNumber);
                                     $order->save();
 
@@ -761,7 +755,6 @@ add_action('plugins_loaded', function () {
                                         $this->get_option('completion', 'completed'),
                                         __("{$PhoneNumber} has overpayed by {$currency} {$ipn_balance}. Transaction ID {$MpesaReceiptNumber}")
                                     );
-                                    $order->add_order_note("Hello {$FirstName}, Your M-PESA payment has been recieved successfully, with receipt number {$parsed['MpesaReceiptNumber']}.", true);
                                     $order->set_transaction_id($MpesaReceiptNumber);
                                     $order->save();
 
