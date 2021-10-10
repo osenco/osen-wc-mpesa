@@ -106,16 +106,10 @@ add_action('plugins_loaded', function () {
                 $this->type               = $this->get_option('type', 4);
                 $this->env                = $this->get_option('env', 'sandbox');
 
-                $register = isset($_GET['mpesa-urls-registered']) 
-                ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
-                        <p>' . $_GET['mpesa-urls-registered'] . '</p>
-                    </div>' 
-                    : '';
+                $this->method_description = (($this->env === 'live')
+                    ? __('Receive payments via Safaricom M-PESA', 'woocommerce')
+                    : __('This plugin comes preconfigured so you can test it out of the box. Afterwards, you can view instructions on <a href="' . admin_url('admin.php?page=wc_mpesa_go_live') . '">how to Go Live</a>', 'woocommerce'));
 
-                $this->method_description = $register . ($this->env === 'live') 
-                ? __('Receive payments via Safaricom M-PESA', 'woocommerce') 
-                : __('This plugin comes preconfigured so you can test it out of the box. Afterwards, you can view instructions on <a href="'.admin_url('admin.php?page=wc_mpesa_go_live').'">how to Go Live</a>', 'woocommerce');
-                
                 add_action('woocommerce_thankyou_mpesa', array($this, 'thankyou_page'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'validate_payment'));
@@ -134,7 +128,18 @@ add_action('plugins_loaded', function () {
                     add_action("woocommerce_order_status_{$status}", array($this, 'process_mpesa_reversal'), 1);
                 }
 
+                add_action('admin_notices', array($this, 'callback_urls_reistration_response'));
                 add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+            }
+
+            function callback_urls_reistration_response()
+            {
+                echo isset($_GET['mpesa-urls-registered'])
+                    ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
+                            <h4>Callback URLs Registration</h4>
+                            <p>' . $_GET['mpesa-urls-registered'] . '</p>
+                        </div>'
+                    : '';
             }
 
             /**
@@ -457,6 +462,10 @@ add_action('plugins_loaded', function () {
                 $vendor_id = null;
                 $items     = $order->get_items('line_item');
 
+                if(function_exists('dokan_get_seller_id_by_order')) {
+                    $vendor_id = dokan_get_seller_id_by_order( $order->get_id() );
+                }
+
                 if (function_exists('wcfm_get_vendor_id_by_post') && !empty($items)) {
                     foreach ($items as $item) {
                         $line_item  = new WC_Order_Item_Product($item);
@@ -473,6 +482,22 @@ add_action('plugins_loaded', function () {
                     }
                 }
 
+                add_filter('wc_mpesa_settings', function($config = array()) use($vendor_id) {
+                    return array(
+                        'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
+                        'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+                        'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? 'bclwIPkcRqw61yUt',
+                        'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
+                        'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
+                        'initiator'  => get_user_meta($vendor_id, 'mpesa_initiator', true) ?? 'test',
+                        'password'   => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
+                        'type'       => (int)get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
+                        'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+                        'account'    => get_user_meta($vendor_id, 'mpesa_account', true) ?? '',
+                        'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999))
+                    );
+                }, 10, 1);
+
                 return $vendor_id;
             }
 
@@ -488,16 +513,17 @@ add_action('plugins_loaded', function () {
                 $total     = $order->get_total();
                 $phone     = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
                 $sign      = get_bloginfo('name');
-                $vendor_id = $this->check_vendor($order);
+
+                $this->check_vendor($order);
 
                 if ($this->debug) {
-                    $result = (new STK($vendor_id))
+                    $result = (new STK())
                         ->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa', true);
                     $payload = wp_json_encode($result['requested']);
                     WC()->session->set('mpesa_request', $payload);
                 } else {
-                    $result = (new STK($vendor_id))
+                    $result = (new STK())
                         ->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa');
                 }
@@ -531,7 +557,7 @@ add_action('plugins_loaded', function () {
                         // Return thankyou redirect
                         return array(
                             'result'   => 'success',
-                            'redirect' => $this->get_return_url($order),
+                            'redirect' => $this->get_return_url($order), //$order->get_checkout_payment_url( $on_checkout = false );
                         );
                     }
                 } else {
@@ -555,7 +581,7 @@ add_action('plugins_loaded', function () {
                 if (wc_get_order($order_id)) {
                     $order = new \WC_Order($order_id);
                     $total = $order->get_total();
-                    $mpesa = new STK($this->check_vendor($order));
+                    $mpesa = new STK();
                     $type  = ($mpesa->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
 
                     echo
@@ -586,8 +612,8 @@ add_action('plugins_loaded', function () {
                                         <th class="woocommerce-table__product-name product-name">
                                             ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                         </th>'
-                        . ($this->settings['enable_bonga'] ?
-                            '<th>&nbsp;</th>' : '') . '
+                            . ($this->settings['enable_bonga'] ?
+                                '<th>&nbsp;</th>' : '') . '
                                     </tr>
                                 </thead>
 
@@ -605,7 +631,7 @@ add_action('plugins_loaded', function () {
                                             </ol>
                                         </td>'
                             . ($this->settings['enable_bonga'] ?
-                            '<td class="woocommerce-table__product-name product-name">
+                                '<td class="woocommerce-table__product-name product-name">
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
@@ -673,10 +699,9 @@ add_action('plugins_loaded', function () {
                     case "request":
                         $order_id  = sanitize_text_field($_POST['order']);
                         $order     = new \WC_Order($order_id);
-                        $vendor_id = $this->check_vendor($order);
                         $total     = $order->get_total();
                         $phone     = $order->get_billing_phone();
-                        $mpesa     = new STK($vendor_id);
+                        $mpesa     = new STK();
 
                         $result = $mpesa->authorize(get_transient('mpesa_token'))
                             ->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
@@ -808,7 +833,7 @@ add_action('plugins_loaded', function () {
                         (new C2B)->register(function ($response) {
                             $status = isset($response['ResponseDescription']) ? 'success' : 'fail';
                             if ($status === 'fail') {
-                                $message = isset($response['errorMessage']) ? $response['errorMessage'] : 'Could not register M-PESA URLs, try again later.';
+                                $message =  $response['errorMessage'] ?? 'Could not register M-PESA URLs, try again later.';
                                 $state   = 'error';
                             } else {
                                 $message = isset($response['ResponseDescription']) ? $response['ResponseDescription'] : 'M-PESA URL registered successfully. You will now receive C2B Payment Notifications.';

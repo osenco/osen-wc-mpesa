@@ -83,47 +83,30 @@ class STK
 	/**
 	 * @param array $config - Key-value pairs of settings
 	 */
-	public function __construct($vendor_id = null)
+	public function __construct()
 	{
-		if (is_null($vendor_id)) {
-			$c2b    = get_option('woocommerce_mpesa_settings');
-
-			$config = array(
-				'env'        => $c2b['env'] ?? 'sandbox',
-				'appkey'     => $c2b['key'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-				'appsecret'  => $c2b['secret'] ?? 'bclwIPkcRqw61yUt',
-				'headoffice' => $c2b['headoffice'] ?? '174379',
-				'shortcode'  => $c2b['shortcode'] ?? '174379',
-				'initiator'  => $c2b['initiator'] ?? 'test',
-				'password'   => $c2b['password'] ?? 'lipia',
-				'type'       => (int)($c2b['idtype'] ?? 4),
-				'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-				'account'    => $c2b['account'] ?? '',
-				'signature'  => $c2b['signature'] ?? md5(rand(12, 999))
-			);
-		} else {
-			$config = array(
-				'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
-				'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-				'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? 'bclwIPkcRqw61yUt',
-				'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
-				'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
-				'initiator'  => get_user_meta($vendor_id, 'mpesa_initiator', true) ?? 'test',
-				'password'   => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
-				'type'       => (int)get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
-				'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-				'account'    => get_user_meta($vendor_id, 'mpesa_account', true) ?? '',
-				'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999))
-			);
-		}
+		$c2b    = get_option('woocommerce_mpesa_settings');
+		$config = apply_filters('wc_mpesa_settings', array(
+			'env'        => $c2b['env'] ?? 'sandbox',
+			'appkey'     => $c2b['key'] ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+			'appsecret'  => $c2b['secret'] ?? 'bclwIPkcRqw61yUt',
+			'headoffice' => $c2b['headoffice'] ?? '174379',
+			'shortcode'  => $c2b['shortcode'] ?? '174379',
+			'initiator'  => $c2b['initiator'] ?? 'test',
+			'password'   => $c2b['password'] ?? 'lipia',
+			'type'       => (int)($c2b['idtype'] ?? 4),
+			'passkey'    => $c2b['passkey'] ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+			'account'    => $c2b['account'] ?? '',
+			'signature'  => $c2b['signature'] ?? md5(rand(12, 999))
+		));
 
 		if ($config['env'] === 'sandbox') {
 			$this->url = 'https://sandbox.safaricom.co.ke';
 		}
 
-        if($config['type'] == 4) {
-            $config['headoffice'] = $config['shortcode'];
-        }
+		if ($config['type'] == 4) {
+			$config['headoffice'] = $config['shortcode'];
+		}
 
 		foreach ($config as $key => $value) {
 			$this->$key = $value;
