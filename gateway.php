@@ -128,10 +128,15 @@ add_action('plugins_loaded', function () {
                     add_action("woocommerce_order_status_{$status}", array($this, 'process_mpesa_reversal'), 1);
                 }
 
-                add_action('admin_notices', array($this, 'callback_urls_reistration_response'));
+                add_action('admin_notices', array($this, 'callback_urls_registration_response'));
                 add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 
-                add_filter('wc_mpesa_settings', array(
+                add_filter('wc_mpesa_settings', array($this, 'set_default_options'), 1, 1);
+            }
+
+            function set_default_options($config = array())
+            {
+                return array(
                     'env'        => $this->get_option('env', 'sandbox'),
                     'appkey'     => $this->get_option('key', '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG'),
                     'appsecret'  => $this->get_option('secret', 'bclwIPkcRqw61yUt'),
@@ -143,10 +148,10 @@ add_action('plugins_loaded', function () {
                     'passkey'    => $this->get_option('passkey', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'),
                     'account'    => $this->get_option('account', ''),
                     'signature'  => $this->get_option('signature', md5(rand(12, 999)))
-                ), 1);
+                );
             }
 
-            function callback_urls_reistration_response()
+            function callback_urls_registration_response()
             {
                 echo isset($_GET['mpesa-urls-registered'])
                     ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
@@ -258,6 +263,7 @@ add_action('plugins_loaded', function () {
                         'description' => __('Random string for Callback Endpoint Encryption Signature', 'woocommerce'),
                         'default'     => $this->sign,
                         'desc_tip'    => true,
+                        'css'        => 'display: none;',
                     ),
                     'resend'             => array(
                         'title'       => __('Resend STK Button Text', 'woocommerce'),
@@ -528,18 +534,17 @@ add_action('plugins_loaded', function () {
                 $total     = $order->get_total();
                 $phone     = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
                 $sign      = get_bloginfo('name');
+                $mpesa     = new STK;
 
                 $this->check_vendor($order);
 
                 if ($this->debug) {
-                    $result = (new STK())
-                        ->authorize(get_transient('mpesa_token'))
+                    $result = $mpesa->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa', true);
                     $payload = wp_json_encode($result['requested']);
                     WC()->session->set('mpesa_request', $payload);
                 } else {
-                    $result = (new STK())
-                        ->authorize(get_transient('mpesa_token'))
+                    $result = $mpesa->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa');
                 }
 
