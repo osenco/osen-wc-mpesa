@@ -130,6 +130,20 @@ add_action('plugins_loaded', function () {
 
                 add_action('admin_notices', array($this, 'callback_urls_reistration_response'));
                 add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+
+                add_filter('wc_mpesa_settings', array(
+                    'env'        => $this->get_option('env', 'sandbox'),
+                    'appkey'     => $this->get_option('key', '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG'),
+                    'appsecret'  => $this->get_option('secret', 'bclwIPkcRqw61yUt'),
+                    'headoffice' => $this->get_option('headoffice', '174379'),
+                    'shortcode'  => $this->get_option('shortcode', '174379'),
+                    'initiator'  => $this->get_option('initiator', 'test'),
+                    'password'   => $this->get_option('password', 'lipia'),
+                    'type'       => (int)($this->get_option('idtype', 4)),
+                    'passkey'    => $this->get_option('passkey', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'),
+                    'account'    => $this->get_option('account', ''),
+                    'signature'  => $this->get_option('signature', md5(rand(12, 999)))
+                ), 1);
             }
 
             function callback_urls_reistration_response()
@@ -430,6 +444,10 @@ add_action('plugins_loaded', function () {
                 if ($description = $this->get_description()) {
                     echo wpautop(wptexturize($description));
                 }
+
+                global $wp_filter;
+                echo wp_json_encode($wp_filter['wc_mpesa_settings']);
+
                 echo '<div id="custom_input"><br>
                     <p class="form-row form-row-wide">
                         <label for="mobile" class="form-label">' . __("Confirm M-PESA Number", "woocommerce") . ' </label>
@@ -482,7 +500,7 @@ add_action('plugins_loaded', function () {
                     }
                 }
 
-                add_filter('wc_mpesa_settings', function ($config = array()) use ($vendor_id) {
+                add_filter('wc_mpesa_settings', function () use ($vendor_id) {
                     return array(
                         'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
                         'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
@@ -496,7 +514,7 @@ add_action('plugins_loaded', function () {
                         'account'    => get_user_meta($vendor_id, 'mpesa_account', true) ?? '',
                         'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999))
                     );
-                }, 10, 1);
+                }, 10);
 
                 return $vendor_id;
             }
@@ -514,20 +532,6 @@ add_action('plugins_loaded', function () {
                 $phone     = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
                 $sign      = get_bloginfo('name');
 
-                add_filter('wc_mpesa_settings', array(
-                    'env'        => $this->get_option('env', 'sandbox'),
-                    'appkey'     => $this->get_option('key', '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG'),
-                    'appsecret'  => $this->get_option('secret', 'bclwIPkcRqw61yUt'),
-                    'headoffice' => $this->get_option('headoffice', '174379'),
-                    'shortcode'  => $this->get_option('shortcode', '174379'),
-                    'initiator'  => $this->get_option('initiator', 'test'),
-                    'password'   => $this->get_option('password', 'lipia'),
-                    'type'       => (int)($this->get_option('idtype', 4)),
-                    'passkey'    => $this->get_option('passkey', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'),
-                    'account'    => $this->get_option('account', ''),
-                    'signature'  => $this->get_option('signature', md5(rand(12, 999)))
-                ));
-                
                 $this->check_vendor($order);
 
                 if ($this->debug) {
