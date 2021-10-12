@@ -229,7 +229,7 @@ add_action('plugins_loaded', function () {
                         'default'     => __('bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', 'woocommerce'),
                         'desc_tip'    => true,
                         'class'       => 'wide-input',
-                        'css'         => 'min-width: 45%;',
+                        'css'         => 'min-width: 55%;',
                     ),
                     'account'            => array(
                         'title'       => __('Account Reference', 'woocommerce'),
@@ -318,7 +318,7 @@ add_action('plugins_loaded', function () {
                         'title'       => __('Enable Manual Payments', 'woocommerce'),
                         'label'       => __('Enable C2B API(Offline Payments)', 'woocommerce'),
                         'type'        => 'checkbox',
-                        'description' => '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="button button-secondary" href="' . home_url('wc-api/lipwa?action=register') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>',
+                        'description' => '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="page-title-action" href="' . home_url('wc-api/lipwa?action=register') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>',
                         'default'     => 'no',
                     ),
                     'enable_bonga'       => array(
@@ -462,8 +462,8 @@ add_action('plugins_loaded', function () {
                 $vendor_id = null;
                 $items     = $order->get_items('line_item');
 
-                if(function_exists('dokan_get_seller_id_by_order')) {
-                    $vendor_id = dokan_get_seller_id_by_order( $order->get_id() );
+                if (function_exists('dokan_get_seller_id_by_order')) {
+                    $vendor_id = dokan_get_seller_id_by_order($order->get_id());
                 }
 
                 if (function_exists('wcfm_get_vendor_id_by_post') && !empty($items)) {
@@ -482,7 +482,7 @@ add_action('plugins_loaded', function () {
                     }
                 }
 
-                add_filter('wc_mpesa_settings', function($config = array()) use($vendor_id) {
+                add_filter('wc_mpesa_settings', function ($config = array()) use ($vendor_id) {
                     return array(
                         'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
                         'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
@@ -514,6 +514,20 @@ add_action('plugins_loaded', function () {
                 $phone     = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
                 $sign      = get_bloginfo('name');
 
+                add_filter('wc_mpesa_settings', array(
+                    'env'        => $this->get_option('env', 'sandbox'),
+                    'appkey'     => $this->get_option('key', '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG'),
+                    'appsecret'  => $this->get_option('secret', 'bclwIPkcRqw61yUt'),
+                    'headoffice' => $this->get_option('headoffice', '174379'),
+                    'shortcode'  => $this->get_option('shortcode', '174379'),
+                    'initiator'  => $this->get_option('initiator', 'test'),
+                    'password'   => $this->get_option('password', 'lipia'),
+                    'type'       => (int)($this->get_option('idtype', 4)),
+                    'passkey'    => $this->get_option('passkey', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'),
+                    'account'    => $this->get_option('account', ''),
+                    'signature'  => $this->get_option('signature', md5(rand(12, 999)))
+                ));
+                
                 $this->check_vendor($order);
 
                 if ($this->debug) {
@@ -674,7 +688,7 @@ add_action('plugins_loaded', function () {
              * @param bool $plain_text
              * @param \WC_Email $email
              */
-            function email_mpesa_receipt($order, $sent_to_admin = false, $plain_text = false, $email)
+            function email_mpesa_receipt($order, $sent_to_admin = false, $plain_text = false, $email = null)
             {
                 if ($email->id === 'customer_completed_order' && $order->get_transaction_id() && $order->get_payment_method() === 'mpesa') {
                     $receipt = $order->get_transaction_id();

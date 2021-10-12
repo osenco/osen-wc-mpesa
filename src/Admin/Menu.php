@@ -146,7 +146,7 @@ class Menu
             <li>Enter the OTP and wait for the confirmation</li>
             <li>
                 Switch accounts to your newly created company and copy the app credentials displayed and paste in the
-                plugin settings
+                <a href="<?php echo esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')); ?>">plugin settings</a>
             </li>
             <li>
                 If you do not receive the online passkey in your email, write to <a
