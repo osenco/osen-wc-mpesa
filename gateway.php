@@ -445,9 +445,6 @@ add_action('plugins_loaded', function () {
                     echo wpautop(wptexturize($description));
                 }
 
-                global $wp_filter;
-                echo wp_json_encode($wp_filter['wc_mpesa_settings']);
-
                 echo '<div id="custom_input"><br>
                     <p class="form-row form-row-wide">
                         <label for="mobile" class="form-label">' . __("Confirm M-PESA Number", "woocommerce") . ' </label>
