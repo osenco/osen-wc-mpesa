@@ -96,14 +96,14 @@ class STK
 			'type'       => 4,
 			'passkey'    => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
 			'account'    => '',
-			'signature'  => md5(rand(12, 999))
+			'signature'  => md5(rand(12, 999)),
 		));
 
 		if ($config['env'] === 'sandbox') {
 			$this->url = 'https://sandbox.safaricom.co.ke';
 		}
 
-		if ($config['type'] == 4) {
+		if ((int) $config['type'] === 4) {
 			$config['headoffice'] = $config['shortcode'];
 		}
 
@@ -223,8 +223,8 @@ class STK
 			'CallBackURL'       => add_query_arg(
 				array(
 					'action' => 'reconcile',
-					'sign' => $this->signature,
-					'order' => $reference
+					'sign'   => $this->signature,
+					'order'  => $reference,
 				),
 				home_url("wc-api/lipwa")
 			),

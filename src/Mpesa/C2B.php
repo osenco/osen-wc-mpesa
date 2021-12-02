@@ -82,25 +82,25 @@ class C2B
 
     public function __construct()
     {
-		$config = apply_filters('wc_mpesa_settings', array(
-			'env'        => 'sandbox',
-			'appkey'     => '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
-			'appsecret'  => 'bclwIPkcRqw61yUt',
-			'headoffice' => '174379',
-			'shortcode'  => '174379',
-			'initiator'  => 'test',
-			'password'   => 'lipia',
-			'type'       => 4,
-			'passkey'    => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-			'account'    => '',
-			'signature'  => md5(rand(12, 999))
-		));
+        $config = apply_filters('wc_mpesa_settings', array(
+            'env'        => 'sandbox',
+            'appkey'     => '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
+            'appsecret'  => 'bclwIPkcRqw61yUt',
+            'headoffice' => '174379',
+            'shortcode'  => '174379',
+            'initiator'  => 'test',
+            'password'   => 'lipia',
+            'type'       => 4,
+            'passkey'    => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
+            'account'    => '',
+            'signature'  => md5(rand(12, 999)),
+        ));
 
         if ($config['env'] === 'sandbox') {
             $this->url = 'https://sandbox.safaricom.co.ke';
         }
 
-        if($config['type'] == 4) {
+        if ((int) $config['type'] === 4) {
             $config['headoffice'] = $config['shortcode'];
         }
 
@@ -111,35 +111,35 @@ class C2B
 
     /**
      * Function to generate access token
-     * 
+     *
      * @return C2B
      */
     public function authorize($token = null)
     {
-		if (is_null($token) || !$token) {
-			$credentials = base64_encode($this->appkey . ':' . $this->appsecret);
-			$response    = wp_remote_get(
-				$this->url . '/oauth/v1/generate?grant_type=client_credentials',
-				array(
-					'headers' => array(
-						'Authorization' => 'Basic ' . $credentials,
-					),
-				)
-			);
+        if (is_null($token) || !$token) {
+            $credentials = base64_encode($this->appkey . ':' . $this->appsecret);
+            $response    = wp_remote_get(
+                $this->url . '/oauth/v1/generate?grant_type=client_credentials',
+                array(
+                    'headers' => array(
+                        'Authorization' => 'Basic ' . $credentials,
+                    ),
+                )
+            );
 
-			$return      = is_wp_error($response) ? 'null' : json_decode($response['body']);
-			$this->token = isset($return->access_token) ? $return->access_token : '';
-			set_transient('mpesa_token', $this->token, 60 * 55);
-		} else {
-			$this->token = $token;
-		}
+            $return      = is_wp_error($response) ? 'null' : json_decode($response['body']);
+            $this->token = isset($return->access_token) ? $return->access_token : '';
+            set_transient('mpesa_token', $this->token, 60 * 55);
+        } else {
+            $this->token = $token;
+        }
 
         return $this;
     }
 
     /**
      * Function to process response data for validation
-     * 
+     *
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return array
      */
@@ -167,7 +167,7 @@ class C2B
 
     /**
      * Function to process response data for confirmation
-     * 
+     *
      * @param callable $callback - Optional callable function to process the response - must return boolean
      * @return array
      */
@@ -195,7 +195,7 @@ class C2B
 
     /**
      * Function to register validation and confirmation URLs
-     * 
+     *
      * @param string $env - Environment for which to register URLs
      * @return bool/array
      */
@@ -241,7 +241,7 @@ class C2B
      */
     public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment')
     {
-        $phone     = '254'.substr($phone, -9);
+        $phone     = '254' . substr($phone, -9);
         $timestamp = date('YmdHis');
         $password  = base64_encode($this->headoffice . $this->passkey . $timestamp);
         $post_data = array(
@@ -313,7 +313,7 @@ class C2B
      */
     public function reverse($transaction, $amount, $receiver = "", $receiver_type = 3, $remarks = "Reversal", $occasion = "Transaction Reversal", $callback = null)
     {
-        $phone     = '254'.substr($receiver, -9);
+        $phone     = '254' . substr($receiver, -9);
         $env       = $this->env;
         $plaintext = $this->password;
         $publicKey = file_get_contents(__DIR__ . "/cert/{$env}/cert.cer");

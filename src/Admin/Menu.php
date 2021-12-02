@@ -122,7 +122,7 @@ class Menu
 
         <p>To create a Business Manager profile:</p>
         <ol>
-            <li>Log in to M-PESA Org Portal, As the Business Administrator through HO</li>
+            <li>Log in to <a href="https://org.ke.m-pesa.com/" target="_blank">M-Pesa Web Portal</a>, As the Business Administrator through HO</li>
             <li>Click Browse organization, click children to view the child stores,</li>
             <li>Select more to view the selected store details, Select operators then click add operators.</li>
             <li>Enter operator details and assign <b>Business Manager</b> role</li>
@@ -166,7 +166,7 @@ class Menu
         </p>
         <p>
             These URLs must be HTTPS in production. Validation is an optional feature that needs to be activated on
-            M-Pesa, the owner of the shortcode needs to make this request for activation. This can be done by sending an
+            M-Pesa - the owner of the shortcode needs to make this request for activation. This can be done by sending an
             email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on
             the <a href="https://developer.safaricom.co.ke/">developer portal</a>.
         </p>
@@ -185,7 +185,7 @@ class Menu
             After going live on Daraja you will receive an email from Safaricom with production URLs.
         </p>
         <p>
-            You don't need to take any action on this as the plugin will automatically update the URLs when you go live.
+            You don't need to take any action on this as the plugin will automatically update the URLs when live.
         </p>
     </article>
 

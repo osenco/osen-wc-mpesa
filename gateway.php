@@ -111,8 +111,8 @@ add_action('plugins_loaded', function () {
                     : __('This plugin comes preconfigured so you can test it out of the box. Afterwards, you can view instructions on <a href="' . admin_url('admin.php?page=wc_mpesa_go_live') . '">how to Go Live</a>', 'woocommerce'));
 
                 add_action('woocommerce_thankyou_mpesa', array($this, 'thankyou_page'));
-                add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'));
-                add_action('woocommerce_thankyou_mpesa', array($this, 'validate_payment'));
+                add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'), 1);
+                add_action('woocommerce_thankyou_mpesa', array($this, 'validate_payment'), 2);
 
                 add_filter('woocommerce_payment_complete_order_status', array($this, 'change_payment_complete_order_status'), 10, 3);
                 add_action('woocommerce_email_before_order_table', array($this, 'email_mpesa_receipt'), 10, 4);
@@ -676,11 +676,15 @@ add_action('plugins_loaded', function () {
             public function request_body()
             {
                 if ($this->debug) {
-                    echo '
-                    <section class="woocommerce-order-details" id="mpesa_request_output">
-                    <p>Mpesa request body</p>
-                        <code>' . WC()->session->get('mpesa_request') . '</code>
-                    </section>';
+                    echo '<section class="woocommerce-order-details" id="mpesa_request_output">
+                            <ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details">
+                                <li class="woocommerce-order-overview__order order">
+                                <p>Mpesa request body:</p>
+                                <strong>' . WC()->session->get('mpesa_request') . '</strong>
+                                </li>
+                                
+                            </ul>
+                        </section>';
                 }
             }
 

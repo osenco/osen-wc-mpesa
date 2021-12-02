@@ -107,10 +107,10 @@ class Utilities
         }
     }
 
-    public function woocommerce_emails_attach_downloadables($attachments, $status, \WC_Order $order)
+    public function woocommerce_emails_attach_downloadables($attachments, $status, $order)
     {
         if (is_object($order) || isset($status) || !empty($order)) {
-            if (method_exists($order, 'has_downloadable_item')) {
+            if (is_a($order, 'WC_Order') && method_exists($order, 'has_downloadable_item')) {
                 if ($order->has_downloadable_item()) {
 
                     $allowed_statuses = array('customer_invoice', 'customer_completed_order');
