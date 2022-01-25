@@ -62,7 +62,7 @@ jQuery(document).ready(function ($) {
                         );
 
                         $("#missed_stk").hide();
-                        $("#renitiate-mpesa-button").hide();
+                        $("#renitiate-mpesa-table").hide();
                         $("#mpesa_request").hide();
 
                         clearInterval(checker);

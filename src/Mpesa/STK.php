@@ -89,8 +89,8 @@ class STK
 			'env'        => 'sandbox',
 			'appkey'     => '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
 			'appsecret'  => 'bclwIPkcRqw61yUt',
-			'headoffice' => '174379',
-			'shortcode'  => '174379',
+			'headoffice' => 174379,
+			'shortcode'  => 174379,
 			'initiator'  => 'test',
 			'password'   => 'lipia',
 			'type'       => 4,
@@ -199,11 +199,12 @@ class STK
 	/**
 	 * Function to process request for payment
 	 *
-	 * @param string $phone     - Phone Number to send STK Prompt Request to
-	 * @param string $amount    - Amount of money to charge
+	 * @param string|int $phone     - Phone Number to send STK Prompt Request to
+	 * @param int|float $amount    - Amount of money to charge
 	 * @param string|int $reference - Account to show in STK Prompt
 	 * @param string $trxdesc   - Transaction Description(optional)
 	 * @param string $remark    - Remarks about transaction(optional)
+	 * 
 	 * @return array
 	 */
 	public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
@@ -226,7 +227,7 @@ class STK
 					'sign'   => $this->signature,
 					'order'  => $reference,
 				),
-				home_url("wc-api/lipwa")
+				site_url("wc-api/lipwa")
 			),
 			'AccountReference'  => empty($this->account) ? $reference : $this->account,
 			'TransactionDesc'   => $trxdesc,
@@ -246,7 +247,7 @@ class STK
 		);
 
 		if (is_wp_error($response)) {
-			return array('errorCode' => 1, 'errorMessage' => $response->get_error_message());
+			return array('errorCode' => 500, 'errorMessage' => $response->get_error_message());
 		} else {
 			$body = json_decode($response['body'], true);
 			return is_null($request)
@@ -302,8 +303,8 @@ class STK
 			'TransactionID'      => $transaction,
 			'PartyA'             => $this->shortcode,
 			'IdentifierType'     => $this->type,
-			'ResultURL'          => home_url('wc-api/lipwa?action=result'),
-			'QueueTimeOutURL'    => home_url('wc-api/lipwa?action=timeout'),
+			'ResultURL'          => site_url('wc-api/lipwa?action=result'),
+			'QueueTimeOutURL'    => site_url('wc-api/lipwa?action=timeout'),
 			'Remarks'            => $remarks,
 			'Occasion'           => $occasion,
 		);

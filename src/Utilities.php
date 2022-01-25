@@ -26,7 +26,7 @@ class Utilities
      */
     public function show_transaction_id($order)
     {
-        if ($order->get_payment_method() === 'mpesa') {
+        if (is_admin() && $order->get_payment_method() === 'mpesa') {
             echo '<tfoot>
                 <tr>
                     <th scope="row">' . __('Transaction ID', 'woocommerce') . ':</th>

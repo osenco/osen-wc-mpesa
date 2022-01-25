@@ -36,14 +36,14 @@ class Initialize
             if (!get_option('wc_mpesa_flush_rewrite_rules_flag')) {
                 add_option('wc_mpesa_flush_rewrite_rules_flag', true);
             }
-    
+
             if (!is_plugin_active('woocommerce/woocommerce.php')) {
                 deactivate_plugins('osen-wc-mpesa/osen-wc-mpesa.php');
-    
+
                 add_action('admin_notices', function () {
                     $class   = 'notice notice-error is-dismissible';
                     $message = __('Please Install/Activate WooCommerce for this extension to work..', 'woocommerce');
-    
+
                     printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
                 });
             }
@@ -95,10 +95,10 @@ class Initialize
     {
         if (is_checkout()) {
             wp_enqueue_style("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/styles.css"));
-            
+
             wp_enqueue_script('jquery');
             wp_enqueue_script("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/scripts.js"), array("jquery"), time(), true);
-            wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');
+            wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . site_url('wc-api/lipwa_receipt') . '"', 'before');
         }
     }
 

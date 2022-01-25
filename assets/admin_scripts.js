@@ -8,7 +8,7 @@ jQuery(document).ready(function ($) {
         $('#woocommerce_mpesa_headoffice').closest('tr').show()
     }
 
-    $('#woocommerce_mpesa_idtype').change(function () {
+    $('#woocommerce_mpesa_idtype').on('change', function () {
         $('#woocommerce_mpesa_headoffice').closest('tr').toggle()
     });
 
@@ -18,7 +18,7 @@ jQuery(document).ready(function ($) {
         $('#woocommerce_mpesa_enable_bonga').closest('tr').hide()
     }
 
-    $('#woocommerce_mpesa_enable_c2b').change(function () {
+    $('#woocommerce_mpesa_enable_c2b').on('change', function () {
         $('#woocommerce_mpesa_enable_bonga').closest('tr').toggle()
     });
 
@@ -32,7 +32,7 @@ jQuery(document).ready(function ($) {
         $('#woocommerce_mpesa_statuses').closest('tr').hide()
     }
 
-    $('#woocommerce_mpesa_enable_reversal').change(function () {
+    $('#woocommerce_mpesa_enable_reversal').on('change', function () {
         $('#woocommerce_mpesa_initiator').closest('tr').toggle()
         $('#woocommerce_mpesa_password').closest('tr').toggle()
         $('#woocommerce_mpesa_statuses').closest('tr').toggle()

@@ -36,23 +36,8 @@ add_filter('woocommerce_order_data_store_cpt_get_orders_query', function ($query
 
 function wc_mpesa_post_id_by_meta_key_and_value($key, $value)
 {
-    // $orders = wc_get_orders(array($key => $value));
-
-    // if (!empty($orders)) {
-    //     return $orders[0]->get_id();
-    // }
-
-    global $wpdb;
-    $meta = $wpdb->get_results("SELECT * FROM `" . $wpdb->postmeta . "` WHERE meta_key='" . $key . "' AND meta_value='" . $value . "'");
-    if (is_array($meta) && !empty($meta) && isset($meta[0])) {
-        $meta = $meta[0];
-    }
-
-    if (is_object($meta)) {
-        return $meta->post_id;
-    } else {
-        return false;
-    }
+    $orders = wc_get_orders(array($key => $value));
+    return empty($orders) ? false : $orders[0]->get_id();
 }
 
 /**
@@ -140,23 +125,23 @@ add_action('plugins_loaded', function () {
                     'env'        => $this->get_option('env', 'sandbox'),
                     'appkey'     => $this->get_option('key', '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG'),
                     'appsecret'  => $this->get_option('secret', 'bclwIPkcRqw61yUt'),
-                    'headoffice' => $this->get_option('headoffice', '174379'),
-                    'shortcode'  => $this->get_option('shortcode', '174379'),
+                    'headoffice' => $this->get_option('headoffice', 174379),
+                    'shortcode'  => $this->get_option('shortcode', 174379),
                     'initiator'  => $this->get_option('initiator', 'test'),
                     'password'   => $this->get_option('password', 'lipia'),
-                    'type'       => (int)($this->get_option('idtype', 4)),
+                    'type'       => (int) ($this->get_option('idtype', 4)),
                     'passkey'    => $this->get_option('passkey', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'),
                     'account'    => $this->get_option('account', ''),
-                    'signature'  => $this->get_option('signature', md5(rand(12, 999)))
+                    'signature'  => $this->get_option('signature', md5(rand(12, 999))),
                 );
             }
 
             function callback_urls_registration_response()
             {
                 echo isset($_GET['mpesa-urls-registered'])
-                    ? '<div class="updated ' . ($_GET['reg-state'] ?? 'notice') . ' is-dismissible">
+                    ? '<div class="updated ' . (sanitize_text_field($_GET['reg-state']) ?? 'notice') . ' is-dismissible">
                             <h4>Callback URLs Registration</h4>
-                            <p>' . $_GET['mpesa-urls-registered'] . '</p>
+                            <p>' . sanitize_text_field($_GET['mpesa-urls-registered']) . '</p>
                         </div>'
                     : '';
             }
@@ -166,15 +151,14 @@ add_action('plugins_loaded', function () {
              */
             public function init_form_fields()
             {
-                $this->sign       = $this->get_option('signature', md5(rand(12, 999)));
-                $this->debug      = $this->get_option('debug', 'no') === 'yes';
-                $this->enable_c2b = $this->get_option('enable_c2b', 'no') === 'yes';
-
                 $shipping_methods = array();
                 foreach (WC()->shipping()->load_shipping_methods() as $method) {
                     $shipping_methods[$method->id] = $method->get_method_title();
                 }
-
+                
+                $this->sign       = $this->get_option('signature', md5(rand(12, 999)));
+                $this->debug      = $this->get_option('debug', 'no') === 'yes';
+                $this->enable_c2b = $this->get_option('enable_c2b', 'no') === 'yes';
                 $this->form_fields = array(
                     'enabled'            => array(
                         'title'       => __('Enable/Disable', 'woocommerce'),
@@ -217,14 +201,14 @@ add_action('plugins_loaded', function () {
                         'title'       => __('Store Number', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Your Store Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
-                        'default'     => __('174379', 'woocommerce'),
+                        'default'     => __(174379, 'woocommerce'),
                         'desc_tip'    => true,
                     ),
                     'shortcode'          => array(
                         'title'       => __('Business Shortcode', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Your MPesa Business Till/Paybill Number. Use "Online Shortcode" in Sandbox', 'woocommerce'),
-                        'default'     => __('174379', 'woocommerce'),
+                        'default'     => __(174379, 'woocommerce'),
                         'desc_tip'    => true,
                     ),
                     'key'                => array(
@@ -251,11 +235,14 @@ add_action('plugins_loaded', function () {
                         'css'         => 'min-width: 55%;',
                     ),
                     'account'            => array(
-                        'title'       => __('Account Reference', 'woocommerce'),
-                        'type'        => 'text',
-                        'description' => __('Account number for transactions. Leave blank to use order ID/Number.', 'woocommerce'),
-                        'default'     => __('', 'woocommerce'),
-                        'desc_tip'    => true,
+                        'title'             => __('Account Reference', 'woocommerce'),
+                        'type'              => 'text',
+                        'description'       => __('Account number for transactions. Leave blank to use order ID/Number.', 'woocommerce'),
+                        'default'           => __('', 'woocommerce'),
+                        'desc_tip'          => true,
+                        'custom_attributes' => array(
+                            'autocomplete' => 'off',
+                        ),
                     ),
                     'signature'          => array(
                         'title'       => __('Encryption Signature', 'woocommerce'),
@@ -263,7 +250,7 @@ add_action('plugins_loaded', function () {
                         'description' => __('Random string for Callback Endpoint Encryption Signature', 'woocommerce'),
                         'default'     => $this->sign,
                         'desc_tip'    => true,
-                        'css'        => 'display: none;',
+                        'css'         => 'display: none;',
                     ),
                     'resend'             => array(
                         'title'       => __('Resend STK Button Text', 'woocommerce'),
@@ -324,9 +311,9 @@ add_action('plugins_loaded', function () {
                         'type'        => 'checkbox',
                         'default'     => 'no',
                         'description' => $this->debug ? '<small>Use the following URLs: <ul>
-                        <li>Validation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '</a></li>
-                        <li>Confirmation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '</a></li>
-                        <li>Reconciliation URL for STK Push: <a href="' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '</a></li>
+                        <li>Validation URL for C2B: <a href="' . site_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '">' . site_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '</a></li>
+                        <li>Confirmation URL for C2B: <a href="' . site_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '">' . site_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '</a></li>
+                        <li>Reconciliation URL for STK Push: <a href="' . site_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '">' . site_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '</a></li>
                         </ul></small>' : __('Show Request Body(to send to Daraja team on request).</small> ', 'woocommerce'),
                     ),
                     'c2b_section'        => array(
@@ -338,7 +325,7 @@ add_action('plugins_loaded', function () {
                         'title'       => __('Enable Manual Payments', 'woocommerce'),
                         'label'       => __('Enable C2B API(Offline Payments)', 'woocommerce'),
                         'type'        => 'checkbox',
-                        'description' => '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="page-title-action" href="' . home_url('wc-api/lipwa?action=register') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>',
+                        'description' => '<small>This requires C2B Validation, which is an optional feature that needs to be activated on M-Pesa. <br>Request for activation by sending an email to <a href="mailto:apisupport@safaricom.co.ke">apisupport@safaricom.co.ke</a>, or through a chat on the <a href="https://developer.safaricom.co.ke/">developer portal.</a><br><br> <a class="page-title-action" href="' . site_url('wc-api/lipwa?action=register') . '">Once enabled, click here to register confirmation & validation URLs</a><br><i>Kindly note that if this is disabled, the user can still resend an STK push if the first one fails.</i></small>',
                         'default'     => 'no',
                     ),
                     'enable_bonga'       => array(
@@ -451,12 +438,17 @@ add_action('plugins_loaded', function () {
                     echo wpautop(wptexturize($description));
                 }
 
-                echo '<div id="custom_input"><br>
-                    <p class="form-row form-row-wide">
-                        <label for="mobile" class="form-label">' . __("Confirm M-PESA Number", "woocommerce") . ' </label>
-                        <input type="text" class="form-control" name="billing_mpesa_phone" id="billing_mpesa_phone" />
-                    </p>
-                </div>';
+                woocommerce_form_field(
+                    'billing_mpesa_phone',
+                    array(
+                        'type'        => 'tel',
+                        'class'       => array('form-row-wide', 'wc-mpesa-phone-field'),
+                        'label'       => 'Confirm M-PESA Phone Number',
+                        'label_class' => 'wc-mpesa-label',
+                        'placeholder' => 'Confirm M-PESA Phone Number',
+                        'required'    => true,
+                    )
+                );
             }
 
             /**
@@ -480,7 +472,12 @@ add_action('plugins_loaded', function () {
              */
             function check_vendor(WC_Order $order)
             {
-                $vendor_id = null;
+
+                /**
+                 * @var int $vendor_id
+                 * @var WC_Order_Item[] $items
+                 */
+                $vendor_id = 0;
                 $items     = $order->get_items('line_item');
 
                 if (function_exists('dokan_get_seller_id_by_order')) {
@@ -499,7 +496,10 @@ add_action('plugins_loaded', function () {
                     foreach ($items as $item) {
                         $line_item  = new WC_Order_Item_Product($item);
                         $product_id = $line_item->get_product_id();
-                        $vendor_id  = WC_Product_Vendors_Utils::get_vendor_id_from_product($product_id);
+                        $vendor_id  = call_user_func_array(
+                            array('WC_Product_Vendors_Utils', 'get_vendor_id_from_product'),
+                            array($product_id)
+                        );
                     }
                 }
 
@@ -508,14 +508,14 @@ add_action('plugins_loaded', function () {
                         'env'        => get_user_meta($vendor_id, 'mpesa_env', true) ?? 'sandbox',
                         'appkey'     => get_user_meta($vendor_id, 'mpesa_key', true) ?? '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
                         'appsecret'  => get_user_meta($vendor_id, 'mpesa_secret', true) ?? 'bclwIPkcRqw61yUt',
-                        'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? '174379',
-                        'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? '174379',
+                        'headoffice' => get_user_meta($vendor_id, 'mpesa_store', true) ?? 174379,
+                        'shortcode'  => get_user_meta($vendor_id, 'mpesa_shortcode', true) ?? 174379,
                         'initiator'  => get_user_meta($vendor_id, 'mpesa_initiator', true) ?? 'test',
                         'password'   => get_user_meta($vendor_id, 'mpesa_password', true) ?? 'lipia',
-                        'type'       => (int)get_user_meta($vendor_id, 'mpesa_type', true) ?? 4,
+                        'type'       => (int) (get_user_meta($vendor_id, 'mpesa_type', true) ?? 4),
                         'passkey'    => get_user_meta($vendor_id, 'mpesa_passkey', true) ?? 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                         'account'    => get_user_meta($vendor_id, 'mpesa_account', true) ?? '',
-                        'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999))
+                        'signature'  => get_user_meta($vendor_id, 'mpesa_signature', true) ?? md5(rand(12, 999)),
                     );
                 }, 10);
 
@@ -530,21 +530,21 @@ add_action('plugins_loaded', function () {
              */
             public function process_payment($order_id)
             {
-                $order     = new \WC_Order($order_id);
-                $total     = $order->get_total();
-                $phone     = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
-                $sign      = get_bloginfo('name');
-                $mpesa     = new STK;
+                $order = new \WC_Order($order_id);
+                $total = $order->get_total();
+                $phone = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
+                $sign  = get_bloginfo('name');
+                $stk   = new STK;
 
                 $this->check_vendor($order);
 
                 if ($this->debug) {
-                    $result = $mpesa->authorize(get_transient('mpesa_token'))
+                    $result = $stk->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa', true);
                     $payload = wp_json_encode($result['requested']);
                     WC()->session->set('mpesa_request', $payload);
                 } else {
-                    $result = $mpesa->authorize(get_transient('mpesa_token'))
+                    $result = $stk->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, $sign . ' Purchase', 'WCMPesa');
                 }
 
@@ -601,19 +601,19 @@ add_action('plugins_loaded', function () {
                 if (wc_get_order($order_id)) {
                     $order = new \WC_Order($order_id);
                     $total = $order->get_total();
-                    $mpesa = new STK();
-                    $type  = ($mpesa->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
+                    $stk   = new STK();
+                    $type  = ($stk->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
 
                     echo
                     '<section class="woocommerce-order-details" id="resend_stk">
                         <input type="hidden" id="current_order" value="' . $order_id . '">
                         <input type="hidden" id="payment_method" value="' . $order->get_payment_method() . '">
                         <p class="checking" id="mpesa_receipt">Confirming receipt, please wait</p>
-                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details" id="renitiate-mpesa-table">
                             <tbody>
                                 <tr class="woocommerce-table__line-item order_item">
                                     <td class="woocommerce-table__product-name product-name">
-                                        <form action="' . home_url("wc-api/lipwa?action=request") . '" method="POST" id="renitiate-mpesa-form">
+                                        <form action="' . site_url("wc-api/lipwa?action=request") . '" method="POST" id="renitiate-mpesa-form">
                                             <input type="hidden" name="order" value="' . $order_id . '">
                                             <button id="renitiate-mpesa-button" class="button alt" type="submit">' . ($this->settings['resend'] ?? 'Resend STK Push') . '</button>
                                         </form>
@@ -643,7 +643,7 @@ add_action('plugins_loaded', function () {
                                             <ol>
                                                 <li>Select <b>Lipa na M-PESA</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
-                                                ' . (($mpesa->type === 4) ? "<li>Enter <b>{$mpesa->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$mpesa->shortcode}</b> as till no.</li>") . '
+                                                ' . (($stk->type === 4) ? "<li>Enter <b>{$stk->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$stk->shortcode}</b> as till no.</li>") . '
                                                 <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                                 <li>Enter your M-PESA PIN</li>
                                                 <li>Confirm your details and press OK.</li>
@@ -655,7 +655,7 @@ add_action('plugins_loaded', function () {
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
                                                 <li>Select <b>' . $type . '</b>.</li>
-                                                ' . (($mpesa->type === 4) ? "<li>Enter <b>{$mpesa->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$mpesa->shortcode}</b> as till no.</li>") . '
+                                                ' . (($stk->type === 4) ? "<li>Enter <b>{$stk->shortcode}</b> as business no.</li><li>Enter <b>{$order_id}</b> as Account no.</li>" : "<li>Enter <b>{$stk->shortcode}</b> as till no.</li>") . '
                                                 <li>Enter Amount <b>' . round($total) . '</b>.</li>
                                                 <li>Enter your M-PESA PIN</li>
                                                 <li>Confirm your details and press OK.</li>
@@ -682,7 +682,6 @@ add_action('plugins_loaded', function () {
                                 <p>Mpesa request body:</p>
                                 <strong>' . WC()->session->get('mpesa_request') . '</strong>
                                 </li>
-                                
                             </ul>
                         </section>';
                 }
@@ -717,47 +716,48 @@ add_action('plugins_loaded', function () {
              */
             public function webhook()
             {
-                $action = $_GET['action'] ?? 'validate';
+                $action = sanitize_text_field($_GET['action']) ?? 'validate';
+                $stk    = new STK();
+                $c2b    = new C2B();
 
                 switch ($action) {
                     case "request":
-                        $order_id  = sanitize_text_field($_POST['order']);
-                        $order     = new \WC_Order($order_id);
-                        $total     = $order->get_total();
-                        $phone     = $order->get_billing_phone();
-                        $mpesa     = new STK();
-
-                        $result = $mpesa->authorize(get_transient('mpesa_token'))
+                        $order_id = sanitize_text_field($_POST['order']);
+                        $order    = new \WC_Order($order_id);
+                        $total    = $order->get_total();
+                        $phone    = get_post_meta($order_id, 'mpesa_phone', true) ?? $order->get_billing_phone();
+                        $result   = $stk->authorize(get_transient('mpesa_token'))
                             ->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
                         if (isset($result['MerchantRequestID'])) {
+                            $order->add_order_note(
+                                __("STK push resent. Awaiting MPesa confirmation of payment for request {$result['MerchantRequestID']}.", 'woocommerce')
+                            );
                             update_post_meta($order_id, 'mpesa_request_id', $result['MerchantRequestID']);
                         }
 
                         wp_send_json($result);
                         break;
                     case "validate":
-                        wp_send_json((new STK)->validate());
+                        wp_send_json($stk->validate());
                         break;
 
                     case "reconcile":
-                        $mpesa = new STK();
-                        $sign  = sanitize_text_field($_GET['sign']);
-
-                        wp_send_json($mpesa->reconcile(function ($response) use ($sign, $mpesa) {
+                        $sign = sanitize_text_field($_GET['sign']);
+                        
+                        wp_send_json($stk->reconcile(function ($response) use ($sign) {
                             if (isset($sign) && $sign === $this->get_option('signature')) {
                                 if (isset($response['Body'])) {
                                     $resultCode        = $response['Body']['stkCallback']['ResultCode'];
                                     $resultDesc        = $response['Body']['stkCallback']['ResultDesc'];
                                     $merchantRequestID = $response['Body']['stkCallback']['MerchantRequestID'];
-                                    $order_id          = $_GET['order'] ?? wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $merchantRequestID);
+                                    $order_id          = sanitize_text_field($_GET['order']) ?? wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $merchantRequestID);
 
                                     if (wc_get_order($order_id)) {
                                         $order     = new \WC_Order($order_id);
-                                        $FirstName = $order->get_billing_first_name();
 
                                         if ($order->get_status() === 'completed') {
-                                            return;
+                                            return false;
                                         }
 
                                         if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
@@ -791,7 +791,7 @@ add_action('plugins_loaded', function () {
                         break;
 
                     case "confirm":
-                        wp_send_json((new STK)->confirm(function ($response = array()) {
+                        wp_send_json($stk->confirm(function ($response = array()) {
                             if (empty($response)) {
                                 wp_send_json(
                                     ['Error' => 'No response data received']
@@ -854,10 +854,10 @@ add_action('plugins_loaded', function () {
                         break;
 
                     case "register":
-                        (new C2B)->register(function ($response) {
+                        $c2b->register(function ($response) {
                             $status = isset($response['ResponseDescription']) ? 'success' : 'fail';
                             if ($status === 'fail') {
-                                $message =  $response['errorMessage'] ?? 'Could not register M-PESA URLs, try again later.';
+                                $message = $response['errorMessage'] ?? 'Could not register M-PESA URLs, try again later.';
                                 $state   = 'error';
                             } else {
                                 $message = isset($response['ResponseDescription']) ? $response['ResponseDescription'] : 'M-PESA URL registered successfully. You will now receive C2B Payment Notifications.';
@@ -879,7 +879,7 @@ add_action('plugins_loaded', function () {
 
                     case "status":
                         $transaction = sanitize_text_field($_POST['transaction']);
-                        wp_send_json((new STK)->status($transaction));
+                        wp_send_json($stk->status($transaction));
                         break;
 
                     case "result":
@@ -923,7 +923,7 @@ add_action('plugins_loaded', function () {
                             $order->update_status('processing', __("{$ResultCode}: {$ResultDesc}", 'woocommerce'));
                         }
 
-                        wp_send_json((new STK)->validate());
+                        wp_send_json($stk->validate());
                         break;
 
                     case "timeout":
@@ -947,10 +947,10 @@ add_action('plugins_loaded', function () {
                             );
                         }
 
-                        wp_send_json((new STK)->timeout());
+                        wp_send_json($stk->timeout());
                         break;
                     default:
-                        wp_send_json((new C2B)->register());
+                        wp_send_json($c2b->register());
                 }
             }
 

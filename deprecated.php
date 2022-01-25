@@ -74,7 +74,6 @@ add_action(
                     $total     = $order->get_total();
                     $phone     = $order->get_billing_phone();
                     $mpesa     = new STK($vendor_id);
-
                     $result = $mpesa->authorize(get_transient('mpesa_token'))
                         ->request($phone, $total, $order_id, get_bloginfo('name') . ' Purchase', 'WCMPesa');
 
@@ -92,44 +91,43 @@ add_action(
                     $mpesa = new STK();
 
                     wp_send_json($mpesa->reconcile(function ($response) use ($settings) {
-                            if (isset($response['Body'])) {
-                                $resultCode        = $response['Body']['stkCallback']['ResultCode'];
-                                $resultDesc        = $response['Body']['stkCallback']['ResultDesc'];
-                                $merchantRequestID = $response['Body']['stkCallback']['MerchantRequestID'];
-                                $order_id          = $_GET['order'] ?? wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $merchantRequestID);
+                        if (isset($response['Body'])) {
+                            $resultCode        = $response['Body']['stkCallback']['ResultCode'];
+                            $resultDesc        = $response['Body']['stkCallback']['ResultDesc'];
+                            $merchantRequestID = $response['Body']['stkCallback']['MerchantRequestID'];
+                            $order_id          = $_GET['order'] ?? wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $merchantRequestID);
 
-                                if (wc_get_order($order_id)) {
-                                    $order     = new \WC_Order($order_id);
-                                    $FirstName = $order->get_billing_first_name();
+                            if (wc_get_order($order_id)) {
+                                $order     = new \WC_Order($order_id);
 
-                                    if ($order->get_status() === 'completed') {
-                                        return;
-                                    }
-
-                                    if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
-                                        $parsed = array();
-                                        foreach ($response['Body']['stkCallback']['CallbackMetadata']['Item'] as $item) {
-                                            $parsed[$item['Name']] = $item['Value'];
-                                        }
-
-                                        $order->update_status(
-                                            ($settings['completion'] ?? 'completed'),
-                                            __("Full MPesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
-                                        );
-                                        $order->set_transaction_id($parsed['MpesaReceiptNumber']);
-                                        $order->save();
-
-                                        do_action('send_to_external_api', $order, $parsed, $this->settings);
-                                    } else {
-                                        $order->update_status(
-                                            'on-hold',
-                                            __("(MPesa Error) {$resultCode}: {$resultDesc}.")
-                                        );
-                                    }
-
-                                    return true;
+                                if ($order->get_status() === 'completed') {
+                                    return;
                                 }
+
+                                if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
+                                    $parsed = array();
+                                    foreach ($response['Body']['stkCallback']['CallbackMetadata']['Item'] as $item) {
+                                        $parsed[$item['Name']] = $item['Value'];
+                                    }
+
+                                    $order->update_status(
+                                        ($settings['completion'] ?? 'completed'),
+                                        __("Full MPesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
+                                    );
+                                    $order->set_transaction_id($parsed['MpesaReceiptNumber']);
+                                    $order->save();
+
+                                    do_action('send_to_external_api', $order, $parsed, $this->settings);
+                                } else {
+                                    $order->update_status(
+                                        'on-hold',
+                                        __("(MPesa Error) {$resultCode}: {$resultDesc}.")
+                                    );
+                                }
+
+                                return true;
                             }
+                        }
 
                         return false;
                     }));

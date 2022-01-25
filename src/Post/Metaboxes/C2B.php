@@ -71,7 +71,7 @@ class C2B
             ? '<button id="mpesaipn_status" name="mpesaipn_status" class="button button-large">Check Payment Status</button>
                     <script>
                         jQuery(document).ready(function($){
-                            $("#mpesaipn_status").click(function(e){
+                            $("#mpesaipn_status").on("click", function(e){
                                 e.preventDefault();
                                 $.post("' . admin_url("admin-ajax.php") . '", {request: ' . $request . '}, function(data){
                                     $("#mpesaipn_status_result").html(data);
@@ -82,15 +82,15 @@ class C2B
             : '<button id="mpesaipn_reinitiate" name="mpesaipn_reinitiate" class="button button-large">Reinitiate Prompt</button>
                     <script>
                         jQuery(document).ready(function($){
-                            $("#mpesaipn_reinitiate").click(function(e){
+                            $("#mpesaipn_reinitiate").on("click", function(e){
                                 e.preventDefault();
                                 $.post("' . home_url("wc-api/lipwa?action=request") . '", {order: ' . $order->get_ID() . '}, function(data){
-                                if(data.errorCode){
-                                    $("#mpesaipn_status_result").html("("+data.errorCode+") "+data.errorMessage);
-                                } else{
-                                    $("#mpesaipn_status_result").html("STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>");
-                                }
-                            });
+                                    if(data.errorCode){
+                                        $("#mpesaipn_status_result").html("("+data.errorCode+") "+data.errorMessage);
+                                    } else{
+                                        $("#mpesaipn_status_result").html("STK Resent. Confirming payment <span>.</span><span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>");
+                                    }
+                                });
                             });
                         });
                     </script>') . '

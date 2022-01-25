@@ -86,8 +86,8 @@ class C2B
             'env'        => 'sandbox',
             'appkey'     => '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
             'appsecret'  => 'bclwIPkcRqw61yUt',
-            'headoffice' => '174379',
-            'shortcode'  => '174379',
+            'headoffice' => 174379,
+            'shortcode'  => 174379,
             'initiator'  => 'test',
             'password'   => 'lipia',
             'type'       => 4,
@@ -204,8 +204,8 @@ class C2B
         $post_data = array(
             'ShortCode'       => $this->headoffice,
             'ResponseType'    => 'Completed',
-            'ConfirmationURL' => home_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
-            'ValidationURL'   => home_url("wc-api/lipwa?action=validate&sign={$this->signature}"),
+            'ConfirmationURL' => site_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
+            'ValidationURL'   => site_url("wc-api/lipwa?action=validate&sign={$this->signature}"),
         );
 
         $data_string = wp_json_encode($post_data);
@@ -253,7 +253,7 @@ class C2B
             'PartyA'            => $phone,
             'PartyB'            => $this->shortcode,
             'PhoneNumber'       => $phone,
-            'CallBackURL'       => home_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
+            'CallBackURL'       => site_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
             'AccountReference'  => $reference,
             'TransactionDesc'   => $trxdesc,
             'Remark'            => $remark,
@@ -329,8 +329,8 @@ class C2B
             "Amount"                 => $amount,
             "ReceiverParty"          => $phone,
             "RecieverIdentifierType" => $receiver_type,
-            "ResultURL"              => home_url("wc-api/lipwa?action=result&sign={$this->signature}"),
-            "QueueTimeOutURL"        => home_url("wc-api/lipwa?action=timeout&sign={$this->signature}"),
+            "ResultURL"              => site_url("wc-api/lipwa?action=result&sign={$this->signature}"),
+            "QueueTimeOutURL"        => site_url("wc-api/lipwa?action=timeout&sign={$this->signature}"),
             "Remarks"                => $remarks,
             "Occasion"               => $occasion,
         );
