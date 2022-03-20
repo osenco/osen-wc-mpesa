@@ -19,6 +19,7 @@ class Utilities
         add_filter('woocommerce_account_orders_columns', array($this, 'add_transaction_id_column'), 10, 1);
         add_action('woocommerce_my_account_my_orders_column_receipt', array($this, 'add_transaction_id_column_row'));
         add_action('woocommerce_order_details_after_order_table_items', array($this, 'show_transaction_id'), 10, 1);
+        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'admin_show_transaction_id'), 10, 1);
     }
 
     /**
@@ -37,6 +38,23 @@ class Utilities
                     <td>' . $order->get_meta('mpesa_phone', 'woocommerce') . '</td>
                 </tr>
             </tfoot>';
+        }
+    }
+
+    /**
+     * @param \WC_Order $order
+     */
+    function admin_show_transaction_id($order)
+    {
+        if ($order->get_payment_method() === 'mpesa') {
+            echo '<p class="form-field form-field-wide">
+                    <strong>' . __('Transaction ID', 'woocommerce') . ':</strong><br>
+                    <span class="woocommerce-Price-amount amount">' . $order->get_transaction_id() . '</span>
+                </p>
+                <p class="form-field form-field-wide">
+                    <strong>' . __('Paying Phone', 'woocommerce') . ':</strong><br>
+                    <a href="tel:' . $order->get_meta('mpesa_phone', 'woocommerce') . '">' . $order->get_meta('mpesa_phone', 'woocommerce') . '</a>
+                </p>';
         }
     }
 

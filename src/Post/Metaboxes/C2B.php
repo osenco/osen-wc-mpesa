@@ -10,6 +10,8 @@
 
 namespace Osen\Woocommerce\Post\Metaboxes;
 
+use WC_Order;
+
 class C2B
 {
     public function __construct()
@@ -22,8 +24,14 @@ class C2B
 
     public function mpesa_mb_sm()
     {
-        add_meta_box('wc_mpesa_mb_payment_status', 'Incase MPesa timed out', [$this, 'mpesa_status'], ['shop_order'], 'side', 'low');
-        add_meta_box('wc_mpesa_mb_payment_create', 'Paid For Via MPesa?', [$this, 'mpesa_payment'], 'shop_order', 'side', 'low');
+        global $post;
+        if (\wc_get_order($post)) {
+            $order = new WC_Order($post);
+            if ($order->get_payment_method() == 'mpesa') {
+                add_meta_box('wc_mpesa_mb_payment_status', 'Incase MPesa timed out', [$this, 'mpesa_status'], ['shop_order'], 'side', 'low');
+                add_meta_box('wc_mpesa_mb_payment_create', 'Paid For Via MPesa?', [$this, 'mpesa_payment'], 'shop_order', 'side', 'low');
+            }
+        }
     }
 
     public function mpesa_payment($post)

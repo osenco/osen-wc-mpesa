@@ -167,9 +167,9 @@ class Menu
                 <p>
                     The plugin uses the following URLs for this purpose:
                 <ol>
-                    <li><?php echo 'Validation URL: <a href="' . site_url('wc-api/lipwa?action=validate&sign=' . $mpesa->signature) . '">' . site_url('wc-api/lipwa?action=validate&sign=' . $mpesa->signature) . '</a>'; ?>
+                    <li><?php echo 'Validation URL: <a href="' . home_url('wc-api/lipwa?action=validate&sign=' . $mpesa->signature) . '">' . home_url('wc-api/lipwa?action=validate&sign=' . $mpesa->signature) . '</a>'; ?>
                     </li>
-                    <li><?php echo 'Confirmation URL: <a href="' . site_url('wc-api/lipwa?action=confirm&sign=' . $mpesa->signature) . '">' . site_url('wc-api/lipwa?action=confirm&sign=' . $mpesa->signature) . '</a>'; ?>
+                    <li><?php echo 'Confirmation URL: <a href="' . home_url('wc-api/lipwa?action=confirm&sign=' . $mpesa->signature) . '">' . home_url('wc-api/lipwa?action=confirm&sign=' . $mpesa->signature) . '</a>'; ?>
                     </li>
                 </ol>
                 </p>

@@ -92,7 +92,7 @@ class C2B
             'password'   => 'lipia',
             'type'       => 4,
             'passkey'    => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-            'account'    => '',
+            'reference'    => '',
             'signature'  => md5(rand(12, 999)),
         ));
 
@@ -204,8 +204,8 @@ class C2B
         $post_data = array(
             'ShortCode'       => $this->headoffice,
             'ResponseType'    => 'Completed',
-            'ConfirmationURL' => site_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
-            'ValidationURL'   => site_url("wc-api/lipwa?action=validate&sign={$this->signature}"),
+            'ConfirmationURL' => home_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
+            'ValidationURL'   => home_url("wc-api/lipwa?action=validate&sign={$this->signature}"),
         );
 
         $data_string = wp_json_encode($post_data);
@@ -253,7 +253,7 @@ class C2B
             'PartyA'            => $phone,
             'PartyB'            => $this->shortcode,
             'PhoneNumber'       => $phone,
-            'CallBackURL'       => site_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
+            'CallBackURL'       => home_url("wc-api/lipwa?action=confirm&sign={$this->signature}"),
             'AccountReference'  => $reference,
             'TransactionDesc'   => $trxdesc,
             'Remark'            => $remark,
@@ -329,8 +329,8 @@ class C2B
             "Amount"                 => $amount,
             "ReceiverParty"          => $phone,
             "RecieverIdentifierType" => $receiver_type,
-            "ResultURL"              => site_url("wc-api/lipwa?action=result&sign={$this->signature}"),
-            "QueueTimeOutURL"        => site_url("wc-api/lipwa?action=timeout&sign={$this->signature}"),
+            "ResultURL"              => home_url("wc-api/lipwa?action=result&sign={$this->signature}"),
+            "QueueTimeOutURL"        => home_url("wc-api/lipwa?action=timeout&sign={$this->signature}"),
             "Remarks"                => $remarks,
             "Occasion"               => $occasion,
         );

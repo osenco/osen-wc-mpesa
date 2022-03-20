@@ -44,12 +44,14 @@ function wc_depecrated_check_vendor(WC_Order $order)
 
 add_action('init', function () {
     add_rewrite_rule('lipwa/([^/]*)/?', 'index.php?lipwa=$matches[1]', 'top');
+    add_rewrite_rule('wcpesa/([^/]*)/?', 'index.php?wcpesa=$matches[1]', 'top');
 });
 
 add_filter(
     'query_vars',
     function ($vars) {
         array_push($vars, 'lipwa');
+        array_push($vars,  'wcpesa');
         return $vars;
     },
     10,
@@ -59,12 +61,16 @@ add_filter(
 add_action(
     'template_redirect',
     function () {
-        if (get_query_var('lipwa')) {
+        if (get_query_var('lipwa') || get_query_var('wcpesa')) {
             header("Access-Control-Allow-Origin: *");
             header("Content-Type: Application/json");
 
             $action = get_query_var('lipwa', 'something_ominous');
             $settings = get_option('woocommerce_mpesa_settings');
+
+            if (get_query_var('wcpesa')) {
+                $action = get_query_var('wcpesa', 'something_ominous');
+            }
 
             switch ($action) {
                 case "request":

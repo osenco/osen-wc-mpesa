@@ -98,7 +98,7 @@ class Initialize
 
             wp_enqueue_script('jquery');
             wp_enqueue_script("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/scripts.js"), array("jquery"), time(), true);
-            wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . site_url('wc-api/lipwa_receipt') . '"', 'before');
+            wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');
         }
     }
 

@@ -49,9 +49,7 @@ if (!defined('WCM_PLUGIN_FILE')) {
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
-register_activation_hook(__FILE__, function () {
-    set_transient('wc-mpesa-activation-notice', true, 5);
-});
+register_activation_hook(__FILE__, fn () => set_transient('wc-mpesa-activation-notice', true, 5));
 
 add_action('admin_notices', function () {
     /* Check transient, if available display notice */
@@ -59,8 +57,8 @@ add_action('admin_notices', function () {
         echo '<div class="updated notice is-dismissible">
             <p>Thank you for installing the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>.</p>
             <p>
-            <a class="button" href="'.admin_url('admin.php?page=wc_mpesa_about').'">About M-Pesa for WooCommerce</a>
-            <a class="button button-primary" href="'.admin_url('admin.php?page=wc_mpesa_go_live').'">How to Go Live</a>
+            <a class="button" href="' . admin_url('admin.php?page=wc_mpesa_about') . '">About M-Pesa for WooCommerce</a>
+            <a class="button button-primary" href="' . admin_url('admin.php?page=wc_mpesa_go_live') . '">How to Go Live</a>
             </p>
         </div>';
         /* Delete transient, only display this notice once. */

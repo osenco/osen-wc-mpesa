@@ -63,7 +63,7 @@ class STK
 	/**
 	 * @param string  | Account Reference  | defaults to 'order_id'
 	 */
-	public $account = '';
+	public $reference = '';
 
 	/**
 	 * @param string  | Encryption Signature
@@ -95,7 +95,7 @@ class STK
 			'password'   => 'lipia',
 			'type'       => 4,
 			'passkey'    => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-			'account'    => '',
+			'reference'    => '',
 			'signature'  => md5(rand(12, 999)),
 		));
 
@@ -227,9 +227,9 @@ class STK
 					'sign'   => $this->signature,
 					'order'  => $reference,
 				),
-				site_url("wc-api/lipwa")
+				home_url("wc-api/lipwa")
 			),
-			'AccountReference'  => empty($this->account) ? $reference : $this->account,
+			'AccountReference'  => empty($this->reference) ? $reference : $this->reference,
 			'TransactionDesc'   => $trxdesc,
 			'Remark'            => $remark,
 		);
@@ -303,8 +303,8 @@ class STK
 			'TransactionID'      => $transaction,
 			'PartyA'             => $this->shortcode,
 			'IdentifierType'     => $this->type,
-			'ResultURL'          => site_url('wc-api/lipwa?action=result'),
-			'QueueTimeOutURL'    => site_url('wc-api/lipwa?action=timeout'),
+			'ResultURL'          => home_url('wc-api/lipwa?action=result'),
+			'QueueTimeOutURL'    => home_url('wc-api/lipwa?action=timeout'),
 			'Remarks'            => $remarks,
 			'Occasion'           => $occasion,
 		);
