@@ -5,7 +5,7 @@
  * @author Osen Concepts < hi@osen.co.ke >
  * @version 3.0.0
  *
- * Plugin Name: Osen WC Mpesa 
+ * Plugin Name: Osen WC Mpesa
  * Plugin URI: https://wcmpesa.co.ke/
  * Description: This plugin extends WordPress and WooCommerce functionality to integrate <cite>Mpesa</cite> for making and receiving online payments.
  * Author: Osen Concepts Kenya < hi@osen.co.ke >
@@ -39,31 +39,35 @@
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
-    exit;
+ exit;
 }
 
 define('WCM_VER', '2.3.6');
 if (!defined('WCM_PLUGIN_FILE')) {
-    define('WCM_PLUGIN_FILE', __FILE__);
+ define('WCM_PLUGIN_FILE', __FILE__);
 }
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
-register_activation_hook(__FILE__, fn () => set_transient('wc-mpesa-activation-notice', true, 5));
+register_activation_hook(__FILE__, function () {
+ set_transient('wc-mpesa-activation-notice', true, 5);
+});
 
 add_action('admin_notices', function () {
-    /* Check transient, if available display notice */
-    if (get_transient('wc-mpesa-activation-notice')) {
-        echo '<div class="updated notice is-dismissible">
-            <p>Thank you for installing the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>.</p>
-            <p>
-            <a class="button" href="' . admin_url('admin.php?page=wc_mpesa_about') . '">About M-Pesa for WooCommerce</a>
-            <a class="button button-primary" href="' . admin_url('admin.php?page=wc_mpesa_go_live') . '">How to Go Live</a>
-            </p>
-        </div>';
-        /* Delete transient, only display this notice once. */
-        delete_transient('wc-mpesa-activation-notice');
-    }
+ /* Check transient, if available display notice */
+ if (get_transient('wc-mpesa-activation-notice')): ?>
+<div class="updated notice is-dismissible">
+  <p>Thank you for installing the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>.</p>
+  <p>
+    <a class="button" href="<?php echo admin_url('admin.php?page=wc_mpesa_about'); ?>'">About M-Pesa for WooCommerce</a>
+    <a class="button button-primary" href="<?php echo admin_url('admin.php?page=wc_mpesa_go_live'); ?>">How to Go
+      Live</a>
+  </p>
+</div>
+<?php
+/* Delete transient, only display this notice once. */
+ delete_transient('wc-mpesa-activation-notice');?>
+<?php endif;
 });
 
 /**

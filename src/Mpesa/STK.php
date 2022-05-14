@@ -3,7 +3,7 @@
 namespace Osen\Woocommerce\Mpesa;
 
 /**
- * @package MPesa For WooCommerce
+ * @package M-Pesa For WooCommerce
  * @subpackage C2B Library
  * @author Osen Concepts < hi@osen.co.ke >
  * @version 2.0.0

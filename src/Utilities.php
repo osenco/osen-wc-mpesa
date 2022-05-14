@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package MPesa For WooCommerce
+ * @package M-Pesa For WooCommerce
  * @subpackage WooCommerce Mpesa Gateway
  * @author Osen Concepts < hi@osen.co.ke >
  * @since 0.18.01

@@ -51,6 +51,10 @@ jQuery(document).ready(function ($) {
                         
                         $("#mpesa_receipt").html(`Payment confirmed. Receipt number: <b>${data.receipt}</b>.`);
 
+                        if(data.user_token_instructions) {
+                          $("#mpesa_receipt").html(data.user_token_instructions);
+                        }
+
                         $("#missed_stk").hide();
                         $("#renitiate-mpesa-table").hide();
                         $("#mpesa_request").hide();
