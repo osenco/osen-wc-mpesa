@@ -775,45 +775,46 @@ add_action('plugins_loaded', function () {
       $sign = sanitize_text_field($_GET['sign']);
 
       wp_send_json($stk->reconcile(function ($response) use ($sign) {
-       if (isset($sign) && $sign === $this->get_option('signature')) {
-        if (isset($response['Body'])) {
-         $resultCode        = $response['Body']['stkCallback']['ResultCode'];
-         $resultDesc        = $response['Body']['stkCallback']['ResultDesc'];
-         $merchantRequestID = $response['Body']['stkCallback']['MerchantRequestID'];
-         $order_id          = sanitize_text_field($_GET['order']) ?? wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $merchantRequestID);
+       //    if (isset($sign) && $sign === $this->get_option('signature')) {
+       if (isset($response['Body'])) {
 
-         if (wc_get_order($order_id)) {
-          $order = new \WC_Order($order_id);
+        $resultCode        = $response['Body']['stkCallback']['ResultCode'];
+        $resultDesc        = $response['Body']['stkCallback']['ResultDesc'];
+        $merchantRequestID = $response['Body']['stkCallback']['MerchantRequestID'];
+        $order_id          = sanitize_text_field($_GET['order']) ?? wc_mpesa_post_id_by_meta_key_and_value('mpesa_request_id', $merchantRequestID);
 
-          if ($order->get_status() === 'completed') {
-           return false;
-          }
+        if (wc_get_order($order_id)) {
+         $order = new \WC_Order($order_id);
 
-          if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
-           $parsed = array();
-           foreach ($response['Body']['stkCallback']['CallbackMetadata']['Item'] as $item) {
-            $parsed[$item['Name']] = $item['Value'];
-           }
-
-           $order->set_transaction_id($parsed['MpesaReceiptNumber']);
-           $order->save();
-           $order->update_status(
-            $this->get_option('completion', 'completed'),
-            __("Full M-Pesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
-           );
-
-           do_action('send_to_external_api', $order, $parsed, $this->settings);
-          } else {
-           $order->update_status(
-            'on-hold',
-            __("(M-Pesa Error) {$resultCode}: {$resultDesc}.")
-           );
-          }
-
-          return true;
+         if ($order->get_status() === 'completed') {
+          return false;
          }
+
+         if (isset($response['Body']['stkCallback']['CallbackMetadata'])) {
+          $parsed = array();
+          foreach ($response['Body']['stkCallback']['CallbackMetadata']['Item'] as $item) {
+           $parsed[$item['Name']] = $item['Value'];
+          }
+
+          $order->set_transaction_id($parsed['MpesaReceiptNumber']);
+          $order->save();
+          $order->update_status(
+           $this->get_option('completion', 'completed'),
+           __("Full M-Pesa Payment Received From {$parsed['PhoneNumber']}. Transaction ID {$parsed['MpesaReceiptNumber']}.")
+          );
+
+          do_action('send_to_external_api', $order, $parsed, $this->settings);
+         } else {
+          $order->update_status(
+           'on-hold',
+           __("(M-Pesa Error) {$resultCode}: {$resultDesc}.")
+          );
+         }
+
+         return true;
         }
        }
+       //    }
 
        return false;
       }));
