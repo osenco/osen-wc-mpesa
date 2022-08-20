@@ -51,7 +51,6 @@ add_filter('woocommerce_payment_gateways', function ($gateways) {
 
 add_action('plugins_loaded', function () {
     if (class_exists('WC_Payment_Gateway')) {
-
         /**
          * @class WC_Gateway_MPesa
          * @extends WC_Payment_Gateway
@@ -98,7 +97,7 @@ add_action('plugins_loaded', function () {
 
                 add_action('woocommerce_thankyou_mpesa', array($this, 'thankyou_page'));
                 add_action('woocommerce_thankyou_mpesa', array($this, 'request_body'), 1);
-                add_action('woocommerce_thankyou_mpesa', array($this, 'validate_payment'), 2);
+                add_action('woocommerce_receipt_mpesa', array($this, 'validate_payment'), 2);
 
                 add_filter('woocommerce_payment_complete_order_status', array($this, 'change_payment_complete_order_status'), 10, 3);
                 add_action('woocommerce_email_before_order_table', array($this, 'email_mpesa_receipt'), 10, 4);
@@ -124,7 +123,7 @@ add_action('plugins_loaded', function () {
                 add_filter('wc_mpesa_settings', array($this, 'set_default_options'), 1, 1);
             }
 
-            function set_default_options()
+            public function set_default_options()
             {
                 return array(
                     'env'        => $this->get_option('env', 'sandbox'),
@@ -141,7 +140,7 @@ add_action('plugins_loaded', function () {
                 );
             }
 
-            function callback_urls_registration_response()
+            public function callback_urls_registration_response()
             {
                 echo isset($_GET['mpesa-urls-registered'])
                     ? '<div class="updated ' . (sanitize_text_field($_GET['reg-state']) ?? 'notice') . ' is-dismissible">
@@ -475,7 +474,7 @@ add_action('plugins_loaded', function () {
              * @param WC_Order $order
              * @return int|null
              */
-            function check_vendor(WC_Order $order)
+            public function check_vendor(WC_Order $order)
             {
                 /**
                  * @var int $vendor_id
@@ -538,7 +537,7 @@ add_action('plugins_loaded', function () {
                 $total = $order->get_total();
                 $phone = sanitize_text_field($_POST['billing_mpesa_phone'] ?? $order->get_billing_phone());
                 $sign  = get_bloginfo('name');
-                $stk   = new STK;
+                $stk   = new STK();
 
                 $this->check_vendor($order);
 
@@ -581,8 +580,7 @@ add_action('plugins_loaded', function () {
                         // Return thankyou redirect
                         return array(
                             'result'   => 'success',
-                            'redirect' => $this->get_return_url($order),
-                            //$order->get_checkout_payment_url( $on_checkout = false )
+                            'redirect' => $order->get_checkout_payment_url(true)
                         );
                     }
                 }
@@ -596,7 +594,7 @@ add_action('plugins_loaded', function () {
             }
 
             //Create Payment Page
-            function payment_page($order_id)
+            public function payment_page($order_id)
             {
                 if (wc_get_order($order_id)) {
                     $order = new \WC_Order($order_id);
@@ -617,10 +615,12 @@ add_action('plugins_loaded', function () {
                     $total = $order->get_total();
                     $stk   = new STK();
                     $type  = ($stk->type === 4) ? 'Pay Bill' : 'Buy Goods and Services';
+                    $return_url = $order->get_checkout_order_received_url();
 
                     echo
                     '<section class="woocommerce-order-details" id="resend_stk">
                         <input type="hidden" id="current_order" value="' . $order_id . '">
+                        <input type="hidden" id="return_url" value="' . $return_url . '">
                         <input type="hidden" id="payment_method" value="' . $order->get_payment_method() . '">
                         <p class="checking" id="mpesa_receipt">Confirming receipt, please wait</p>
                         <table class="woocommerce-table woocommerce-table--order-details shop_table order_details" id="renitiate-mpesa-table">
@@ -711,7 +711,7 @@ add_action('plugins_loaded', function () {
              * @param bool $plain_text
              * @param \WC_Email $email
              */
-            function email_mpesa_receipt($order, $sent_to_admin = false, $plain_text = false, $email = null)
+            public function email_mpesa_receipt($order, $sent_to_admin = false, $plain_text = false, $email = null)
             {
                 if ($email->id === 'customer_completed_order' && $order->get_transaction_id() && $order->get_payment_method() === 'mpesa') {
                     $receipt = $order->get_transaction_id();
@@ -720,7 +720,7 @@ add_action('plugins_loaded', function () {
                 }
             }
 
-            function resend_request()
+            public function resend_request()
             {
                 $order_id = sanitize_text_field($_POST['order']);
                 $order    = new \WC_Order($order_id);
@@ -983,11 +983,11 @@ add_action('plugins_loaded', function () {
                 }
             }
 
-            function webhook_reconcile()
+            public function webhook_reconcile()
             {
                 $sign = sanitize_text_field($_GET['sign']);
 
-                wp_send_json((new STK)->reconcile(function ($response) use ($sign) {
+                wp_send_json((new STK())->reconcile(function ($response) use ($sign) {
                     if (isset($sign) && $sign === $this->get_option('signature')) {
                         if (isset($response['Body'])) {
                             $stkCallback       = $response['Body']['stkCallback'];
@@ -1092,7 +1092,7 @@ add_action('plugins_loaded', function () {
              * @since 3.0.0
              * @param int $order_id
              */
-            function process_mpesa_reversal($order_id)
+            public function process_mpesa_reversal($order_id)
             {
                 $order       = wc_get_order($order_id);
                 $transaction = $order->get_transaction_id();
@@ -1102,7 +1102,7 @@ add_action('plugins_loaded', function () {
                 $method      = $order->get_payment_method();
 
                 if ($method === 'mpesa') {
-                    $response = (new C2B)
+                    $response = (new C2B())
                         ->authorize(get_transient('mpesa_token'))
                         ->reverse($transaction, $amount, $phone);
 

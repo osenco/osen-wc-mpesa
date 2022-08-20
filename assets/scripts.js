@@ -61,6 +61,8 @@ jQuery(document).ready(function ($) {
 
                         clearInterval(checker);
 
+                        location.href = $('#return_url').val();
+
                         return false;
                     }
                 });
