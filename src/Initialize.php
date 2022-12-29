@@ -93,19 +93,19 @@ class Initialize
 
  public function osen_wc_scripts()
  {
-  if (is_checkout()) {
-   wp_enqueue_style("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/styles.css"));
-
-   wp_enqueue_script('jquery');
-   wp_enqueue_script("wc-mpesa-3-0", plugins_url("osen-wc-mpesa/assets/scripts.js"), array("jquery"), time(), true);
-   wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');
-  }
+     if (is_checkout()) {
+         wp_enqueue_style("wc-mpesa-3-0", plugins_url("/../assets/styles.css",__FILE__));
+         
+         wp_enqueue_script('jquery');
+         wp_enqueue_script("wc-mpesa-3-0", plugins_url("/../assets/scripts.js",__FILE__), array("jquery"), time(), true);
+         wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');
+     }
  }
 
  public function osen_admin_scripts()
  {
-  wp_enqueue_style("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.min.css"));
-  wp_enqueue_script("c3", plugins_url("osen-wc-mpesa/assets/c3/c3.bundle.js"), array("jquery"));
-  wp_enqueue_script("wc-mpesa-settings", plugins_url("osen-wc-mpesa/assets/admin_scripts.js"), array("jquery"));
+     wp_enqueue_style("c3", plugins_url("/../assets/c3/c3.min.css",__FILE__), ['jquery']);
+     wp_enqueue_script("c3", plugins_url("/../assets/c3/c3.bundle.js", __FILE__), ['jquery']);
+     wp_enqueue_script("wc-mpesa-settings", plugins_url("osen-wc-mpesa/assets/admin_scripts.js", "jquery"));
  }
 }
