@@ -12,6 +12,19 @@ jQuery(document).ready(function ($) {
         $('#woocommerce_mpesa_headoffice').closest('tr').toggle()
     });
 
+    if ($('#woocommerce_mpesa_debug').is(':checked')) {
+        $('#woocommerce_mpesa_debug_title').show()
+        $('.woocommerce_mpesa_debug_text').show()
+    } else {
+        $('#woocommerce_mpesa_debug_title').hide()
+        $('.woocommerce_mpesa_debug_text').hide()
+    }
+
+    $('#woocommerce_mpesa_debug').on('change', function () {
+        $('#woocommerce_mpesa_debug_title').toggle()
+        $('.woocommerce_mpesa_debug_text').toggle()
+    });
+
     if ($('#woocommerce_mpesa_enable_c2b').is(':checked')) {
         $('#woocommerce_mpesa_enable_bonga').closest('tr').show()
     } else {

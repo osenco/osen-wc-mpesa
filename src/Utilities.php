@@ -25,7 +25,7 @@ class Utilities
     /**
      * @param \WC_Order $order
      */
-    public function show_transaction_id($order)
+    public function show_transaction_id(\WC_Order $order)
     {
         if (is_admin() && $order->get_payment_method() === 'mpesa') {
             echo '<tfoot>
@@ -44,7 +44,7 @@ class Utilities
     /**
      * @param \WC_Order $order
      */
-    function admin_show_transaction_id($order)
+    function admin_show_transaction_id(\WC_Order $order)
     {
         if ($order->get_payment_method() === 'mpesa') {
             echo '<p class="form-field form-field-wide">
@@ -63,7 +63,7 @@ class Utilities
      *
      * @param array $columns
      */
-    public function add_transaction_id_column($columns)
+    public function add_transaction_id_column(array $columns)
     {
         $new_columns = array();
 
@@ -82,7 +82,7 @@ class Utilities
     /**
      * @param \WC_Order $order
      */
-    public function add_transaction_id_column_row($order)
+    public function add_transaction_id_column_row(\WC_Order $order)
     {
         // Example with a custom field
         if ($value = $order->get_transaction_id()) {
@@ -95,7 +95,7 @@ class Utilities
      *
      * @param array $columns
      */
-    public function wc_mpesa_order_column($columns)
+    public function wc_mpesa_order_column(array $columns)
     {
         $ordered_columns = array();
 
@@ -103,7 +103,7 @@ class Utilities
             $ordered_columns[$key] = $column;
 
             if ('order_date' === $key) {
-                $ordered_columns['transaction_id'] = __('Receipt', 'woocommerce');
+                $ordered_columns['transaction_id'] = __('Transaction ID', 'woocommerce');
             }
         }
 
@@ -120,12 +120,12 @@ class Utilities
         global $post;
         $the_order = wc_get_order($post->ID);
 
-        if ('transaction_id' === $column && $the_order->get_payment_method() === 'mpesa') {
+        if ('transaction_id' === $column) {
             echo $the_order->get_transaction_id() ?? 'N/A';
         }
     }
 
-    public function woocommerce_emails_attach_downloadables($attachments, $status, $order)
+    public function woocommerce_emails_attach_downloadables(array $attachments, $status, $order)
     {
         if (is_object($order) || isset($status) || !empty($order)) {
             if (is_a($order, 'WC_Order') && method_exists($order, 'has_downloadable_item')) {

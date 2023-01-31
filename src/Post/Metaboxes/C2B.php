@@ -19,7 +19,7 @@ class C2B
         add_action('add_meta_boxes', [$this, 'mpesa_mb_sm']);
         add_action('save_post', array($this, 'save_order'), 10, 3);
         add_action('restrict_manage_posts', array($this, 'filter_orders_by_payment_method'), 20);
-        add_filter('request',               array($this, 'filter_orders_by_payment_method_query'));
+        add_filter('request', array($this, 'filter_orders_by_payment_method_query'));
     }
 
     public function mpesa_mb_sm()
@@ -115,12 +115,13 @@ class C2B
             $transaction_id = $order->get_transaction_id();
 
             if ($update && !$transaction_id && isset($_POST['receipt'])) {
+                $receipt_number = sanitize_text_field($_POST['receipt']);
                 if (isset($_POST['full_amount'])) {
-                    $order->payment_complete(sanitize_text_field($_POST['receipt']));
-                    $order->add_order_note("Full M-Pesa payment received. Transaction ID {$_POST['receipt']}");
+                    $order->payment_complete(sanitize_text_field($receipt_number));
+                    $order->add_order_note("Full M-Pesa payment received. Transaction ID {$receipt_number}");
                 } else {
-                    $order->set_transaction_id(sanitize_text_field($_POST['receipt']));
-                    $order->add_order_note("Mpesa payment received. Transaction ID {$_POST['receipt']}");
+                    $order->set_transaction_id(sanitize_text_field($receipt_number));
+                    $order->add_order_note("Mpesa payment received. Transaction ID {$receipt_number}");
                     $order->save();
                 }
             }
@@ -139,10 +140,8 @@ class C2B
         if ('shop_order' === $typenow) {
 
             // get all payment methods, even inactive ones
-            $gateways = WC()->payment_gateways->payment_gateways();
-
-?>
-            <select name="_shop_order_payment_method" id="dropdown_shop_order_payment_method">
+            $gateways = \WC()->payment_gateways->payment_gateways(); ?>
+            <select name="_shop_order_payment_method" id="dropdown_shop_order_payment_method" class="select2 wc-enhanced-select">
                 <option value="">
                     <?php esc_html_e('All Payment Methods', 'wc-filter-orders-by-payment'); ?>
                 </option>
@@ -156,7 +155,6 @@ class C2B
 <?php
         }
     }
-
 
     /**
      * Process bulk filter order payment method

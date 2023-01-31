@@ -60,7 +60,14 @@ add_action('plugins_loaded', function () {
             public $sign;
             public $debug           = false;
             public $enable_c2b      = false;
+            public $enable_bonga      = false;
             public $enable_reversal = false;
+            public $enable_for_methods;
+            public $enable_for_virtual;
+            public $instructions;
+            public $shortcode;
+            public $env;
+            public $type;
 
             /**
              * Constructor for the gateway.
@@ -219,21 +226,21 @@ add_action('plugins_loaded', function () {
                         'title'       => __('App Consumer Key', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Your App Consumer Key From Safaricom Daraja.', 'woocommerce'),
-                        'default'     => __('9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG', 'woocommerce'),
+                        'default'     => '9v38Dtu5u2BpsITPmLcXNWGMsjZRWSTG',
                         'desc_tip'    => true,
                     ),
                     'secret'             => array(
                         'title'       => __('App Consumer Secret', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Your App Consumer Secret From Safaricom Daraja.', 'woocommerce'),
-                        'default'     => __('bclwIPkcRqw61yUt', 'woocommerce'),
+                        'default'     => 'bclwIPkcRqw61yUt',
                         'desc_tip'    => true,
                     ),
                     'passkey'            => array(
                         'title'       => __('Online Pass Key', 'woocommerce'),
                         'type'        => 'text',
                         'description' => __('Used to create a password for use when making a Lipa Na M-Pesa Online Payment API call.', 'woocommerce'),
-                        'default'     => __('bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919', 'woocommerce'),
+                        'default'     => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
                         'desc_tip'    => true,
                         'class'       => 'wide-input',
                         'css'         => 'min-width: 55%;',
@@ -242,7 +249,7 @@ add_action('plugins_loaded', function () {
                         'title'             => __('Account Reference', 'woocommerce'),
                         'type'              => 'text',
                         'description'       => __('Account number for transactions. Leave blank to use order ID/Number.', 'woocommerce'),
-                        'default'           => __('', 'woocommerce'),
+                        'default'           => '',
                         'desc_tip'          => true,
                         'custom_attributes' => array(
                             'autocomplete' => 'off',
@@ -311,14 +318,19 @@ add_action('plugins_loaded', function () {
                     ),
                     'debug'              => array(
                         'title'       => __('Debug Mode', 'woocommerce'),
-                        'label'       => __('Check to enable debug mode and show request body', 'woocommerce'),
+                        'label'       => __('Enable debug mode and show request body', 'woocommerce'),
                         'type'        => 'checkbox',
                         'default'     => 'no',
-                        'description' => $this->debug ? '<small>Use the following URLs: <ul>
+                    ),
+                    'debug_title'              => array(
+                        'title'       => __('You can send the following URLs to Daraja team on request', 'woocommerce'),
+                        'type'        => 'title',
+                        'description' => '<ul class="woocommerce_mpesa_debug_text">
                         <li>Validation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=validate&sign=' . $this->sign) . '</a></li>
                         <li>Confirmation URL for C2B: <a href="' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=confirm&sign=' . $this->sign) . '</a></li>
                         <li>Reconciliation URL for STK Push: <a href="' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '">' . home_url('wc-api/lipwa?action=reconcile&sign=' . $this->sign) . '</a></li>
-                        </ul></small>' : __('Show Request Body(to send to Daraja team on request).</small> ', 'woocommerce'),
+                        </ul>',
+                        'css' => 'margin-top: -10px;'
                     ),
                     'c2b_section'        => array(
                         'title'       => __('M-Pesa Manual Payments', 'woocommerce'),
@@ -637,7 +649,7 @@ add_action('plugins_loaded', function () {
                         </table>
                     </section>';
 
-                    if ($this->settings['enable_c2b']) {
+                    if ($this->enable_c2b) {
                         echo
                         '<section class="woocommerce-order-details" id="missed_stk">
                             <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
@@ -646,7 +658,7 @@ add_action('plugins_loaded', function () {
                                         <th class="woocommerce-table__product-name product-name">
                                             ' . __("STK Push didn't work? Pay Manually Via M-PESA", "woocommerce") . '
                                         </th>'
-                            . ($this->settings['enable_bonga'] ?
+                            . ($this->enable_bonga ?
                                 '<th>&nbsp;</th>' : '') . '
                                     </tr>
                                 </thead>
@@ -664,7 +676,7 @@ add_action('plugins_loaded', function () {
                                                 <li>Wait for a confirmation message from M-PESA.</li>
                                             </ol>
                                         </td>'
-                            . ($this->settings['enable_bonga'] ?
+                            . ($this->enable_bonga ?
                                 '<td class="woocommerce-table__product-name product-name">
                                             <ol>
                                                 <li>Dial *236# and select <b>Lipa na Bonga Points</b>.</li>
@@ -775,7 +787,7 @@ add_action('plugins_loaded', function () {
                     case "reconcile":
                         $sign = sanitize_text_field($_GET['sign']);
 
-                        wp_send_json($stk->reconcile(function ($response) use ($sign) {
+                        wp_send_json($stk->reconcile(function (array $response) use ($sign) {
                             //    if (isset($sign) && $sign === $this->get_option('signature')) {
                             if (isset($response['Body'])) {
                                 $stkCallback       = $response['Body']['stkCallback'];
@@ -819,7 +831,7 @@ add_action('plugins_loaded', function () {
                         break;
 
                     case "confirm":
-                        wp_send_json($stk->confirm(function ($response = array()) {
+                        wp_send_json($stk->confirm(function ($response) {
                             if (empty($response)) {
                                 wp_send_json(
                                     ['Error' => 'No response data received']

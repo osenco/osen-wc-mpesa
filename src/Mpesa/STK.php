@@ -202,12 +202,12 @@ class STK
      * @param string|int $phone     - Phone Number to send STK Prompt Request to
      * @param int|float $amount    - Amount of money to charge
      * @param string|int $reference - Account to show in STK Prompt
-     * @param string $trxdesc   - Transaction Description(optional)
+     * @param string $trx_desc   - Transaction Description(optional)
      * @param string $remark    - Remarks about transaction(optional)
      *
      * @return array
      */
-    public function request($phone, $amount, $reference, $trxdesc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
+    public function request($phone, $amount, $reference, $trx_desc = 'WooCommerce Payment', $remark = 'WooCommerce Payment', $request = null)
     {
         $phone     = '254' . substr($phone, -9);
         $timestamp = date('YmdHis');
@@ -230,7 +230,7 @@ class STK
                 home_url("wc-api/lipwa")
             ),
             'AccountReference'  => empty($this->reference) ? $reference : $this->reference,
-            'TransactionDesc'   => $trxdesc,
+            'TransactionDesc'   => $trx_desc,
             'Remark'            => $remark,
         );
 
@@ -251,8 +251,8 @@ class STK
         } else {
             $body = json_decode($response['body'], true);
             return is_null($request)
-            ? $body
-            : array_merge($body, ['requested' => $post_data]);
+                ? $body
+                : array_merge($body, ['requested' => $post_data]);
         }
     }
 
@@ -267,9 +267,9 @@ class STK
         $response = is_null($data) ? json_decode(file_get_contents('php://input'), true) : $data;
 
         return is_null($callback)
-        ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
-        : (call_user_func_array($callback, array($response)) ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
-            : array('resultCode' => 1, 'resultDesc' => 'Reconciliation failed'));
+            ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
+            : (call_user_func_array($callback, array($response)) ? array('resultCode' => 0, 'resultDesc' => 'Reconciliation successful')
+                : array('resultCode' => 1, 'resultDesc' => 'Reconciliation failed'));
     }
 
     /**
@@ -296,9 +296,16 @@ class STK
 
     public function status($transaction, $command = 'TransactionStatusQuery', $remarks = 'Transaction Status Query', $occasion = '')
     {
+        $env       = $this->env;
+        $plain_text = $this->password;
+        $public_key = file_get_contents(__DIR__ . "/cert/{$env}/cert.cer");
+
+        openssl_public_encrypt($plain_text, $encrypted, $public_key, OPENSSL_PKCS1_PADDING);
+
+        $password  = base64_encode($encrypted);
         $post_data = array(
             'Initiator'          => $this->initiator,
-            'SecurityCredential' => $this->credentials,
+            'SecurityCredential' => $password,
             'CommandID'          => $command,
             'TransactionID'      => $transaction,
             'PartyA'             => $this->shortcode,
@@ -318,11 +325,12 @@ class STK
                     'Authorization' => 'Bearer ' . $this->token,
                 ),
                 'body'    => $data_string,
+                'timeout' => 500
             )
         );
 
         return is_wp_error($response)
-        ? array('errorCode' => 1, 'errorMessage' => $response->get_error_message())
-        : json_decode($response['body'], true);
+            ? array('errorCode' => 1, 'errorMessage' => $response->get_error_message())
+            : json_decode($response['body'], true);
     }
 }

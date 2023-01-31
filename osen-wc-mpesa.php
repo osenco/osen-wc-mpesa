@@ -39,35 +39,76 @@
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
- exit;
+	exit;
 }
 
 define('WCM_VER', '2.3.6');
 if (!defined('WCM_PLUGIN_FILE')) {
- define('WCM_PLUGIN_FILE', __FILE__);
+	define('WCM_PLUGIN_FILE', __FILE__);
 }
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 register_activation_hook(__FILE__, function () {
- set_transient('wc-mpesa-activation-notice', true, 5);
+	set_transient('wc-mpesa-activation-notice', true, 5);
+	
+	if (!is_plugin_active('woocommerce/woocommerce.php')) {
+		deactivate_plugins('osen-wc-mpesa/osen-wc-mpesa.php');
+
+		add_action('admin_notices', function () {
+			$class   = 'notice notice-error is-dismissible';
+			$message = __('Please Install/Activate WooCommerce for this extension to work..', 'woocommerce');
+
+			printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
+		});
+	}
+
+	flush_rewrite_rules();
+	exit(wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa')));
 });
 
+/**
+ * Check transient and show notice only once - delete transient immediately after
+ */
 add_action('admin_notices', function () {
- /* Check transient, if available display notice */
- if (get_transient('wc-mpesa-activation-notice')): ?>
-<div class="updated notice is-dismissible">
-  <p>Thank you for installing the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>.</p>
-  <p>
-    <a class="button" href="<?php echo admin_url('admin.php?page=wc_mpesa_about'); ?>'">About M-Pesa for WooCommerce</a>
-    <a class="button button-primary" href="<?php echo admin_url('admin.php?page=wc_mpesa_go_live'); ?>">How to Go
-      Live</a>
-  </p>
-</div>
-<?php
-/* Delete transient, only display this notice once. */
- delete_transient('wc-mpesa-activation-notice');?>
-<?php endif;
+	if (get_transient('wc-mpesa-activation-notice')) {
+		$class         = 'updated notice is-dismissible';
+		$message       = 'Thank you for installing the M-Pesa for WooCommerce plugin! <strong>You are awesome</strong>!';
+		$about_message = 'About M-Pesa for WooCommerce';
+		$about_url     = admin_url('admin.php?page=wc_mpesa_about');
+		$live_message  = 'How to Go Live';
+		$live_url      = admin_url('admin.php?page=wc_mpesa_go_live');
+		$btn_class     = 'button button-primary';
+
+		printf(
+			'<div class="%1$s"><p>%2$s</p><p><a class="button" href="%3$s">%4$s</a><a class="%5$s" href="%6$s">%7$s</a></p></div>',
+			esc_attr($class),
+			esc_html($message),
+			esc_attr($about_url),
+			esc_html($about_message),
+			esc_attr($btn_class),
+			esc_attr($live_url),
+			esc_html($live_message)
+		);
+
+		delete_transient('wc-mpesa-activation-notice');
+	}
+});
+
+add_action('wp_enqueue_scripts', function () {
+	if (is_checkout()) {
+		wp_enqueue_style("wc-mpesa-3-0", plugins_url("assets/styles.css", __FILE__));
+
+		wp_enqueue_script('jquery');
+		wp_enqueue_script("wc-mpesa-3-0", plugins_url("assets/scripts.js", __FILE__), array("jquery"), false, true);
+		wp_add_inline_script("wc-mpesa-3-0", 'var MPESA_RECEIPT_URL = "' . home_url('wc-api/lipwa_receipt') . '"', 'before');
+	}
+});
+
+add_action('admin_enqueue_scripts', function () {
+	wp_enqueue_style("c3", plugins_url("assets/c3/c3.min.css", __FILE__));
+	wp_enqueue_script("c3", plugins_url("assets/c3/c3.bundle.js", __FILE__), array("jquery"));
+	wp_enqueue_script("wc-mpesa-settings", plugins_url("assets/admin_scripts.js", __FILE__), array("jquery"), false, true);
 });
 
 /**
