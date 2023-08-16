@@ -125,19 +125,25 @@ class Utilities
         }
     }
 
+    /**
+     *  Fixed Issue - https://github.com/osenco/osen-wc-mpesa/issues/60#issue-1661328791
+     * 
+     * first check if $order is an instance of WC_Order. If not, return the original $attachments.
+     * 
+     */
     public function woocommerce_emails_attach_downloadables(array $attachments, $status, $order)
     {
-        if (is_object($order) || isset($status) || !empty($order)) {
-            if (is_a($order, 'WC_Order') && method_exists($order, 'has_downloadable_item')) {
-                if ($order->has_downloadable_item()) {
+        // Check if the $order is an instance of WC_Order
+        if (!($order instanceof \WC_Order)) {
+            return $attachments;
+        }
 
-                    $allowed_statuses = array('customer_invoice', 'customer_completed_order');
-                    if (isset($status) && in_array($status, $allowed_statuses)) {
-                        foreach ($order->get_items() as $item) {
-                            foreach ($order->get_item_downloads($item) as $download) {
-                                $attachments[] = str_replace(content_url(), WP_CONTENT_DIR, $download['file']);
-                            }
-                        }
+        if ($order->has_downloadable_item()) {
+            $allowed_statuses = array('customer_invoice', 'customer_completed_order');
+            if (isset($status) && in_array($status, $allowed_statuses)) {
+                foreach ($order->get_items() as $item) {
+                    foreach ($order->get_item_downloads($item) as $download) {
+                        $attachments[] = str_replace(content_url(), WP_CONTENT_DIR, $download['file']);
                     }
                 }
             }
@@ -145,4 +151,5 @@ class Utilities
 
         return $attachments;
     }
+
 }
